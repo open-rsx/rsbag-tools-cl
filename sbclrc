@@ -1,0 +1,128 @@
+(require :asdf)
+
+;; We do this strange stuff to avoid loading sb-posix (for getenv)
+;; before quicklisp.
+(defvar *lisp-share-path*
+  (with-output-to-string (stream)
+    (sb-ext:run-program
+     "sh" '("-c" "env echo -n \"${SBCL_HOME}\"/../../../share/common-lisp")
+     :search t
+     :output stream)))
+
+#-quicklisp
+(let ((quicklisp-init (format nil "~A/quicklisp/setup.lisp" "~/.local/share/common-lisp" #+not *lisp-share-path*)))
+  (when (probe-file quicklisp-init)
+    (load quicklisp-init)))
+
+(require :sb-posix)
+
+(defun load-system (system)
+  (let ((*compile-verbose* nil)
+	(*compile-print*   nil)
+	(*load-verbose*    nil)
+	(*load-print*      nil))
+    (tagbody
+     retry
+       (handler-bind
+	   ((asdf:missing-component
+	     #'(lambda (condition)
+		 ;; defined below
+		 (funcall
+		  (intern "%LOAD-SYSTEM-FROM-ARTIFACT")
+		  (asdf::missing-requires condition))
+		 (go retry)))
+	    (quicklisp-client::system-not-found
+	     #'(lambda (condition)
+		 ;; defined below
+		 (funcall
+		  (intern "%LOAD-SYSTEM-FROM-ARTIFACT")
+		  (quicklisp-client::system-not-found-name condition))
+		 (go retry))))
+	 (ql:quickload system :verbose nil :explain nil :prompt nil)))))
+
+(load-system :alexandria)
+(load-system :split-sequence)
+(load-system :drakma)
+
+(defvar *jenkins-base-url*
+  (let ((url (sb-posix:getenv "HUDSON_URL")))
+    (subseq url 0 (position #\/ url :from-end t)))
+  "Base URL of the jenkins instance that has the artifacts.")
+
+(defvar *job-name* (sb-posix:getenv "JOB_NAME")
+  "Our job name.")
+
+(defvar *job-workspace* (sb-posix:getenv "WORKSPACE")
+  "Our workspace.")
+
+(defvar *dep-suffixes* (append
+			(split-sequence:split-sequence
+			 #\: (sb-posix:getenv "DEP_SUFFIX")
+			 :remove-empty-subseqs t)
+			'(nil))
+  "A list of priority-sorted suffixes to append to systems when trying
+to download artifacts.")
+
+(defun %download-project-artifact (name destination-directory)
+  (let ((destination (make-pathname
+		      :name     (concatenate 'string name ".tar")
+		      :type     "gz"
+		      :defaults destination-directory)))
+    ;; Download the artifact archive.
+    (ensure-directories-exist destination-directory)
+    (unless (some
+	     #'(lambda (suffix)
+		 (ignore-errors
+		   (alexandria:with-output-to-file
+		       (stream destination
+			       :if-does-not-exist :create
+			       :if-exists         :supersede
+			       :element-type      '(unsigned-byte 8))
+		     (let* ((url
+			     (format nil "~A/job/~A~@[-~A~]/lastSuccessfulBuild/artifact/~2:*~A~@[-~A~].tar.gz"
+				     *jenkins-base-url* name suffix)))
+		       (multiple-value-bind (http-stream result)
+			   (drakma:http-request url :want-stream t)
+			 (unless (= result 200)
+			   (error "~@<Download failed with result code ~D.~@:>"
+				  result))
+			 (alexandria:copy-stream
+			  http-stream stream
+			  :element-type '(unsigned-byte 8)))))
+		   t))
+	     *dep-suffixes*)
+      (error "~@<Could not download artifact for system ~A.~@:>"
+	     name))
+
+    ;; Extract the archive.
+    (unless (zerop
+	     (sb-ext:process-exit-code
+	      (sb-ext:run-program
+	       "sh" (list "-c" (format nil "cd ~S && tar -xzf ~S"
+				       (namestring destination-directory)
+				       (namestring destination)))
+	       :search t
+	       :wait   t)))
+      (error "~@<Could not extract artifact archive ~A~@:>"
+	     destination))))
+
+(defun %load-system-from-artifact (system-name)
+  (unless (and *jenkins-base-url* *job-name* *job-workspace*)
+    (error "~@<Cannot download artifact for system ~A since at least ~
+one Jenkins environment variable is missing.~@:>"
+	   system-name))
+
+  (let ((name (string-downcase (string system-name)))
+	(deps (format nil "~A/deps/" *job-workspace*)))
+    (%download-project-artifact name deps)
+
+    (let ((asd (first (directory (merge-pathnames
+				  (make-pathname
+				   :directory (list :relative name :wild-inferiors)
+				   :name      name
+				   :type      "asd")
+				  deps)))))
+      (load asd))))
+
+(when (null *jenkins-base-url*)
+  (load "~/.sbclrc"))
