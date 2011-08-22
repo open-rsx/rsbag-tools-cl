@@ -10,7 +10,7 @@
      :output stream)))
 
 #-quicklisp
-(let ((quicklisp-init (format nil "~A/quicklisp/setup.lisp" "~/.local/share/common-lisp" #+not *lisp-share-path*)))
+(let ((quicklisp-init (format nil "~A/quicklisp/setup.lisp" *lisp-share-path*)))
   (when (probe-file quicklisp-init)
     (load quicklisp-init)))
 
