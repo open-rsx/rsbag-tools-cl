@@ -18,6 +18,9 @@
 ;; along with this program. If not, see <http://www.gnu.org/licenses>.
 
 (cl:defpackage :rsbag.tools.play
+  (:shadowing-import-from :rsbag
+   :direction)
+
   (:use
    :cl
    :alexandria
@@ -26,7 +29,10 @@
    :com.dvlsoft.clon
 
    :rsb
-   :rsb.common)
+   :rsb.common
+
+   :rsbag
+   :rsbag.rsb)
 
   (:export
    :main)

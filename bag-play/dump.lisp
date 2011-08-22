@@ -7,7 +7,6 @@
 (load-system :cl-rsbag-tools-play)
 
 (load-system :cl-rsbag-tidelog)
-(load "~/code/cl-rsbag/trunk/src/rsb.lisp")
 
 (asdf:clear-source-registry)
 (asdf:clear-output-translations)

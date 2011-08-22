@@ -73,13 +73,13 @@ Examples:
 
       (log1 :info "Using URIs ~@<~@;~{~A~^, ~}~@:>" uris)
 
-      (let ((connection (rsbag::events->bag uris output)))
+      (let ((connection (events->bag uris output)))
 
 	(with-interactive-interrupt-exit (:signals (sb-unix:SIGINT
 						    sb-unix:SIGTERM))
 	  (iter (sleep 10)
 		(format t "~A ~@<~@;~{~A~^, ~}~@:>~%"
 			(local-time:now)
-			(rsbag:bag-channels (rsbag::connection-bag connection)))))
+			(bag-channels (connection-bag connection)))))
 
 	(close connection)))))

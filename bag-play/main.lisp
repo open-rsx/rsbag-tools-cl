@@ -64,7 +64,7 @@ Examples:
       (log1 :info "Using channels ~@<~@;~{~A~^, ~}~@:>" channels)
       (log1 :info "Using base-URI ~A" base-uri)
 
-      (let ((connection (rsbag::bag->events input base-uri)))
+      (let ((connection (bag->events input base-uri)))
 
 	(with-interactive-interrupt-exit ()
 	  (iter (sleep 10)
