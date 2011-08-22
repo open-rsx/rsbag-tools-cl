@@ -68,23 +68,28 @@ to download artifacts.")
 
 (defun %download-project-artifact (name destination-directory
 				   &key
-				   label
-				   suffixes)
-  (let ((destination (make-pathname
-		      :name     (concatenate 'string name ".tar")
-		      :type     "gz"
-		      :defaults destination-directory)))
+				     label
+				     suffixes)
+  (let ((combinations (alexandria:map-product #'list
+					      (list label nil)
+					      suffixes))
+	(destination  (make-pathname
+		       :name     (concatenate 'string name ".tar")
+		       :type     "gz"
+		       :defaults destination-directory)))
     ;; Download the artifact archive.
     (ensure-directories-exist destination-directory)
     (unless (some
-	     #'(lambda (suffix)
+	     #'(lambda (label-and-suffix)
 		 (ignore-errors
 		   (alexandria:with-output-to-file
 		       (stream destination
 			       :if-does-not-exist :create
 			       :if-exists         :supersede
 			       :element-type      '(unsigned-byte 8))
-		     (let* ((url
+		     (let* ((label  (first label-and-suffix))
+			    (suffix (second label-and-suffix))
+			    (url
 			     (format nil "~A/job/~A~@[-~A~]/~@[label=~A/~]lastSuccessfulBuild/artifact/~3:*~A~@[-~A~].tar.gz"
 				     *jenkins-base-url* name suffix label)))
 		       (multiple-value-bind (http-stream result)
@@ -96,7 +101,7 @@ to download artifacts.")
 			  http-stream stream
 			  :element-type '(unsigned-byte 8)))))
 		   t))
-	     suffixes)
+	     combinations)
       (error "~@<Could not download artifact for system ~A.~@:>"
 	     name))
 
@@ -123,14 +128,12 @@ one Jenkins environment variable is missing.~@:>"
 
   (let ((name (string-downcase (string system-name)))
 	(deps (format nil "~A/deps/" *job-workspace*)))
+    ;; Download and extract the artifact into the dependency
+    ;; directory.
     (%download-project-artifact name deps
 				:label    label
 				:suffixes suffixes)
 
-    (let ((asds (directory (merge-pathnames
-			    (make-pathname
-			     :directory (list :relative name :wild-inferiors)
-			     :name      name
-			     :type      "asd")
-			    deps))))
-      (map nil #'load asds))))
+    ;; Re-initialize the source registry to allow the new asd-files to
+    ;; get picked up.
+    (asdf:initialize-source-registry)))
