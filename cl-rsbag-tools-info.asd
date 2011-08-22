@@ -61,7 +61,7 @@
   :description "A tool that displays information about rsbag log files."
   :depends-on  ((:version :cl-rsbag      "0.1.0")
 
-		(:version :cl-rsb-common "0.5.0"))
+		(:version :cl-rsb-common "0.1.0"))
   :components  ((:module     "bag-info"
 	         :components ((:file       "package")
 			      (:file       "main"

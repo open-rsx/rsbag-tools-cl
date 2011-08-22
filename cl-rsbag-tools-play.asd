@@ -62,7 +62,7 @@
   :depends-on  ((:version :cl-rsbag      "0.1.0")
 		
 		(:version :cl-rsb        "0.5.0")
-		(:version :cl-rsb-common "0.5.0"))
+		(:version :cl-rsb-common "0.1.0"))
   :components  ((:module     "bag-play"
 	         :components ((:file       "package")
 			      (:file       "main"
