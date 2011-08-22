@@ -35,7 +35,7 @@
 (defconstant +version-major+ 0
   "Major component of version number.")
 
-(defconstant +version-minor+ 1
+(defconstant +version-minor+ 4
   "Minor component of version number.")
 
 (defconstant +version-revision+ 0
@@ -60,9 +60,9 @@
   :license     "GPL3; see COPYING file for details."
   :description "A tool that captures RSB events and stores them in
 rsbag log files."
-  :depends-on  ((:version :cl-rsbag      "0.1.0")
+  :depends-on  ((:version :cl-rsbag      "0.4.0")
 
-		(:version :cl-rsb        "0.5.0")
+		(:version :cl-rsb        "0.4.0")
 		(:version :cl-rsb-common "0.1.0"))
   :components  ((:module     "bag-record"
 	         :components ((:file       "package")
