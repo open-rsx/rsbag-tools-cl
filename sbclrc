@@ -124,7 +124,6 @@ one Jenkins environment variable is missing.~@:>"
   (let ((name (string-downcase (string system-name)))
 	(deps (format nil "~A/deps/" *job-workspace*)))
     (%download-project-artifact name deps
-				:version  version
 				:label    label
 				:suffixes suffixes)
 
