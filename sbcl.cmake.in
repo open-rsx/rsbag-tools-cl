@@ -15,9 +15,7 @@ ENDIF()
 
 IF(EXISTS "@GZEXE_EXECUTABLE@")
     MESSAGE("Compressing image file @NAME@")
-    EXECUTE_PROCESS(COMMAND     cmake -E copy
-                                "@CMAKE_CURRENT_BINARY_DIR@/@NAME@"
-				"@CMAKE_CURRENT_BINARY_DIR@/@NAME@-uncompressed")
     EXECUTE_PROCESS(COMMAND     "@GZEXE_EXECUTABLE@" "@CMAKE_CURRENT_BINARY_DIR@/@NAME@"
                     OUTPUT_FILE "@CMAKE_CURRENT_BINARY_DIR@/@NAME@.gzexe.log")
+    FILE(REMOVE "@CMAKE_CURRENT_BINARY_DIR@/@NAME@~")
 ENDIF()
