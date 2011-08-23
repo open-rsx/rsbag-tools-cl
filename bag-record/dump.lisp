@@ -2,6 +2,7 @@
 
 (load-system :cl-ppcre) ;; for regex filter
 
+(load-system :cl-protobuf)
 (load-system :cl-spread) ;; for spread transport
 
 (load-system :swank) ;; for the lulz
