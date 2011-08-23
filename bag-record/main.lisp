@@ -77,8 +77,7 @@ Examples:
 
       (let ((connection (events->bag uris output)))
 
-	(with-interactive-interrupt-exit (:signals (sb-unix:SIGINT
-						    sb-unix:SIGTERM))
+	(with-interactive-interrupt-exit ()
 	  (iter (sleep 10)
 		(format t "~A ~@<~@;~{~A~^, ~}~@:>~%"
 			(local-time:now)
