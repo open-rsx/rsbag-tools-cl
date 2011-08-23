@@ -19,7 +19,13 @@
 
 (cl:defpackage :rsbag.tools.play
   (:shadowing-import-from :rsbag
-   :direction)
+   :direction
+
+   :meta-data-count
+   :meta-data-keys
+   :meta-data-values
+   :meta-data-plist
+   :meta-data-alist)
 
   (:use
    :cl
