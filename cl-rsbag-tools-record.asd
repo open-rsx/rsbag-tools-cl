@@ -63,7 +63,7 @@ rsbag log files."
   :depends-on  ((:version :cl-rsbag      "0.4.0")
 
 		(:version :cl-rsb        "0.4.0")
-		(:version :cl-rsb-common "0.1.0"))
+		(:version :cl-rsb-common "0.4.0"))
   :components  ((:module     "bag-record"
 	         :components ((:file       "package")
 			      (:file       "main"

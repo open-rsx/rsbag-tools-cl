@@ -61,6 +61,8 @@ Examples:
   (setf *default-configuration* (options-from-default-sources))
   (process-commandline-options
    :version         (cl-rsbag-tools-record-system:version/list)
+   :more-versions   (list :rsbag         (cl-rsbag-system:version/list)
+			  :rsbag-tidelog (cl-rsbag-system:version/list))
    :update-synopsis #'update-synopsis
    :return          #'(lambda () (return-from main)))
 
