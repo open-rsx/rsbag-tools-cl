@@ -71,12 +71,21 @@ Examples:
 		  ,@(when sizes?
 		      `(:size ,(reduce #'+ (bag-channels bag)
 				       :key #'channel-size)))
-		  :start  ,(rsbag::start bag)
-		  :end    ,(rsbag::end   bag))
+		  :start  ,(rsbag:start bag)
+		  :end    ,(rsbag:end   bag))
 		(iter (for channel each (bag-channels bag))
-		      (collect (list (channel-name channel)
-				     `(:events ,(length channel)
-				       ,@(when sizes?
-					   `(:size   ,(channel-size channel)))
-				       :start  ,(rsbag::start channel)
-				       :end    ,(rsbag::end   channel))))))))))
+		      (bind (((:accessors-r/o (length length)
+					      (start  rsbag:start)
+					      (end    rsbag:end))  channel)
+			     (duration (when (and start end)
+					 (local-time:timestamp-difference
+					  end start))))
+		       (collect (list (channel-name channel)
+				      `(:events ,length
+					,@(when sizes?
+					    `(:size   ,(channel-size channel)))
+					:start  ,start
+					:end    ,end
+					:length ,duration
+					:rate   ,(when (and duration (plusp duration))
+						   (/ length duration))))))))))))
