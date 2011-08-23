@@ -1,3 +1,5 @@
+(load-system :asdf-system-connections)
+
 (load-system :cl-ppcre) ;; for regex filter
 
 (load-system :cl-spread) ;; for spread transport
