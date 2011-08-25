@@ -31,7 +31,8 @@ Currently, the following file formats are supported:~{~&+ ~4A (extension: \".~(~
 Examples:
 
   bag-play --all /tmp/everything.tide spread://azurit:4803/
-  bag-play -c /nao/vision/top /tmp/nao.tide 'spread:/nao/vision/top?name=4803'"
+  bag-play -c /nao/vision/top /tmp/nao.tide 'spread:/nao/vision/top?name=4803'
+"
 					 (map 'list #'car (rsbag.backend:backend-classes))))
    :item    (make-common-options)
    :item    (defgroup (:header "Playback Options")
@@ -58,11 +59,12 @@ Examples:
     ;; Create a reader and start the receiving and printing loop.
     (bind (((input base-uri) (remainder))
 	   (channels (if (getopt :long-name "all-channels")
+			 :all
 			 (iter (for channel next (getopt :long-name "channel"))
 			       (while channel)
 			       (collect channel)))))
 
-      (log1 :info "Using channels ~@<~@;~{~A~^, ~}~@:>" channels)
+      (log1 :info "Using channels ~A" channels)
       (log1 :info "Using base-URI ~A" base-uri)
 
       (let ((connection (bag->events input base-uri)))
