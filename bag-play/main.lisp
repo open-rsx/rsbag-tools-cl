@@ -77,11 +77,25 @@ Examples:
 		       :typespec      'non-negative-integer
 		       :argument-name "INDEX"
 		       :description
-		       "Mutually exclusive with --end-time."))
+		       "Mutually exclusive with --end-time.")
+	      (enum    :long-name     "strategy"
+		       :short-name    "r"
+		       :enum          (map 'list #'first (replay-strategy-classes))
+		       :argument-name "STRATEGY"
+		       :description
+		       "Replay events form the specified input file according to STRATEGY."))
    ;; Append RSB options.
    :item    (make-options
 	     :show? (or (eq show t)
 			(and (listp show) (member :rsb show))))))
+
+(defun make-channel-filter (specs)
+  (when specs
+    (apply #'disjoin
+	   (map 'list #'(lambda (spec)
+			  #'(lambda (channel)
+			      (cl-ppcre:scan spec (channel-name channel))))
+		specs))))
 
 (defun main ()
   "Entry point function of the bag-play program."
@@ -103,9 +117,10 @@ Examples:
 	   (start-index (getopt :long-name "start-index"))
 	   (end-time    (getopt :long-name "end-time"))
 	   (end-index   (getopt :long-name "end-index"))
-	   (channels    (or (iter (for channel next (getopt :long-name "channel"))
-				  (while channel)
-				  (collect channel))
+	   (channels    (or (make-channel-filter
+			     (iter (for channel next (getopt :long-name "channel"))
+				   (while channel)
+				   (collect channel)))
 			    t)))
 
       (when (and start-time start-index)
@@ -120,6 +135,7 @@ Examples:
       (log1 :info "Using base-URI ~A" base-uri)
 
       (let ((connection (apply #'bag->events input base-uri
+			       :channels channels
 			       (append (when start-time
 					 (list :start-time start-time))
 				       (when start-index
