@@ -19,26 +19,64 @@
 
 (in-package :rsbag.tools.play)
 
+(defun make-help-string ()
+  "Return a help that explains the commandline option interface."
+  (with-output-to-string (stream)
+    (format stream "Replay events from INPUT-FILE on RSB channels ~
+derived from BASE-URI. BASE-URI which has to be of the form
+
+  ")
+    (print-uri-help stream)
+    (format stream
+	    "
+The file format of INPUT-FILE is guessed based on the ~
+filename. Currently, the following file formats are supported:~{~&+ ~
+~4A (extension: \".~(~:*~A~)\")~}
+
+Examples:
+
+  ~A --all /tmp/everything.tide spread://azurit:4803/
+  ~:*~A -c /nao/vision/top /tmp/nao.tide 'spread:/nao/vision/top?name=4803'
+"
+	    (map 'list #'car (rsbag.backend:backend-classes))
+	    "bag-play")))
+
 (defun update-synopsis (&key
 			(show :default))
   "Create and return a commandline option tree."
   (make-synopsis
-   :postfix "BASE-URI"
-   :item    (make-text :contents (format nil "Capture events being exchanged on the scopes designated by URIS and store them in the specified output file. For each URI, one channel is created in the output file. These channels store the events exchanged in the corresponding RSB channels.
-
-Currently, the following file formats are supported:~{~&+ ~4A (extension: \".~(~:*~A~)\")~}
-
-Examples:
-
-  bag-play --all /tmp/everything.tide spread://azurit:4803/
-  bag-play -c /nao/vision/top /tmp/nao.tide 'spread:/nao/vision/top?name=4803'"
-					 (map 'list #'car (rsbag.backend:backend-classes))))
+   :postfix "INPUT-FILE BASE-URI"
+   :item    (make-text :contents (make-help-string))
    :item    (make-common-options)
    :item    (defgroup (:header "Playback Options")
-	      (flag :long-name   "all-channels"
-		    :short-name  "a"
-		    :description
-		    "Replay data from all channels stored in the specified file."))
+	      (flag    :long-name   "all-channels"
+		       :short-name  "a"
+		       :description
+		       "Replay data from all channels stored in the specified file.")
+	      (lispobj :long-name     "start-time"
+		       :short-name    "s"
+		       :typespec      '(or real local-time:timestamp)
+		       :argument-name "TIMESTAMP-OR-SECONDS"
+		       :description
+		       "Start replaying events at the point in time indicated by TIMESTAMP-OR-SECONDS. When the value should be parsed as a timestamp, the syntax @[YYYY-MM-DDT]HH:MM:SS has to be used. A single real number is interpreted as time in seconds relative to the beginning of the replay. Mutually exclusive with --start-index. NOT IMPLEMENTED YET.")
+	      (lispobj :long-name     "start-index"
+		       :short-name    "S"
+		       :typespec      'non-negative-integer
+		       :argument-name "INDEX"
+		       :description
+		       "Mutually exclusive with --start-time.")
+	      (lispobj :long-name     "end-time"
+		       :short-name    "e"
+		       :typespec      '(or real local-time:timestamp)
+		       :argument-name "TIMESTAMP-OR-SECONDS"
+		       :description
+		       "Stop replaying events at the point in time indicated by TIMESTAMP-OR-SECONDS. When the value should be parsed as a timestamp, the syntax @[YYYY-MM-DDT]HH:MM:SS has to be used. A single real number is interpreted as time in seconds relative to the beginning of the replay. Mutually exclusive with --end-index. NOT IMPLEMENTED YET.")
+	      (lispobj :long-name     "end-index"
+		       :short-name    "E"
+		       :typespec      'non-negative-integer
+		       :argument-name "INDEX"
+		       :description
+		       "Mutually exclusive with --end-time."))
    ;; Append RSB options.
    :item    (make-options
 	     :show? (or (eq show t)
@@ -48,6 +86,7 @@ Examples:
   "Entry point function of the bag-play program."
   (update-synopsis)
   (setf *default-configuration* (options-from-default-sources))
+  (local-time:enable-read-macros)
   (process-commandline-options
    :version         (cl-rsbag-tools-play-system:version/list)
    :more-versions   (list :rsbag         (cl-rsbag-system:version/list)
@@ -60,11 +99,13 @@ Examples:
     ;; Create a reader and start the receiving and printing loop.
     (bind (((input base-uri) (remainder))
 	   (channels (if (getopt :long-name "all-channels")
+			 t
 			 (iter (for channel next (getopt :long-name "channel"))
 			       (while channel)
 			       (collect channel)))))
 
-      (log1 :info "Using channels ~@<~@;~{~A~^, ~}~@:>" channels)
+      (log1 :info "Using channels ~:[~A~;~@<~@;~{~A~^, ~}~@:>~]"
+	    (listp channels) channels)
       (log1 :info "Using base-URI ~A" base-uri)
 
       (let ((connection (bag->events input base-uri)))
