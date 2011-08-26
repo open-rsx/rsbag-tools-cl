@@ -35,7 +35,7 @@ filename. Currently, the following file formats are supported:~{~&+ ~
 
 Examples:
 
-  ~A --all /tmp/everything.tide spread://azurit:4803/
+  ~A /tmp/everything.tide spread://azurit:4803/
   ~:*~A -c /nao/vision/top /tmp/nao.tide 'spread:/nao/vision/top?name=4803'
 "
 	    (map 'list #'car (rsbag.backend:backend-classes))
@@ -49,10 +49,11 @@ Examples:
    :item    (make-text :contents (make-help-string))
    :item    (make-common-options)
    :item    (defgroup (:header "Playback Options")
-	      (flag    :long-name   "all-channels"
-		       :short-name  "a"
+	      (stropt  :long-name     "channel"
+		       :short-name    "c"
+		       :argument-name "NAME-OR-REGEXP"
 		       :description
-		       "Replay data from all channels stored in the specified file.")
+		       "Select the channels matching NAME-OR-REGEXP for replay. This option can be specified multiple times.")
 	      (lispobj :long-name     "start-time"
 		       :short-name    "s"
 		       :typespec      '(or real local-time:timestamp)
@@ -98,17 +99,37 @@ Examples:
 
     ;; Create a reader and start the receiving and printing loop.
     (bind (((input base-uri) (remainder))
-	   (channels (if (getopt :long-name "all-channels")
-			 t
-			 (iter (for channel next (getopt :long-name "channel"))
-			       (while channel)
-			       (collect channel)))))
+	   (start-time  (getopt :long-name "start-time"))
+	   (start-index (getopt :long-name "start-index"))
+	   (end-time    (getopt :long-name "end-time"))
+	   (end-index   (getopt :long-name "end-index"))
+	   (channels    (or (iter (for channel next (getopt :long-name "channel"))
+				  (while channel)
+				  (collect channel))
+			    t)))
 
-      (log1 :info "Using channels ~:[~A~;~@<~@;~{~A~^, ~}~@:>~]"
+      (when (and start-time start-index)
+	(error "~@<The commandline options \"start-time\" and ~
+\"start-index\" are mutually exclusive.~@:>"))
+      (when (and end-time end-index)
+	(error "~@<The commandline options \"end-time\" and ~
+\"end-index\" are mutually exclusive.~@:>"))
+
+      (log1 :info "Using ~:[~*all channels~;channels matching ~@<~@;~{~S~^, ~}~@:>~]"
 	    (listp channels) channels)
       (log1 :info "Using base-URI ~A" base-uri)
 
-      (let ((connection (bag->events input base-uri)))
+      (let ((connection (apply #'bag->events input base-uri
+			       (append (when start-time
+					 (list :start-time start-time))
+				       (when start-index
+					 (list :start-index start-index))
+				       (when end-time
+					 (list :end-time end-time))
+				       (when end-index
+					 (list :end-index end-index))))))
+
+	(log1 :info "Connection ~A" connection)
 
 	(with-interactive-interrupt-exit ()
 	  (iter (sleep 10)
