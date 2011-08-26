@@ -132,7 +132,6 @@ Examples:
 	(log1 :info "Connection ~A" connection)
 
 	(with-interactive-interrupt-exit ()
-	  (iter (sleep 10)
-		(format t "~A~%" (local-time:now))))
+	  (replay connection (connection-strategy connection)))
 
 	(close connection)))))
