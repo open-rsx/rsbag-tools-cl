@@ -19,20 +19,27 @@
 
 (in-package :rsbag.tools.info)
 
-(defun update-synopsis ()
-  "Create and return a commandline option tree."
-  (make-synopsis
-   :postfix "BAG-FILE"
-   :item    (make-text :contents (format nil "Display information about a ~
-specified log file.
+(defun make-help-string (&key
+			 (program-name "bag-info"))
+  "Return a help that explains the commandline option interface."
+  (format nil "Display information about BAG-FILE.
 
-Currently, the following file formats are supported:~{~&+ ~
+The file format of BAG-FILE is guessed based on the ~
+filename. Currently, the following file formats are supported:~{~&+ ~
 ~4A (extension: \".~(~:*~A~)\")~}
 
 Examples:
 
-  bag-info /tmp/everything.tide"
-					 (map 'list #'car (rsbag.backend:backend-classes))))
+  ~A /tmp/everything.tide
+"
+	  (map 'list #'car (rsbag.backend:backend-classes))
+	  program-name))
+
+(defun update-synopsis ()
+  "Create and return a commandline option tree."
+  (make-synopsis
+   :postfix "BAG-FILE"
+   :item    (make-text :contents (make-help-string))
    :item    (make-common-options)
    :item    (defgroup (:header "Display Options")
 	      (flag :long-name  "compute-sizes"
