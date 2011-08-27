@@ -19,17 +19,32 @@
 
 (in-package :rsbag.tools.record)
 
+(defun make-help-string ()
+  "Return a help that explains the commandline option interface."
+  (with-output-to-string (stream)
+    (format stream "Capture events being exchanged on the scopes ~
+designated by URIS and store them in the specified output file. For ~
+each URI, one channel is created in the output file. These channels ~
+store the events exchanged in the corresponding RSB channels. Each URI ~
+has to be of the form
+
+  ")
+    (print-uri-help stream)
+    (format stream
+	    "
+Examples:
+
+  ~A -o /tmp/everything.tide spread://azurit:4803/
+  ~:*~A -o /tmp/nao.tide 'spread:/nao/vision/top?name=4803'
+"
+	    "bag-record")))
+
 (defun update-synopsis (&key
 			(show :default))
   "Create and return a commandline option tree."
   (make-synopsis
    :postfix "[URIS]"
-   :item    (make-text :contents "Capture events being exchanged on the scopes designated by URIS and store them in the specified output file. For each URI, one channel is created in the output file. These channels store the events exchanged in the corresponding RSB channels.
-
-Examples:
-
-  bag-record -o /tmp/everything.tide spread://azurit:4803/
-  bag-record -o /tmp/nao.tide 'spread:/nao/vision/top?name=4803'")
+   :item    (make-text :contents (make-help-string))
    :item    (make-common-options)
    :item    (defgroup (:header "Recording Options")
 	      (path    :long-name  "output-file"
