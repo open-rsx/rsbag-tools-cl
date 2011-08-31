@@ -131,7 +131,7 @@ Examples:
 \"end-index\" are mutually exclusive.~@:>"))
 
       (log1 :info "Using ~:[~*all channels~;channels matching ~@<~@;~{~S~^, ~}~@:>~]"
-	    (listp channels) channels)
+	    (not (eq channels t)) channels)
       (log1 :info "Using base-URI ~A" base-uri)
 
       (let ((connection (apply #'bag->events input base-uri
