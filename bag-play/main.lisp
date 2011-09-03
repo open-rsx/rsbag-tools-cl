@@ -83,7 +83,14 @@ Examples:
 		       :enum          (map 'list #'first (replay-strategy-classes))
 		       :argument-name "STRATEGY"
 		       :description
-		       "Replay events form the specified input file according to STRATEGY."))
+		       "Replay events form the specified input file according to STRATEGY.")
+	      (enum    :long-name     "show-progress"
+		       :short-name    "p"
+		       :enum          '(:none :line)
+		       :default-value :line
+		       :argument-name "STYLE"
+		       :description
+		       "Indicate progress of the ongoing playback using style STYLE."))
    ;; Append RSB options.
    :item    (make-options
 	     :show? (or (eq show t)
@@ -96,6 +103,18 @@ Examples:
 			  #'(lambda (channel)
 			      (cl-ppcre:scan spec (channel-name channel))))
 		specs))))
+
+(defun print-progress (progress
+		       index start-index end-index
+		       timestamp)
+  "Print the progress of the current replay onto the stream that is
+the value of `*standard-output*'."
+  (format *standard-output* "~C~A ~6,2F % ~9:D [~9:D,~9:D]"
+	  #\Return
+	  timestamp
+	  (* 100 progress)
+	  index start-index end-index)
+  (force-output *standard-output*))
 
 (defun main ()
   "Entry point function of the bag-play program."
@@ -121,7 +140,8 @@ Examples:
 			     (iter (for channel next (getopt :long-name "channel"))
 				   (while channel)
 				   (collect channel)))
-			    t)))
+			    t))
+	   (progress    (getopt :long-name "show-progress")))
 
       (when (and start-time start-index)
 	(error "~@<The commandline options \"start-time\" and ~
@@ -148,6 +168,10 @@ Examples:
 	(log1 :info "Connection ~A" connection)
 
 	(with-interactive-interrupt-exit ()
-	  (replay connection (connection-strategy connection)))
+	  (replay connection (connection-strategy connection)
+		  :progress (case progress
+			      (:line #'print-progress))))
+	(unless (eq progress :none)
+	  (terpri *standard-output*))
 
 	(close connection)))))
