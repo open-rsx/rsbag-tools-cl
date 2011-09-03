@@ -35,6 +35,12 @@ FOREACH(SCRIPT ${SCRIPTS})
 ENDFOREACH()
 ADD_CUSTOM_TARGET(scripts ALL DEPENDS ${IMAGES})
 
+# Installation
+FOREACH(IMAGE ${IMAGES})
+  INSTALL(PROGRAMS    "${IMAGE}"
+          DESTINATION "bin")
+ENDFOREACH()
+
 # Tests
 SET(DATA_DIR "${cl-rsbag-tools_SOURCE_DIR}/test/data/")
 
