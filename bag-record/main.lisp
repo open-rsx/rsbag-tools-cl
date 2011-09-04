@@ -47,22 +47,32 @@ Examples:
    :item    (make-text :contents (make-help-string))
    :item    (make-common-options)
    :item    (defgroup (:header "Recording Options")
-	      (path    :long-name  "output-file"
-		       :short-name "o"
-		       :type       :file
+	      (path    :long-name     "output-file"
+		       :short-name    "o"
+		       :type          :file
 		       :description
 		       (format nil "Name of the file into which captured events should be written. The file format is determined based on the file type (extension). Currently, the following file formats are supported:~{~&+ ~4A (extension: \".~(~:*~A~)\")~}."
 			    (map 'list #'car (rsbag.backend:backend-classes))))
-	      (lispobj :long-name "max-buffer-size"
-		       :typespec  'positive-integer
+	      (enum    :long-name     "channel-allocation"
+		       :short-name    "a"
+		       :enum          (map 'list #'car (rsbag.rsb:channel-strategy-classes))
+		       :default-value :scope-and-type
+		       :argument-name "STRATEGY"
+		       :description
+		       (format nil "The strategy that should be use to ~
+allocate channels in the output bag file for received ~
+events. Currently, the following strategies are supported:~{~&+ ~A~}."
+			       (map 'list #'car (rsbag.rsb:channel-strategy-classes))))
+	      (lispobj :long-name     "max-buffer-size"
+		       :typespec      'positive-integer
 		       :description
 		       "The maximum amount of unwritten data that can be accumulated in memory before a disk write is forced.")
-	      (lispobj :long-name "max-buffer-count"
-		       :typespec  'positive-integer
+	      (lispobj :long-name     "max-buffer-count"
+		       :typespec      'positive-integer
 		       :description
 		       "The maximum number of unwritten events that can be accumulated in memory before a disk write is forced.")
-	      (lispobj :long-name "max-buffer-time"
-		       :typespec  'positive-real
+	      (lispobj :long-name     "max-buffer-time"
+		       :typespec      'positive-real
 		       :description
 		       "The maximum age unwritten data in memory can reach before a disk write is forced."))
    ;; Append RSB options.
@@ -84,13 +94,15 @@ Examples:
   (with-logged-warnings
 
     ;; Create a reader and start the receiving and printing loop.
-    (let* ((uris   (map 'list #'puri:uri (remainder)))
-	   (output (or (getopt :long-name "output-file")
-		       (error "Specify output file"))))
+    (let* ((uris               (map 'list #'puri:uri (remainder)))
+	   (output             (or (getopt :long-name "output-file")
+				   (error "Specify output file")))
+	   (channel-allocation (getopt :long-name "channel-allocation")))
 
       (log1 :info "Using URIs ~@<~@;~{~A~^, ~}~@:>" uris)
 
-      (let ((connection (events->bag uris output)))
+      (let ((connection (events->bag uris output
+				     :channel-strategy channel-allocation)))
 
 	(with-interactive-interrupt-exit ()
 	  (iter (sleep 10)
