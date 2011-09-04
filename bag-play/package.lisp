@@ -21,6 +21,7 @@
   (:shadowing-import-from :rsbag
    :direction
 
+   :meta-data
    :meta-data-count
    :meta-data-keys
    :meta-data-values
