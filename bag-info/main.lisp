@@ -68,7 +68,7 @@ Examples:
   (with-logged-warnings
     (bind (((input) (remainder))
 	   (sizes?  (getopt :long-name "compute-sizes"))
-	   (*print-right-margin* (or most-positive-fixnum (com.dvlsoft.clon::line-width context)))
+	   (*print-right-margin* (com.dvlsoft.clon::stream-line-width *standard-output*))
 	   (*print-miser-width*  *print-right-margin*))
       (with-bag (bag input :direction :input)
 	(format t "File ~S~&~2T~<~@;~@{~@(~6A~): ~

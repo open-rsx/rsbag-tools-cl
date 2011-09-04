@@ -103,7 +103,9 @@ events. Currently, the following strategies are supported:~{~&+ ~A~}."
       (log1 :info "Using URIs ~@<~@;~{~A~^, ~}~@:>" uris)
 
       (let ((connection (events->bag uris output
-				     :channel-strategy channel-allocation)))
+				     :channel-strategy channel-allocation))
+	    (*print-right-margin* (com.dvlsoft.clon::stream-line-width *standard-output*))
+	    (*print-miser-width*  *print-right-margin*))
 
 	(with-interactive-interrupt-exit ()
 	  (iter (sleep 10)
