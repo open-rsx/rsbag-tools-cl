@@ -36,6 +36,7 @@ Examples:
 
   ~A -o /tmp/everything.tide spread://azurit:4803/
   ~:*~A -o /tmp/nao.tide 'spread:/nao/vision/top?name=4803'
+  ~:*~A -o /tmp/multichannel.tide 'spread:/nao/vision/top' 'spread:/nao/audio/all'
 "
 	    "bag-record")))
 
@@ -45,7 +46,7 @@ Examples:
   (make-synopsis
    :postfix "[URIS]"
    :item    (make-text :contents (make-help-string))
-   :item    (make-common-options)
+   :item    (make-common-options :show show)
    :item    (defgroup (:header "Recording Options")
 	      (path    :long-name     "output-file"
 		       :short-name    "o"
@@ -66,15 +67,15 @@ events. Currently, the following strategies are supported:~{~&+ ~A~}."
 	      (lispobj :long-name     "max-buffer-size"
 		       :typespec      'positive-integer
 		       :description
-		       "The maximum amount of unwritten data that can be accumulated in memory before a disk write is forced.")
+		       "The maximum amount of unwritten data that can be accumulated in memory before a disk write is forced. NOT IMPLEMENTED YET.")
 	      (lispobj :long-name     "max-buffer-count"
 		       :typespec      'positive-integer
 		       :description
-		       "The maximum number of unwritten events that can be accumulated in memory before a disk write is forced.")
+		       "The maximum number of unwritten events that can be accumulated in memory before a disk write is forced. NOT IMPLEMENTED YET.")
 	      (lispobj :long-name     "max-buffer-time"
 		       :typespec      'positive-real
 		       :description
-		       "The maximum age unwritten data in memory can reach before a disk write is forced."))
+		       "The maximum age unwritten data in memory can reach before a disk write is forced. NOT IMPLEMENTED YET."))
    ;; Append RSB options.
    :item    (make-options
 	     :show? (or (eq show t)

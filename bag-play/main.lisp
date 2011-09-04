@@ -47,7 +47,7 @@ Examples:
   (make-synopsis
    :postfix "INPUT-FILE BASE-URI"
    :item    (make-text :contents (make-help-string))
-   :item    (make-common-options)
+   :item    (make-common-options :show show)
    :item    (defgroup (:header "Playback Options")
 	      (stropt  :long-name     "channel"
 		       :short-name    "c"

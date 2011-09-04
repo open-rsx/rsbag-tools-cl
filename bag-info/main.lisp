@@ -35,12 +35,13 @@ Examples:
 	  (map 'list #'car (rsbag.backend:backend-classes))
 	  program-name))
 
-(defun update-synopsis ()
+(defun update-synopsis (&key
+		        (show :default))
   "Create and return a commandline option tree."
   (make-synopsis
    :postfix "BAG-FILE"
    :item    (make-text :contents (make-help-string))
-   :item    (make-common-options)
+   :item    (make-common-options :show show)
    :item    (defgroup (:header "Display Options")
 	      (flag :long-name  "compute-sizes"
 		    :short-name "s"
