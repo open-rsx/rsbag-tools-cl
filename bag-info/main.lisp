@@ -88,7 +88,8 @@ Examples:
 					 (local-time:timestamp-difference
 					  end start))))
 		       (collect (list (channel-name channel)
-				      `(:events ,length
+				      `(:type   ,(meta-data channel :type)
+					:events ,length
 					,@(when sizes?
 					    `(:size   ,(channel-size channel)))
 					:start  ,start
