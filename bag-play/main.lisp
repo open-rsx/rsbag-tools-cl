@@ -78,12 +78,16 @@ Examples:
 		       :argument-name "INDEX"
 		       :description
 		       "Mutually exclusive with --end-time.")
-	      (enum    :long-name     "strategy"
+	      (enum    :long-name     "replay-strategy"
 		       :short-name    "r"
 		       :enum          (map 'list #'first (replay-strategy-classes))
+		       :default-value :recorded-timing
 		       :argument-name "STRATEGY"
 		       :description
-		       "Replay events form the specified input file according to STRATEGY.")
+		       (format nil "Replay events form the specified ~
+input file according to STRATEGY. Currently, the following strategies ~
+are supported:~{~&+ ~A~}."
+			       (map 'list #'first (replay-strategy-classes))))
 	      (enum    :long-name     "show-progress"
 		       :short-name    "p"
 		       :enum          '(:none :line)
@@ -132,16 +136,17 @@ the value of `*standard-output*'."
 
     ;; Create a reader and start the receiving and printing loop.
     (bind (((input base-uri) (remainder))
-	   (start-time  (getopt :long-name "start-time"))
-	   (start-index (getopt :long-name "start-index"))
-	   (end-time    (getopt :long-name "end-time"))
-	   (end-index   (getopt :long-name "end-index"))
-	   (channels    (or (make-channel-filter
-			     (iter (for channel next (getopt :long-name "channel"))
-				   (while channel)
-				   (collect channel)))
-			    t))
-	   (progress    (getopt :long-name "show-progress")))
+	   (start-time       (getopt :long-name "start-time"))
+	   (start-index      (getopt :long-name "start-index"))
+	   (end-time         (getopt :long-name "end-time"))
+	   (end-index        (getopt :long-name "end-index"))
+	   (channels         (or (make-channel-filter
+				  (iter (for channel next (getopt :long-name "channel"))
+					(while channel)
+					(collect channel)))
+				 t))
+	   (replay-strategy  (getopt :long-name "replay-strategy"))
+	   (progress         (getopt :long-name "show-progress")))
 
       (when (and start-time start-index)
 	(error "~@<The commandline options \"start-time\" and ~
@@ -155,7 +160,8 @@ the value of `*standard-output*'."
       (log1 :info "Using base-URI ~A" base-uri)
 
       (let ((connection (apply #'bag->events input base-uri
-			       :channels channels
+			       :channels        channels
+			       :replay-strategy replay-strategy
 			       (append (when start-time
 					 (list :start-time start-time))
 				       (when start-index
