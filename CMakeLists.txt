@@ -37,8 +37,8 @@ ADD_CUSTOM_TARGET(scripts ALL DEPENDS ${IMAGES})
 
 # Installation
 FOREACH(IMAGE ${IMAGES})
-  INSTALL(PROGRAMS    "${IMAGE}"
-          DESTINATION "bin")
+    INSTALL(PROGRAMS    "${IMAGE}"
+            DESTINATION "bin")
 ENDFOREACH()
 
 # Tests
@@ -47,20 +47,20 @@ SET(DATA_DIR "${cl-rsbag-tools_SOURCE_DIR}/test/data/")
 ENABLE_TESTING()
 
 FOREACH(IMAGE ${IMAGES})
-  FILE(RELATIVE_PATH NAME "${CMAKE_CURRENT_BINARY_DIR}" "${IMAGE}")
-  ADD_TEST(NAME    "${NAME}-help"
-           COMMAND "${IMAGE}" --help)
-  ADD_TEST(NAME    "${NAME}-help-all"
-           COMMAND "${IMAGE}" --help-all)
-  ADD_TEST(NAME    "${NAME}-version"
-           COMMAND "${IMAGE}" --version)
+    FILE(RELATIVE_PATH NAME "${CMAKE_CURRENT_BINARY_DIR}" "${IMAGE}")
+    ADD_TEST(NAME    "${NAME}-help"
+             COMMAND "${IMAGE}" --help)
+    ADD_TEST(NAME    "${NAME}-help-all"
+             COMMAND "${IMAGE}" --help-all)
+    ADD_TEST(NAME    "${NAME}-version"
+             COMMAND "${IMAGE}" --version)
 ENDFOREACH()
 
 FILE(GLOB TIDE_FILES
      "${DATA_DIR}/*.tide")
 FOREACH(TIDE_FILE ${TIDE_FILES})
-  FILE(RELATIVE_PATH NAME "${DATA_DIR}" "${TIDE_FILE}")
-  ADD_TEST(NAME    "bag-info${NAME}"
-           COMMAND "${CMAKE_CURRENT_BINARY_DIR}/bag-info"
-	           "${TIDE_FILE}")
+    FILE(RELATIVE_PATH NAME "${DATA_DIR}" "${TIDE_FILE}")
+    ADD_TEST(NAME    "bag-info${NAME}"
+             COMMAND "${CMAKE_CURRENT_BINARY_DIR}/bag-info"
+                     "${TIDE_FILE}")
 ENDFOREACH()
