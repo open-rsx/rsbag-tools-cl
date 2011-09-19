@@ -40,6 +40,30 @@ Examples:
 "
 	    "bag-record")))
 
+(defun make-filter-help-string ()
+  "Return a help string that explains how to specify filters and lists
+the available filters. "
+  (with-output-to-string (stream)
+    (format stream "Specify a filter that received events have to ~
+match in order to be processed rather than discarded. This option can ~
+be supplied multiple times in which case events have to match all ~
+specified filters. Each SPEC has to be of the form
+
+  KIND KEY1 VALUE1 KEY2 VALUE2 ...
+
+where keys and values depend on KIND and may be optional in some ~
+cases. Examples (note that the single quotes have to be included only ~
+when used within a shell):
+
+  --filter 'origin \"EAEE2B00-AF4B-11E0-8930-001AA0342D7D\"'
+  --filter 'regex \".*foo[0-9]+\"'
+
+The following filters are currently available (paragraph headings ~
+correspond to respective KIND):
+
+")
+    (print-filter-help stream)))
+
 (defun update-synopsis (&key
 			(show :default))
   "Create and return a commandline option tree."
@@ -64,6 +88,11 @@ Examples:
 allocate channels in the output bag file for received ~
 events. Currently, the following strategies are supported:~{~&+ ~A~}."
 			       (map 'list #'car (rsbag.rsb:channel-strategy-classes))))
+	      (stropt  :long-name       "filter"
+		       :short-name      "f"
+		       :argument-name   "SPEC"
+		       :description
+		       (make-filter-help-string))
 	      (lispobj :long-name     "max-buffer-size"
 		       :typespec      'positive-integer
 		       :description
@@ -98,12 +127,17 @@ events. Currently, the following strategies are supported:~{~&+ ~A~}."
     (let* ((uris               (map 'list #'puri:uri (remainder)))
 	   (output             (or (getopt :long-name "output-file")
 				   (error "Specify output file")))
-	   (channel-allocation (getopt :long-name "channel-allocation")))
+	   (channel-allocation (getopt :long-name "channel-allocation"))
+	   (filters            (iter (for spec next (getopt :long-name "filter"))
+				     (while spec)
+				     (collect
+					 (make-filter (parse-filter-spec spec))))))
 
       (log1 :info "Using URIs ~@<~@;~{~A~^, ~}~@:>" uris)
 
       (let* ((connection (events->bag uris output
-				      :channel-strategy channel-allocation))
+				      :channel-strategy channel-allocation
+				      :filters          filters))
 	     (*print-right-margin* (com.dvlsoft.clon::stream-line-width *standard-output*))
 	     (*print-miser-width*  *print-right-margin*))
 
