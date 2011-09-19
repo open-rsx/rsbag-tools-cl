@@ -58,9 +58,17 @@ ENDFOREACH()
 
 FILE(GLOB TIDE_FILES
      "${DATA_DIR}/*.tide")
+
 FOREACH(TIDE_FILE ${TIDE_FILES})
     FILE(RELATIVE_PATH NAME "${DATA_DIR}" "${TIDE_FILE}")
     ADD_TEST(NAME    "bag-info${NAME}"
              COMMAND "${CMAKE_CURRENT_BINARY_DIR}/bag-info"
                      "${TIDE_FILE}")
+ENDFOREACH()
+
+FOREACH(TIDE_FILE "${DATA_DIR}/empty.tide" "${DATA_DIR}/empty-channel.tide")
+    FILE(RELATIVE_PATH NAME "${DATA_DIR}" "${TIDE_FILE}")
+    ADD_TEST(NAME    "bag-play${NAME}"
+             COMMAND "${CMAKE_CURRENT_BINARY_DIR}/bag-play"
+                     "${TIDE_FILE}" inprocess:)
 ENDFOREACH()
