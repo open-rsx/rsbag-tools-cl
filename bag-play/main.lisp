@@ -132,6 +132,9 @@ the value of `*standard-output*'."
    :update-synopsis #'update-synopsis
    :return          #'(lambda () (return-from main)))
 
+  (unless (length= 2 (remainder))
+    (error "~@<Specify input file and base URI.~@:>"))
+
   (with-logged-warnings
 
     ;; Create a reader and start the receiving and printing loop.
