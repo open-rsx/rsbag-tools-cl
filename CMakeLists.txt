@@ -68,7 +68,9 @@ FOREACH(TIDE_FILE ${TIDE_FILES})
                      "${TIDE_FILE}")
 ENDFOREACH()
 
-FOREACH(TIDE_FILE "${DATA_DIR}/empty.tide" "${DATA_DIR}/empty-channel.tide")
+FOREACH(TIDE_FILE "${DATA_DIR}/empty.tide"
+                  "${DATA_DIR}/empty-channel.tide"
+                  "${DATA_DIR}/single-event.tide")
     FILE(RELATIVE_PATH NAME "${DATA_DIR}" "${TIDE_FILE}")
     ADD_TEST(NAME    "bag-play${NAME}"
              COMMAND "${CMAKE_CURRENT_BINARY_DIR}/bag-play"
