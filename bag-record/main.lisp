@@ -24,21 +24,43 @@
   (with-output-to-string (stream)
     (format stream "Capture events being exchanged on the scopes ~
 designated by URIS and store them in the specified output file. For ~
-each URI, one channel is created in the output file. These channels ~
+each URI, one or more channels may be created in the output ~
+file (depending on the channel allocation strategy). These channels ~
 store the events exchanged in the corresponding RSB channels. Each URI ~
 has to be of the form
 
   ")
-    (print-uri-help stream)
-    (format stream
-	    "
-Examples:
+    (print-uri-help stream)))
 
-  ~A -o /tmp/everything.tide spread://azurit:4803/
-  ~:*~A -o /tmp/nao.tide 'spread:/nao/vision/top?name=4803'
-  ~:*~A -o /tmp/multichannel.tide 'spread:/nao/vision/top' 'spread:/nao/audio/all'
+(defun make-examples-string (&key
+			     (program-name "bag-record"))
+  "Make and return a string containing usage examples of the program."
+  (format nil "~A -o /tmp/everything.tide spread://azurit:4803/
+
+  Connect to the bus using the Spread transport assuming the Spread ~
+daemon is listening on port 4803 on host \"azurit\". Participate in ~
+the \"root\" channel (designated by \"/\") and capture all events into ~
+the log file \"/tmp/everything.tide\". Recording continues until the ~
+program receives SIGINT or SIGTERM each of which causes a clean ~
+shutdown.
+
+~:*~A -o /tmp/nao.tide -f 'xpath :xpath \"node()/@width = ~
+100\" :fallback-policy :do-not-match' ~
+'spread:/nao/vision/top?name=4803'
+
+  Store events for the scope \"/nao/vision/top\" (and sub-scopes) in ~
+the log file \"/tmp/nao.tide\", if the event payload has a width field ~
+that has the value 100. The bus connection uses the Spread transport ~
+with the daemon name option.
+
+~:*~A -o /tmp/multichannel.tide 'spread:/nao/vision/top' ~
+'spread:/nao/audio/all'
+
+  Store events being exchanged on the channels designated by ~
+\"/nao/vision/top\" and \"/nao/audio/all\" into the log file ~
+\"/tmp/multichannel.tide\".
 "
-	    "bag-record")))
+	  program-name))
 
 (defun make-filter-help-string ()
   "Return a help string that explains how to specify filters and lists
@@ -70,6 +92,7 @@ correspond to respective KIND):
 			(show :default))
   "Create and return a commandline option tree."
   (make-synopsis
+   ;; Basic usage and specific options.
    :postfix "[URIS]"
    :item    (make-text :contents (make-help-string))
    :item    (make-common-options :show show)
@@ -110,7 +133,10 @@ events. Currently, the following strategies are supported:~{~&+ ~A~}."
    ;; Append RSB options.
    :item    (make-options
 	     :show? (or (eq show t)
-			(and (listp show) (member :rsb show))))))
+			(and (listp show) (member :rsb show))))
+   ;; Append examples.
+   :item    (defgroup (:header "Examples")
+	      (make-text :contents (make-examples-string)))))
 
 (defun main ()
   "Entry point function of the bag-record program."
