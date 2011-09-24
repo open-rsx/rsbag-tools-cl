@@ -32,9 +32,11 @@
    :cl
    :alexandria
    :iterate
+   :bind
    :com.dvlsoft.clon
 
    :rsb
+   :rsb.patterns
    :rsb.common
 
    :rsbag

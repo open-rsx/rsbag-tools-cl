@@ -19,6 +19,30 @@
 
 (in-package :rsbag.tools.record)
 
+(defun invoke-with-control-service (uri connection thunk)
+  "Expose an RPC server at URI that allows remote clients to control
+CONNECTION while THUNK executes."
+  (log1 :info "Exposing control interface at URI ~A" uri)
+  (let ((thread (bt:current-thread)))
+    (with-local-server (server uri)
+      (with-methods (server)
+	  (("start"     (request :void)
+	     (declare (ignore request))
+	     (log1 :info "Starting recording")
+	     (start connection)
+	     (values))
+	   ("stop"      (request :void)
+	     (declare (ignore request))
+	     (log1 :info "Stopping recording")
+	     (stop connection)
+	     (values))
+	   ("terminate" (request :void)
+	     (declare (ignore request))
+	     (log1 :info "Terminating")
+	     (interrupt thread)
+	     (values)))
+	(funcall thunk)))))
+
 (defun make-help-string ()
   "Return a help that explains the commandline option interface."
   (with-output-to-string (stream)
@@ -113,11 +137,22 @@ correspond to respective KIND):
 allocate channels in the output bag file for received ~
 events. Currently, the following strategies are supported:~{~&+ ~A~}."
 			       (map 'list #'car (rsbag.rsb:channel-strategy-classes))))
-	      (stropt  :long-name       "filter"
-		       :short-name      "f"
-		       :argument-name   "SPEC"
+	      (stropt  :long-name     "filter"
+		       :short-name    "f"
+		       :argument-name "SPEC"
 		       :description
 		       (make-filter-help-string))
+	      (stropt  :long-name     "control-uri"
+		       :short-name    "c"
+		       :argument-name "URI"
+		       :description
+		       "A URI specifying the root scope and transport configuration of an RPC server exposing methods which allow controlling the recording process. Currently, the following methods are provided:
++ start : void -> void
+  Restart recording after it has been stopped.
++ stop : void -> void
+  Stop recording allowing it to be restarted later.
++ terminate : void -> void
+  Terminate the recording process and the program.")
 	      (lispobj :long-name     "max-buffer-size"
 		       :typespec      'positive-integer
 		       :description
@@ -152,27 +187,34 @@ events. Currently, the following strategies are supported:~{~&+ ~A~}."
   (with-logged-warnings
 
     ;; Create a reader and start the receiving and printing loop.
-    (let* ((uris               (map 'list #'puri:uri (remainder)))
-	   (output             (or (getopt :long-name "output-file")
-				   (error "Specify output file")))
-	   (channel-allocation (getopt :long-name "channel-allocation"))
-	   (filters            (iter (for spec next (getopt :long-name "filter"))
-				     (while spec)
-				     (collect
-					 (make-filter (parse-filter-spec spec))))))
+    (bind ((control-uri          (when-let ((string (getopt :long-name "control-uri")))
+				   (puri:parse-uri string)))
+	   (uris                 (map 'list #'puri:parse-uri (remainder)))
+	   (output               (or (getopt :long-name "output-file")
+				     (error "~@<Specify output file.~@:>")))
+	   (channel-allocation   (getopt :long-name "channel-allocation"))
+	   (filters              (iter (for spec next (getopt :long-name "filter"))
+				       (while spec)
+				       (collect
+					   (make-filter (parse-filter-spec spec)))))
+	   (connection           (events->bag uris output
+					      :channel-strategy channel-allocation
+					      :filters          filters))
+
+	   (*print-right-margin* (com.dvlsoft.clon::stream-line-width *standard-output*))
+	   (*print-miser-width*  *print-right-margin*)
+
+	   ((:flet recording-loop ())
+	    (unwind-protect
+		 (with-interactive-interrupt-exit ()
+		   (iter (sleep 10)
+			 (format t "~A ~@<~@;~{~A~^, ~}~@:>~%"
+				 (local-time:now)
+				 (bag-channels (connection-bag connection)))))
+	      (close connection))))
 
       (log1 :info "Using URIs ~@<~@;~{~A~^, ~}~@:>" uris)
-
-      (let* ((connection (events->bag uris output
-				      :channel-strategy channel-allocation
-				      :filters          filters))
-	     (*print-right-margin* (com.dvlsoft.clon::stream-line-width *standard-output*))
-	     (*print-miser-width*  *print-right-margin*))
-
-	(with-interactive-interrupt-exit ()
-	  (iter (sleep 10)
-		(format t "~A ~@<~@;~{~A~^, ~}~@:>~%"
-			(local-time:now)
-			(bag-channels (connection-bag connection)))))
-
-	(close connection)))))
+      (if control-uri
+	  (invoke-with-control-service
+	   control-uri connection #'recording-loop)
+	  (recording-loop)))))
