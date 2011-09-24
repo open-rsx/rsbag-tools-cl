@@ -57,6 +57,8 @@ when used within a shell):
 
   --filter 'origin \"EAEE2B00-AF4B-11E0-8930-001AA0342D7D\"'
   --filter 'regex \".*foo[0-9]+\"'
+  --filter 'regex :regex \".*foo[0-9]+\"' (equivalent)
+  -f 'xpath :xpath \"node()/@foo\" :fallback-policy :do-not-match'
 
 The following filters are currently available (paragraph headings ~
 correspond to respective KIND):
