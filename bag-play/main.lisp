@@ -143,11 +143,10 @@ the value of `*standard-output*'."
 	   (start-index      (getopt :long-name "start-index"))
 	   (end-time         (getopt :long-name "end-time"))
 	   (end-index        (getopt :long-name "end-index"))
-	   (channels         (or (make-channel-filter
-				  (iter (for channel next (getopt :long-name "channel"))
-					(while channel)
-					(collect channel)))
-				 t))
+	   (channel-specs    (iter (for channel next (getopt :long-name "channel"))
+				   (while channel)
+				   (collect channel)))
+	   (channels         (or (make-channel-filter channel-specs) t))
 	   (replay-strategy  (getopt :long-name "replay-strategy"))
 	   (progress         (getopt :long-name "show-progress")))
 
@@ -159,7 +158,7 @@ the value of `*standard-output*'."
 \"end-index\" are mutually exclusive.~@:>"))
 
       (log1 :info "Using ~:[~*all channels~;channels matching ~@<~@;~{~S~^, ~}~@:>~]"
-	    (not (eq channels t)) channels)
+	    (not (eq channels t)) channel-specs)
       (log1 :info "Using base-URI ~A" base-uri)
 
       (let ((connection (apply #'bag->events input base-uri
