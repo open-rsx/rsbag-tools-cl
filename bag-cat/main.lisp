@@ -83,6 +83,13 @@ whose names end in either \"STRING\" or \"BYTES\".
    :postfix "INPUT-FILE-OR--"
    :item    (make-text :contents (make-help-string))
    :item    (make-common-options :show show)
+   :item    (defgroup (:header "Printing Options")
+	      (stropt  :long-name     "entry-separator"
+		       :short-name    "p"
+		       :argument-name "STRING-OR-KEYWORD"
+		       :default-value ":newline"
+		       :description
+		       "A string that should be printing between each pair of entries. The special values :none and :newline disable printing of entry separators and cause a newline character to be used as entry separator respectively."))
    :item    (defgroup (:header "Selection Options")
 	      (stropt  :long-name     "channel"
 		       :short-name    "c"
@@ -142,15 +149,22 @@ whose names end in either \"STRING\" or \"BYTES\".
   (with-logged-warnings
 
     ;; Create a reader and start the receiving and printing loop.
-    (bind ((input       (first (remainder)))
-	   (start-time  (getopt :long-name "start-time"))
-	   (start-index (getopt :long-name "start-index"))
-	   (end-time    (getopt :long-name "end-time"))
-	   (end-index   (getopt :long-name "end-index"))
-	   (specs       (iter (for channel next (getopt :long-name "channel"))
-			      (while channel)
-			      (collect channel)))
-	   (channels    (or (make-channel-filter specs) t)))
+    (bind ((input           (first (remainder)))
+	   (entry-separator (when-let ((string (getopt :long-name "entry-separator")))
+			      (if (starts-with #\: string)
+				  (read-from-string string)
+				  string)))
+	   (start-time      (getopt :long-name "start-time"))
+	   (start-index     (getopt :long-name "start-index"))
+	   (end-time        (getopt :long-name "end-time"))
+	   (end-index       (getopt :long-name "end-index"))
+	   (specs           (iter (for channel next (getopt :long-name "channel"))
+				  (while channel)
+				  (collect channel)))
+	   (channels        (or (make-channel-filter specs) t)))
+
+      (check-type entry-separator (or string (member :none :newline))
+		  ":none, :newline or a string not starting with \":\"")
 
       (when (and start-time start-index)
 	(error "~@<The commandline options \"start-time\" and ~
@@ -170,4 +184,11 @@ whose names end in either \"STRING\" or \"BYTES\".
 	    (iter (for datum each sequence
 		       :from (or start-index 0)
 		       :to   end-index)
+		  (unless (first-iteration-p)
+		    (cond
+		      ((stringp entry-separator)
+		       (princ entry-separator *standard-output*))
+		      ((eq entry-separator :newline)
+		       (terpri *standard-output*))))
+
 		  (output datum *standard-output*))))))))
