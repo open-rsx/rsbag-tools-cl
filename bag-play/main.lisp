@@ -41,6 +41,44 @@ Examples:
 	    (map 'list #'car (rsbag.backend:backend-classes))
 	    "bag-play")))
 
+(defun make-replay-strategy-help-string ()
+  "Return a help string that explains how to specify replay strategies
+and lists the available replay strategies."
+  (with-output-to-string (stream)
+    (format stream "Replay events form the specified input file ~
+according to STRATEGY. Each SPEC has to be of the form
+
+  KIND KEY1 VALUE1 KEY2 VALUE2 ...
+
+where keys and values depend on KIND and may be optional in some ~
+cases. Examples (note that the single quotes have to be included only ~
+when used within a shell):
+
+  --replay-strategy recorded-timing
+  -r as-fast-as-possible
+  --replay-strategy 'fixed-rate :rate 10'
+
+Currently, the following strategies are supported:
+
+")
+    (print-classes-help-string
+     (replay-strategy-classes) stream
+     :initarg-blacklist '(:start-index :end-index :error-policy))))
+
+(defun parse-replay-strategy-spec (string)
+  "Parse STRING as a filter specification of one of the forms
+
+  KIND KEY1 VALUE1 KEY2 VALUE2 ...
+
+and return the result as a list."
+  (with-input-from-string (stream string)
+    (iter (for token in-stream stream)
+	  (collect
+	      (if (and (first-iteration-p)
+		       (not (keywordp token)))
+		  (make-keyword (string-upcase (string token)))
+		  token)))))
+
 (defun update-synopsis (&key
 			(show :default))
   "Create and return a commandline option tree."
@@ -78,16 +116,12 @@ Examples:
 		       :argument-name "INDEX"
 		       :description
 		       "Mutually exclusive with --end-time.")
-	      (enum    :long-name     "replay-strategy"
+	      (stropt  :long-name     "replay-strategy"
 		       :short-name    "r"
-		       :enum          (map 'list #'first (replay-strategy-classes))
-		       :default-value :recorded-timing
+		       :default-value "recorded-timing"
 		       :argument-name "STRATEGY"
 		       :description
-		       (format nil "Replay events form the specified ~
-input file according to STRATEGY. Currently, the following strategies ~
-are supported:~{~&+ ~A~}."
-			       (map 'list #'first (replay-strategy-classes))))
+		       (make-replay-strategy-help-string))
 	      (enum    :long-name     "show-progress"
 		       :short-name    "p"
 		       :enum          '(:none :line)
@@ -147,7 +181,10 @@ the value of `*standard-output*'."
 				   (while channel)
 				   (collect channel)))
 	   (channels         (or (make-channel-filter channel-specs) t))
-	   (replay-strategy  (getopt :long-name "replay-strategy"))
+	   ((name &rest args) (parse-replay-strategy-spec
+			       (getopt :long-name "replay-strategy")))
+	   (class            (find-replay-strategy-class name))
+	   (replay-strategy  (apply #'make-instance class args))
 	   (progress         (getopt :long-name "show-progress")))
 
       (when (and start-time start-index)
