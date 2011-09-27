@@ -199,8 +199,8 @@ recorded.~@:>"))
 	   (channel-allocation   (getopt :long-name "channel-allocation"))
 	   (filters              (iter (for spec next (getopt :long-name "filter"))
 				       (while spec)
-				       (collect
-					   (make-filter (parse-filter-spec spec)))))
+				       (collect (apply #'rsb.filter:filter
+						       (parse-instantiation-spec spec)))))
 	   (connection           (events->bag uris output
 					      :channel-strategy channel-allocation
 					      :filters          filters))
