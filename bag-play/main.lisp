@@ -46,11 +46,11 @@ Examples:
 and lists the available replay strategies."
   (with-output-to-string (stream)
     (format stream "Replay events form the specified input file ~
-according to STRATEGY. Each SPEC has to be of the form
+according to STRATEGY. SPEC has to be of the form
 
   KIND KEY1 VALUE1 KEY2 VALUE2 ...
 
-where keys and values depend on KIND and may be optional in some ~
+where keys and values depend on KIND and are optional in most ~
 cases. Examples (note that the single quotes have to be included only ~
 when used within a shell):
 
@@ -64,20 +64,6 @@ Currently, the following strategies are supported:
     (print-classes-help-string
      (replay-strategy-classes) stream
      :initarg-blacklist '(:start-index :end-index :error-policy))))
-
-(defun parse-replay-strategy-spec (string)
-  "Parse STRING as a filter specification of one of the forms
-
-  KIND KEY1 VALUE1 KEY2 VALUE2 ...
-
-and return the result as a list."
-  (with-input-from-string (stream string)
-    (iter (for token in-stream stream)
-	  (collect
-	      (if (and (first-iteration-p)
-		       (not (keywordp token)))
-		  (make-keyword (string-upcase (string token)))
-		  token)))))
 
 (defun update-synopsis (&key
 			(show :default))
@@ -119,7 +105,7 @@ and return the result as a list."
 	      (stropt  :long-name     "replay-strategy"
 		       :short-name    "r"
 		       :default-value "recorded-timing"
-		       :argument-name "STRATEGY"
+		       :argument-name "SPEC"
 		       :description
 		       (make-replay-strategy-help-string))
 	      (enum    :long-name     "show-progress"
@@ -181,10 +167,11 @@ the value of `*standard-output*'."
 				   (while channel)
 				   (collect channel)))
 	   (channels         (or (make-channel-filter channel-specs) t))
-	   ((name &rest args) (parse-replay-strategy-spec
-			       (getopt :long-name "replay-strategy")))
-	   (class            (find-replay-strategy-class name))
-	   (replay-strategy  (apply #'make-instance class args))
+	   (replay-strategy  (bind (((name &rest args)
+				     (parse-instantiation-spec
+				      (getopt :long-name "replay-strategy")))
+				    (class (find-replay-strategy-class name)))
+			       (apply #'make-instance class args)))
 	   (progress         (getopt :long-name "show-progress")))
 
       (when (and start-time start-index)
