@@ -53,7 +53,7 @@ FOREACH(IMAGE ${IMAGES})
     ADD_TEST(NAME    "${NAME}-help"
              COMMAND "${IMAGE}" --help)
     ADD_TEST(NAME    "${NAME}-help-all"
-             COMMAND "${IMAGE}" --help-all)
+             COMMAND "${IMAGE}" --help-for=all)
     ADD_TEST(NAME    "${NAME}-version"
              COMMAND "${IMAGE}" --version)
 ENDFOREACH()
