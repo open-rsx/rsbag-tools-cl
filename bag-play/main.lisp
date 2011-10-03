@@ -31,17 +31,12 @@ derived from BASE-URI. BASE-URI which has to be of the form
 	    "
 The file format of INPUT-FILE is guessed based on the ~
 filename. Currently, the following file formats are supported:~{~&+ ~
-~4A (extension: \".~(~:*~A~)\")~}
-
-Examples:
-
-  ~A /tmp/everything.tide spread://azurit:4803/
-  ~:*~A -c /nao/vision/top /tmp/nao.tide 'spread:/nao/vision/top?name=4803'
-"
+~4A (extension: \".~(~:*~A~)\")~}"
 	    (map 'list #'car (rsbag.backend:backend-classes))
 	    "bag-play")))
 
-(defun make-replay-strategy-help-string ()
+(defun make-replay-strategy-help-string (&key
+					 (show :default))
   "Return a help string that explains how to specify replay strategies
 and lists the available replay strategies."
   (with-output-to-string (stream)
@@ -58,12 +53,36 @@ when used within a shell):
   -r as-fast-as-possible
   --replay-strategy 'fixed-rate :rate 10'
 
-Currently, the following strategies are supported:
-
 ")
-    (print-classes-help-string
-     (replay-strategy-classes) stream
-     :initarg-blacklist '(:start-index :end-index :error-policy))))
+    (with-abbreviation (stream :strategies show)
+      (format stream "Currently, the following strategies are supported:
+
+" )
+      (print-classes-help-string
+       (replay-strategy-classes) stream
+       :initarg-blacklist '(:start-index :end-index :error-policy :stream)))))
+
+(defun make-examples-string (&key
+			     (program-name "bag-play"))
+  "Make and return a string containing usage examples of the program."
+  (format nil "~A /tmp/everything.tide spread://azurit:4803/
+
+  Replay all events from all channels stored in the log file ~
+\"/tmp/everything.tide\" mimicking the recorded timing as closely as ~
+possible. Publish replayed events on the channels they were originally ~
+published on. Use the Spread daemon listening on port 4803 of host ~
+azurit to connect to the bus.
+
+~:*~A -r as-fast-as-possible -c /nao/vision/top /tmp/nao.tide ~
+'spread:/mynamespace'
+
+  Replay events recorded from the log file \"/tmp/nao.tide\" for the ~
+channel designated by \"/nao/vision/top\" (and potentially recorded ~
+sub-channels) as fast as possible, discarding the recorded timing ~
+information. Publish replayed on channels with the prefix ~
+\"/mynamespace\", i.e. \"/mynamespace/nao/vision/top\" for events ~
+recorded for \"/nao/vision/top\". "
+	  program-name))
 
 (defun update-synopsis (&key
 			(show :default))
@@ -107,7 +126,7 @@ Currently, the following strategies are supported:
 		       :default-value "recorded-timing"
 		       :argument-name "SPEC"
 		       :description
-		       (make-replay-strategy-help-string))
+		       (make-replay-strategy-help-string :show show))
 	      (enum    :long-name     "show-progress"
 		       :short-name    "p"
 		       :enum          '(:none :line)
@@ -118,7 +137,10 @@ Currently, the following strategies are supported:
    ;; Append RSB options.
    :item    (make-options
 	     :show? (or (eq show t)
-			(and (listp show) (member :rsb show))))))
+			(and (listp show) (member :rsb show))))
+   ;; Append examples.
+   :item    (defgroup (:header "Examples")
+	      (make-text :contents (make-examples-string)))))
 
 (defun make-channel-filter (specs)
   (when specs
