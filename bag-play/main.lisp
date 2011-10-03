@@ -19,16 +19,21 @@
 
 (in-package :rsbag.tools.play)
 
-(defun make-help-string ()
+(defun make-help-string (&key
+			 (show :default))
   "Return a help that explains the commandline option interface."
   (with-output-to-string (stream)
     (format stream "Replay events from INPUT-FILE on RSB channels ~
-derived from BASE-URI. BASE-URI which has to be of the form
+derived from BASE-URI.
+
+")
+    (with-abbreviation (stream :uri show)
+      (format stream "BASE-URI which has to be of the form
 
   ")
-    (print-uri-help stream)
-    (format stream
-	    "
+      (print-uri-help stream :uri-var "BASE-URI"))
+    (format stream "
+
 The file format of INPUT-FILE is guessed based on the ~
 filename. Currently, the following file formats are supported:~{~&+ ~
 ~4A (extension: \".~(~:*~A~)\")~}"
@@ -89,7 +94,7 @@ recorded for \"/nao/vision/top\". "
   "Create and return a commandline option tree."
   (make-synopsis
    :postfix "INPUT-FILE BASE-URI"
-   :item    (make-text :contents (make-help-string))
+   :item    (make-text :contents (make-help-string :show show))
    :item    (make-common-options :show show)
    :item    (defgroup (:header "Playback Options")
 	      (stropt  :long-name     "channel"

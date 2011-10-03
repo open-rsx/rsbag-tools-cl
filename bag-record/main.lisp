@@ -43,18 +43,22 @@ CONNECTION while THUNK executes."
 	     (values)))
 	(funcall thunk)))))
 
-(defun make-help-string ()
+(defun make-help-string (&key
+			 (show :default))
   "Return a help that explains the commandline option interface."
   (with-output-to-string (stream)
     (format stream "Capture events being exchanged on the scopes ~
 designated by URIS and store them in the specified output file. For ~
 each URI, one or more channels may be created in the output ~
 file (depending on the channel allocation strategy). These channels ~
-store the events exchanged in the corresponding RSB channels. Each URI ~
-has to be of the form
+store the events exchanged in the corresponding RSB channels.
+
+")
+    (with-abbreviation (stream :uri show)
+      (format stream "Each URI has to be of the form
 
   ")
-    (print-uri-help stream)))
+      (print-uri-help stream :uri-var "each URI"))))
 
 (defun make-examples-string (&key
 			     (program-name "bag-record"))
@@ -118,7 +122,7 @@ correspond to respective KIND):
   (make-synopsis
    ;; Basic usage and specific options.
    :postfix "[URIS]"
-   :item    (make-text :contents (make-help-string))
+   :item    (make-text :contents (make-help-string :show show))
    :item    (make-common-options :show show)
    :item    (defgroup (:header "Recording Options")
 	      (path    :long-name     "output-file"
@@ -147,6 +151,7 @@ events. Currently, the following strategies are supported:~{~&+ ~A~}."
 		       :argument-name "URI"
 		       :description
 		       "A URI specifying the root scope and transport configuration of an RPC server exposing methods which allow controlling the recording process. Currently, the following methods are provided:
+
 + start : void -> void
   Restart recording after it has been stopped.
 + stop : void -> void
