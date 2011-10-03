@@ -61,7 +61,7 @@
   :description "A tool that recats events stored in rsbag log files."
   :depends-on  (:cl-ppcre ;; for regex-based channel selection
 
-		(:version :cl-rsbag      "0.1.0")
+		(:version :cl-rsbag      #.(version/string))
 
 		(:version :cl-rsb        "0.5.0") ;;; TODO(jmoringe): not really required, functionality-wise
 		(:version :cl-rsb-common "0.1.0"))

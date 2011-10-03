@@ -59,7 +59,7 @@
   :version     #.(version/string)
   :license     "GPL3; see COPYING file for details."
   :description "A tool that displays information about rsbag log files."
-  :depends-on  ((:version :cl-rsbag      "0.1.0")
+  :depends-on  ((:version :cl-rsbag      #.(version/string))
 
 		(:version :cl-rsb-common "0.1.0"))
   :components  ((:module     "bag-info"
