@@ -93,7 +93,7 @@ recorded for \"/nao/vision/top\". "
 			(show :default))
   "Create and return a commandline option tree."
   (make-synopsis
-   :postfix "INPUT-FILE BASE-URI"
+   :postfix "INPUT-FILE [BASE-URI]"
    :item    (make-text :contents (make-help-string :show show))
    :item    (make-common-options :show show)
    :item    (defgroup (:header "Playback Options")
@@ -179,13 +179,13 @@ the value of `*standard-output*'."
    :update-synopsis #'update-synopsis
    :return          #'(lambda () (return-from main)))
 
-  (unless (length= 2 (remainder))
-    (error "~@<Specify input file and base URI.~@:>"))
+  (unless (<= 1 (length (remainder)) 2)
+    (error "~@<Specify input file and, optionally, base URI.~@:>"))
 
   (with-logged-warnings
 
     ;; Create a reader and start the receiving and printing loop.
-    (bind (((input base-uri) (remainder))
+    (bind (((input &optional (base-uri "/")) (remainder))
 	   (start-time       (getopt :long-name "start-time"))
 	   (start-index      (getopt :long-name "start-index"))
 	   (end-time         (getopt :long-name "end-time"))
