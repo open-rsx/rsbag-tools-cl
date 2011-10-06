@@ -194,11 +194,8 @@ the value of `*standard-output*'."
 				   (while channel)
 				   (collect channel)))
 	   (channels         (or (make-channel-filter channel-specs) t))
-	   (replay-strategy  (bind (((name &rest args)
-				     (parse-instantiation-spec
-				      (getopt :long-name "replay-strategy")))
-				    (class (find-replay-strategy-class name)))
-			       (apply #'make-instance class args)))
+	   (replay-strategy  (parse-instantiation-spec
+			      (getopt :long-name "replay-strategy")))
 	   (progress         (getopt :long-name "show-progress")))
 
       (when (and start-time start-index)
