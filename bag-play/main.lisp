@@ -46,7 +46,7 @@ filename. Currently, the following file formats are supported:~{~&+ ~
 and lists the available replay strategies."
   (with-output-to-string (stream)
     (format stream "Replay events form the specified input file ~
-according to STRATEGY. SPEC has to be of the form
+according to SPEC which has to be of the form
 
   KIND KEY1 VALUE1 KEY2 VALUE2 ...
 
@@ -57,6 +57,7 @@ when used within a shell):
   --replay-strategy recorded-timing
   -r as-fast-as-possible
   --replay-strategy 'fixed-rate :rate 10'
+  -r 'remote-controlled :uri \"spread://localhost:4803/myplayback/control\"'
 
 ")
     (with-abbreviation (stream :strategies show)
