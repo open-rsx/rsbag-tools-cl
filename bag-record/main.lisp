@@ -60,8 +60,60 @@ store the events exchanged in the corresponding RSB channels.
   ")
       (print-uri-help stream :uri-var "each URI"))))
 
+(defun make-channel-strategy-help-string (&key
+					  (show :default))
+  "Return a help string that explains how to specify replay strategies
+and lists the available replay strategies."
+  (with-output-to-string (stream)
+    (format stream "Allocate channels for received events in the ~
+output bag file according to the strategy designated by SPEC which has ~
+to be of the form
+
+  KIND KEY1 VALUE1 KEY2 VALUE2 ...
+
+where keys and values depend on KIND and are optional in most ~
+cases. Examples (note that the single quotes have to be included only ~
+when used within a shell):
+
+  -a scope-and-type
+
+")
+    (with-abbreviation (stream :channel-strategies show)
+      (format stream "Currently, the following strategies are supported:
+
+" )
+      (print-classes-help-string (channel-strategy-classes) stream))))
+
+(defun make-filter-help-string (&key
+				(show :default))
+  "Return a help string that explains how to specify filters and lists
+the available filters. "
+  (with-output-to-string (stream)
+    (format stream "Specify a filter that received events have to ~
+match in order to be processed rather than discarded. This option can ~
+be supplied multiple times in which case events have to match all ~
+specified filters. Each SPEC has to be of the form
+
+  KIND KEY1 VALUE1 KEY2 VALUE2 ...
+
+where keys and values depend on KIND and may be optional in some ~
+cases. Examples (note that the single quotes have to be included only ~
+when used within a shell):
+
+  --filter 'origin \"EAEE2B00-AF4B-11E0-8930-001AA0342D7D\"'
+  --filter 'regex \".*foo[0-9]+\"'
+  --filter 'regex :regex \".*foo[0-9]+\"' (equivalent)
+  -f 'xpath :xpath \"node()/@foo\" :fallback-policy :do-not-match'
+
+")
+    (with-abbreviation (stream :filters show)
+      (format stream "The following filters are currently available:
+
+")
+      (print-filter-help stream))))
+
 (defun make-examples-string (&key
-			     (program-name "bag-record"))
+			       (program-name "bag-record"))
   "Make and return a string containing usage examples of the program."
   (format nil "~A -o /tmp/everything.tide spread://azurit:4803/
 
@@ -90,32 +142,6 @@ with the daemon name option.
 "
 	  program-name))
 
-(defun make-filter-help-string ()
-  "Return a help string that explains how to specify filters and lists
-the available filters. "
-  (with-output-to-string (stream)
-    (format stream "Specify a filter that received events have to ~
-match in order to be processed rather than discarded. This option can ~
-be supplied multiple times in which case events have to match all ~
-specified filters. Each SPEC has to be of the form
-
-  KIND KEY1 VALUE1 KEY2 VALUE2 ...
-
-where keys and values depend on KIND and may be optional in some ~
-cases. Examples (note that the single quotes have to be included only ~
-when used within a shell):
-
-  --filter 'origin \"EAEE2B00-AF4B-11E0-8930-001AA0342D7D\"'
-  --filter 'regex \".*foo[0-9]+\"'
-  --filter 'regex :regex \".*foo[0-9]+\"' (equivalent)
-  -f 'xpath :xpath \"node()/@foo\" :fallback-policy :do-not-match'
-
-The following filters are currently available (paragraph headings ~
-correspond to respective KIND):
-
-")
-    (print-filter-help stream)))
-
 (defun update-synopsis (&key
 			(show :default))
   "Create and return a commandline option tree."
@@ -131,21 +157,17 @@ correspond to respective KIND):
 		       :description
 		       (format nil "Name of the file into which captured events should be written. The file format is determined based on the file type (extension). Currently, the following file formats are supported:~{~&+ ~4A (extension: \".~(~:*~A~)\")~}."
 			    (map 'list #'car (rsbag.backend:backend-classes))))
-	      (enum    :long-name     "channel-allocation"
+	      (stropt  :long-name     "channel-allocation"
 		       :short-name    "a"
-		       :enum          (map 'list #'car (rsbag.rsb:channel-strategy-classes))
-		       :default-value :scope-and-type
-		       :argument-name "STRATEGY"
+		       :default-value "scope-and-type"
+		       :argument-name "SPEC"
 		       :description
-		       (format nil "The strategy that should be use to ~
-allocate channels in the output bag file for received ~
-events. Currently, the following strategies are supported:~{~&+ ~A~}."
-			       (map 'list #'car (rsbag.rsb:channel-strategy-classes))))
+		       (make-channel-strategy-help-string :show show))
 	      (stropt  :long-name     "filter"
 		       :short-name    "f"
 		       :argument-name "SPEC"
 		       :description
-		       (make-filter-help-string))
+		       (make-filter-help-string :show show))
 	      (stropt  :long-name     "control-uri"
 		       :short-name    "c"
 		       :argument-name "URI"
@@ -196,19 +218,20 @@ recorded.~@:>"))
   (with-logged-warnings
 
     ;; Create a reader and start the receiving and printing loop.
-    (bind ((control-uri          (when-let ((string (getopt :long-name "control-uri")))
-				   (puri:parse-uri string)))
-	   (uris                 (map 'list #'puri:parse-uri (remainder)))
-	   (output               (or (getopt :long-name "output-file")
-				     (error "~@<Specify output file.~@:>")))
-	   (channel-allocation   (getopt :long-name "channel-allocation"))
-	   (filters              (iter (for spec next (getopt :long-name "filter"))
-				       (while spec)
-				       (collect (apply #'rsb.filter:filter
-						       (parse-instantiation-spec spec)))))
-	   (connection           (events->bag uris output
-					      :channel-strategy channel-allocation
-					      :filters          filters))
+    (bind ((control-uri      (when-let ((string (getopt :long-name "control-uri")))
+			       (puri:parse-uri string)))
+	   (uris             (map 'list #'puri:parse-uri (remainder)))
+	   (output           (or (getopt :long-name "output-file")
+				 (error "~@<Specify output file.~@:>")))
+	   (channel-strategy (parse-instantiation-spec
+			      (getopt :long-name "channel-allocation")))
+	   (filters          (iter (for spec next (getopt :long-name "filter"))
+				   (while spec)
+				   (collect (apply #'rsb.filter:filter
+						   (parse-instantiation-spec spec)))))
+	   (connection       (events->bag uris output
+					  :channel-strategy channel-strategy
+					  :filters          filters))
 
 	   (*print-right-margin* (com.dvlsoft.clon::stream-line-width *standard-output*))
 	   (*print-miser-width*  *print-right-margin*)
