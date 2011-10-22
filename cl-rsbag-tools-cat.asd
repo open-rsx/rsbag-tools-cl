@@ -35,7 +35,7 @@
 (defconstant +version-major+ 0
   "Major component of version number.")
 
-(defconstant +version-minor+ 1
+(defconstant +version-minor+ 6
   "Minor component of version number.")
 
 (defconstant +version-revision+ 0
@@ -63,8 +63,8 @@
 
 		(:version :cl-rsbag      #.(version/string))
 
-		(:version :cl-rsb        "0.5.0") ;;; TODO(jmoringe): not really required, functionality-wise
-		(:version :cl-rsb-common "0.1.0"))
+		(:version :cl-rsb        #.(version/string)) ;;; TODO(jmoringe): not really required, functionality-wise
+		(:version :cl-rsb-common #.(version/string)))
   :components  ((:module     "bag-cat"
 	         :components ((:file       "package")
 			      (:file       "main"
