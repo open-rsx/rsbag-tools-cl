@@ -35,7 +35,7 @@
 (defconstant +version-major+ 0
   "Major component of version number.")
 
-(defconstant +version-minor+ 1
+(defconstant +version-minor+ 5
   "Minor component of version number.")
 
 (defconstant +version-revision+ 0
@@ -61,7 +61,7 @@
   :description "A tool that displays information about rsbag log files."
   :depends-on  ((:version :cl-rsbag      #.(version/string))
 
-		(:version :cl-rsb-common "0.1.0"))
+		(:version :cl-rsb-common #.(version/string)))
   :components  ((:module     "bag-info"
 	         :components ((:file       "package")
 			      (:file       "main"
