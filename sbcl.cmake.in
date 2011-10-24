@@ -10,7 +10,7 @@ EXECUTE_PROCESS(COMMAND "@SBCL_EXECUTABLE@" --disable-debugger --no-sysinit @LIS
                 OUTPUT_FILE       "@CMAKE_CURRENT_BINARY_DIR@/@NAME@.log"
 		RESULT_VARIABLE   RESULT)
 IF(NOT ${RESULT} EQUAL 0)
-    MESSAGE(FATAL_ERROR "Failed to dump image file")
+    MESSAGE(FATAL_ERROR "Failed to dump image file @NAME@")
 ENDIF()
 
 # Compress image.

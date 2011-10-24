@@ -1,39 +1,6 @@
-(require :asdf)
-
-;; We do this strange stuff to avoid loading sb-posix (for getenv)
-;; before quicklisp.
-(defvar *lisp-share-path*
-  (with-output-to-string (stream)
-    (sb-ext:run-program
-     "sh" '("-c" "env echo -n \"${SBCL_HOME}\"/../../../share/common-lisp")
-     :search t
-     :output stream)))
-
-#-quicklisp
-(let ((quicklisp-init (format nil "~A/quicklisp/setup.lisp" *lisp-share-path*)))
-  (when (probe-file quicklisp-init)
-    (load quicklisp-init)))
-
-(require :sb-posix)
-
 (defun load-system (system)
   (let ((*compile-verbose* nil)
 	(*compile-print*   nil)
 	(*load-verbose*    nil)
 	(*load-print*      nil))
-    (flet ((try-download (name)
-	     ;; maybe defined by environment
-	     (when (fboundp 'load-system-from-artifact)
-	       (funcall 'load-system-from-artifact name))))
-      (tagbody
-       retry
-	 (handler-bind
-	     ((asdf:missing-component
-		#'(lambda (condition)
-		    (when (try-download (asdf::missing-requires condition))
-		      (go retry))))
-	      (quicklisp-client::system-not-found
-		#'(lambda (condition)
-		    (when (try-download (quicklisp-client::system-not-found-name condition))
-		      (go retry)))))
-	   (ql:quickload system :verbose nil :explain nil :prompt nil))))))
+    (ql:quickload system :verbose nil :explain nil :prompt nil)))

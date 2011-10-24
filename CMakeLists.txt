@@ -18,9 +18,11 @@ ENDIF()
 
 # Configure Lisp environment.
 SET(LISP_INIT_FILE "" CACHE FILEPATH "File to load as Lisp init file.")
+SET(LISP_INIT "")
 IF(LISP_INIT_FILE)
-    SET(LISP_INIT "--userinit ${LISP_INIT_FILE}")
+    SET(LISP_INIT "${LISP_INIT} --userinit ${LISP_INIT_FILE}")
 ENDIF()
+
 SET(CL_SOURCE_REGISTRY "${CMAKE_CURRENT_SOURCE_DIR}//:")
 SET(ASDF_OUTPUT_TRANSLATIONS "(:output-translations (t (\\\"${CMAKE_CURRENT_BINARY_DIR}/fasl-cache\\\" :implementation)) :ignore-inherited-configuration)")
 
