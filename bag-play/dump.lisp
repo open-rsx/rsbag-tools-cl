@@ -8,7 +8,7 @@
 (load-system :swank) ;; for the lulz
 
 (unless (asdf:find-system :cl-rsb-common nil)
-  (load-system-from-artifact :cl-rsb-tools))
+  (ignore-errors (load-system :cl-rsb-tools)))
 (load-system :cl-rsbag-tools-play)
 
 (load-system :cl-rsbag-tidelog)
