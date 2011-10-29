@@ -104,16 +104,6 @@ FOREACH(TIDE_FILE "${DATA_DIR}/empty.tide"
                      "${TIDE_FILE}" inprocess:)
 ENDFOREACH()
 
-FOREACH(TIDE_FILE "${DATA_DIR}/empty.tide"
-                  "${DATA_DIR}/empty-channel.tide"
-                  "${DATA_DIR}/single-event.tide")
-    FILE(RELATIVE_PATH NAME "${DATA_DIR}" "${TIDE_FILE}")
-    ADD_TEST(NAME    "bag-merge${NAME}"
-             COMMAND "${CMAKE_CURRENT_BINARY_DIR}/bag-merge"
-                     -o/tmp/${NAME}-merge-test.tide
-		     "${CURRENT_BINARY}/${TIDE_FILE}")
-ENDFOREACH()
-
 # Installation
 FOREACH(IMAGE ${IMAGES})
     INSTALL(PROGRAMS    "${IMAGE}"
