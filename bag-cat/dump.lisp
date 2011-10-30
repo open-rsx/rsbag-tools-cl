@@ -11,4 +11,5 @@
 (asdf:clear-source-registry)
 (asdf:clear-output-translations)
 
-(com.dvlsoft.clon:dump "bag-cat" rsbag.tools.cat:main)
+(com.dvlsoft.clon:dump "bag-cat" rsbag.tools.cat:main
+		       :compression :best)

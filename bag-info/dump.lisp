@@ -9,4 +9,5 @@
 (asdf:clear-source-registry)
 (asdf:clear-output-translations)
 
-(com.dvlsoft.clon:dump "bag-info" rsbag.tools.info:main)
+(com.dvlsoft.clon:dump "bag-info" rsbag.tools.info:main
+		       :compression :best)

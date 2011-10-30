@@ -21,4 +21,5 @@
   (cffi:use-foreign-library spread::libspread)
   (rsbag.tools.record:main))
 
-(com.dvlsoft.clon:dump "bag-record" reload-spread-and-main)
+(com.dvlsoft.clon:dump "bag-record" reload-spread-and-main
+		       :compression :best)
