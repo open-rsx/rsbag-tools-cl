@@ -66,7 +66,8 @@ when used within a shell):
 " )
       (print-classes-help-string
        (replay-strategy-classes) stream
-       :initarg-blacklist '(:start-index :end-index :error-policy :stream)))))
+       :initarg-blacklist '(:start-index :end-index :error-policy
+			    :stream :previous-command)))))
 
 (defun make-examples-string (&key
 			     (program-name "bag-play"))
