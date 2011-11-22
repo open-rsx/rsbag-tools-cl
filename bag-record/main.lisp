@@ -61,7 +61,7 @@ store the events exchanged in the corresponding RSB channels.
       (print-uri-help stream :uri-var "each URI"))))
 
 (defun make-channel-strategy-help-string (&key
-					  (show :default))
+					    (show :default))
   "Return a help string that explains how to specify replay strategies
 and lists the available replay strategies."
   (with-output-to-string (stream)
@@ -156,7 +156,7 @@ with the daemon name option.
 		       :type          :file
 		       :description
 		       (format nil "Name of the file into which captured events should be written. The file format is determined based on the file type (extension). Currently, the following file formats are supported:~{~&+ ~4A (extension: \".~(~:*~A~)\")~}."
-			    (map 'list #'car (rsbag.backend:backend-classes))))
+			       (map 'list #'car (rsbag.backend:backend-classes))))
 	      (stropt  :long-name     "channel-allocation"
 		       :short-name    "a"
 		       :default-value "scope-and-type"
@@ -216,37 +216,33 @@ with the daemon name option.
 recorded.~@:>"))
 
   (with-logged-warnings
+    (rsb.formatting:with-print-limits (*standard-output*)
+	;; Create a reader and start the receiving and printing loop.
+	(bind ((control-uri   (when-let ((string (getopt :long-name "control-uri")))
+				(puri:parse-uri string)))
+	       (uris          (map 'list #'puri:parse-uri (remainder)))
+	       (output        (or (getopt :long-name "output-file")
+				  (error "~@<Specify output file.~@:>")))
+	       (channel-alloc (parse-instantiation-spec
+			       (getopt :long-name "channel-allocation")))
+	       (filters       (iter (for spec next (getopt :long-name "filter"))
+				    (while spec)
+				    (collect (apply #'rsb.filter:filter
+						    (parse-instantiation-spec spec)))))
+	       (connection    (events->bag uris output
+					   :channel-strategy channel-alloc
+					   :filters          filters))
+	       ((:flet recording-loop ())
+		(unwind-protect
+		     (with-interactive-interrupt-exit ()
+		       (iter (sleep 10)
+			     (format t "~A ~@<~@;~{~A~^, ~}~@:>~%"
+				     (local-time:now)
+				     (bag-channels (connection-bag connection)))))
+		  (close connection))))
 
-    ;; Create a reader and start the receiving and printing loop.
-    (bind ((control-uri      (when-let ((string (getopt :long-name "control-uri")))
-			       (puri:parse-uri string)))
-	   (uris             (map 'list #'puri:parse-uri (remainder)))
-	   (output           (or (getopt :long-name "output-file")
-				 (error "~@<Specify output file.~@:>")))
-	   (channel-strategy (parse-instantiation-spec
-			      (getopt :long-name "channel-allocation")))
-	   (filters          (iter (for spec next (getopt :long-name "filter"))
-				   (while spec)
-				   (collect (apply #'rsb.filter:filter
-						   (parse-instantiation-spec spec)))))
-	   (connection       (events->bag uris output
-					  :channel-strategy channel-strategy
-					  :filters          filters))
-
-	   (*print-right-margin* (com.dvlsoft.clon::stream-line-width *standard-output*))
-	   (*print-miser-width*  *print-right-margin*)
-
-	   ((:flet recording-loop ())
-	    (unwind-protect
-		 (with-interactive-interrupt-exit ()
-		   (iter (sleep 10)
-			 (format t "~A ~@<~@;~{~A~^, ~}~@:>~%"
-				 (local-time:now)
-				 (bag-channels (connection-bag connection)))))
-	      (close connection))))
-
-      (log1 :info "Using URIs ~@<~@;~{~A~^, ~}~@:>" uris)
-      (if control-uri
-	  (invoke-with-control-service
-	   control-uri connection #'recording-loop)
-	  (recording-loop)))))
+	  (log1 :info "Using URIs ~@<~@;~{~A~^, ~}~@:>" uris)
+	  (if control-uri
+	      (invoke-with-control-service
+	       control-uri connection #'recording-loop)
+	      (recording-loop))))))
