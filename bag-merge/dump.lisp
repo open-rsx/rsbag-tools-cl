@@ -11,4 +11,5 @@
 (asdf:clear-source-registry)
 (asdf:clear-output-translations)
 
-(com.dvlsoft.clon:dump "bag-merge" rsbag.tools.merge:main)
+(com.dvlsoft.clon:dump "bag-merge" rsbag.tools.merge:main
+		       :compressions :best)
