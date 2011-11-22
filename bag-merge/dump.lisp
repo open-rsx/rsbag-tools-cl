@@ -12,4 +12,4 @@
 (asdf:clear-output-translations)
 
 (com.dvlsoft.clon:dump "bag-merge" rsbag.tools.merge:main
-		       :compressions :best)
+		       :compression :best)
