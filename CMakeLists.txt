@@ -117,6 +117,7 @@ SET(CPACK_PACKAGE_VERSION_PATCH ${CL_RSBAG_TOOLS_VERSION_PATCH})
 SET(PACKAGE_BASE_NAME      "rsbag-bin-${VERSION_SUFFIX}")
 SET(CPACK_PACKAGE_VERSION  "${CPACK_PACKAGE_VERSION_MAJOR}.${CPACK_PACKAGE_VERSION_MINOR}.${CPACK_PACKAGE_VERSION_PATCH}")
 SET(CPACK_PACKAGE_VENDOR   "CoR-Lab, Bielefeld University")
+SET(PACKAGE_ALT_PRIORITY "100")
 
 IF(CMAKE_SYSTEM_NAME STREQUAL "Linux")
 
@@ -151,7 +152,7 @@ IF(CMAKE_SYSTEM_NAME STREQUAL "Linux")
                            /usr/bin/${BINARY_PREFIX}${NAME}                  \\
                            ${BINARY_PREFIX}${NAME}                           \\
                            /usr/bin/${BINARY_PREFIX}${NAME}${VERSION_SUFFIX} \\
-                           100\n\n")
+                           ${PACKAGE_ALT_PRIORITY}\n\n")
             FILE(APPEND "${PRERM_SCRIPT}"
                         "update-alternatives --remove                            \\
                            ${BINARY_PREFIX}${NAME}                               \\
