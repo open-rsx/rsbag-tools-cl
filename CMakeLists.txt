@@ -42,36 +42,42 @@ ENDIF()
 SET(CL_SOURCE_REGISTRY "${CMAKE_CURRENT_SOURCE_DIR}//:")
 SET(ASDF_OUTPUT_TRANSLATIONS "(:output-translations (t (\\\"${CMAKE_CURRENT_BINARY_DIR}/fasl-cache\\\" :implementation)) :ignore-inherited-configuration)")
 
-# Create images.
-FILE(GLOB SCRIPTS "*/dump.lisp")
-SET(IMAGES)
-FOREACH(SCRIPT ${SCRIPTS})
-    STRING(REPLACE "//dump.lisp" "" IMAGE ${SCRIPT})
-    GET_FILENAME_COMPONENT(NAME ${IMAGE} NAME)
-    CONFIGURE_FILE("${CMAKE_CURRENT_SOURCE_DIR}/sbcl.cmake.in"
-                   "${CMAKE_CURRENT_BINARY_DIR}/sbcl.${NAME}.cmake"
-                   @ONLY)
-    ADD_CUSTOM_COMMAND(OUTPUT  "${CMAKE_CURRENT_BINARY_DIR}/${NAME}"
-                       COMMAND "${CMAKE_COMMAND}" -P "${CMAKE_CURRENT_BINARY_DIR}/sbcl.${NAME}.cmake"
-                       DEPENDS ${SCRIPT}
-                       COMMENT "Creating Lisp image ${NAME} (this can take a long time)")
-    LIST(APPEND IMAGES "${CMAKE_CURRENT_BINARY_DIR}/${NAME}")
+# Create binary.
+SET(SCRIPT    "${CMAKE_CURRENT_SOURCE_DIR}/main/dump.lisp")
+SET(MAIN_NAME "bag")
+CONFIGURE_FILE("${CMAKE_CURRENT_SOURCE_DIR}/sbcl.cmake.in"
+               "${CMAKE_CURRENT_BINARY_DIR}/sbcl.cmake"
+               @ONLY)
+ADD_CUSTOM_COMMAND(OUTPUT  "${CMAKE_CURRENT_BINARY_DIR}/${MAIN_NAME}"
+                   COMMAND "${CMAKE_COMMAND}" -P "${CMAKE_CURRENT_BINARY_DIR}/sbcl.cmake"
+                   DEPENDS "${SCRIPT}"
+                   COMMENT "Creating Lisp image ${MAIN_NAME} (this can take a long time)")
+ADD_CUSTOM_TARGET(binary ALL DEPENDS "${CMAKE_CURRENT_BINARY_DIR}/${MAIN_NAME}")
+
+# Create symlinks.
+FILE(GLOB TOOLS
+          RELATIVE "${CMAKE_CURRENT_SOURCE_DIR}"
+	  "bag-*")
+FOREACH(TOOL ${TOOLS})
+    ADD_CUSTOM_COMMAND(OUTPUT  "${CMAKE_CURRENT_BINARY_DIR}/${TOOL}"
+                       COMMAND "${CMAKE_COMMAND}" -E create_symlink "./${MAIN_NAME}" "${CMAKE_CURRENT_BINARY_DIR}/${TOOL}"
+                       DEPENDS "${CMAKE_CURRENT_BINARY_DIR}/${MAIN_NAME}"
+                       COMMENT "Creating symlink ${TOOL} -> ./${MAIN_NAME}")
 ENDFOREACH()
-ADD_CUSTOM_TARGET(scripts ALL DEPENDS ${IMAGES})
+ADD_CUSTOM_TARGET(links ALL DEPENDS ${TOOLS})
 
 # Tests
 SET(DATA_DIR "${cl-rsbag-tools_SOURCE_DIR}/test/data/")
 
 ENABLE_TESTING()
 
-FOREACH(IMAGE ${IMAGES})
-    FILE(RELATIVE_PATH NAME "${CMAKE_CURRENT_BINARY_DIR}" "${IMAGE}")
-    ADD_TEST(NAME    "${NAME}-help"
-             COMMAND "${IMAGE}" --help)
-    ADD_TEST(NAME    "${NAME}-help-all"
-             COMMAND "${IMAGE}" --help-for=all)
-    ADD_TEST(NAME    "${NAME}-version"
-             COMMAND "${IMAGE}" --version)
+FOREACH(TOOL ${TOOLS})
+    ADD_TEST(NAME    "${TOOL}-help"
+             COMMAND "${CMAKE_CURRENT_BINARY_DIR}/${TOOL}" --help)
+    ADD_TEST(NAME    "${TOOL}-help-all"
+             COMMAND "${CMAKE_CURRENT_BINARY_DIR}/${TOOL}" --help-for=all)
+    ADD_TEST(NAME    "${TOOL}-version"
+             COMMAND "${CMAKE_CURRENT_BINARY_DIR}/${TOOL}" --version)
 ENDFOREACH()
 
 FILE(GLOB TIDE_FILES
@@ -101,14 +107,33 @@ FOREACH(TIDE_FILE "${DATA_DIR}/empty.tide"
 ENDFOREACH()
 
 # Installation
-SET(BINARY_PREFIX  "")
-SET(VERSION_SUFFIX "cl${CL_RSBAG_TOOLS_VERSION_MAJOR}.${CL_RSBAG_TOOLS_VERSION_MINOR}")
-FOREACH(IMAGE ${IMAGES})
-    FILE(RELATIVE_PATH NAME "${CMAKE_CURRENT_BINARY_DIR}" "${IMAGE}")
-    INSTALL(PROGRAMS    "${IMAGE}"
-            DESTINATION "bin"
-	    RENAME      "${BINARY_PREFIX}${NAME}${VERSION_SUFFIX}")
+SET(BINARY_PREFIX    "")
+SET(VERSION_SUFFIX   "cl${CL_RSBAG_TOOLS_VERSION_MAJOR}.${CL_RSBAG_TOOLS_VERSION_MINOR}")
+SET(MAIN_BINARY_NAME ${BINARY_PREFIX}${MAIN_NAME}${VERSION_SUFFIX})
+INSTALL(PROGRAMS    "${CMAKE_CURRENT_BINARY_DIR}/${MAIN_NAME}"
+        DESTINATION "bin"
+        RENAME      "${MAIN_BINARY_NAME}")
+# Fake binary for symlink creation
+ADD_CUSTOM_COMMAND(OUTPUT  "${CMAKE_CURRENT_BINARY_DIR}/${MAIN_BINARY_NAME}"
+                   COMMAND "${CMAKE_COMMAND}" -E touch "${CMAKE_CURRENT_BINARY_DIR}/${MAIN_BINARY_NAME}"
+                   COMMENT "Creating fake link target ${MAIN_BINARY_NAME}")
+SET(TOOLS_VERSIONED "")
+FOREACH(TOOL ${TOOLS})
+    SET(TOOL_NAME "${BINARY_PREFIX}${TOOL}${VERSION_SUFFIX}")
+    SET(TOOLS_VERSIONED "${CMAKE_CURRENT_BINARY_DIR}/${TOOL_NAME};${TOOLS_VERSIONED}")
+    INSTALL(CODE "MESSAGE(\"Creating symlink ${TOOL_NAME} -> ${MAIN_BINARY_NAME}\")")
+    ADD_CUSTOM_COMMAND(OUTPUT  "${CMAKE_CURRENT_BINARY_DIR}/${TOOL_NAME}"
+                       COMMAND "${CMAKE_COMMAND}" -E create_symlink "./${MAIN_BINARY_NAME}" "${CMAKE_CURRENT_BINARY_DIR}/${TOOL_NAME}"
+                       DEPENDS "${CMAKE_CURRENT_BINARY_DIR}/${MAIN_NAME}"
+                               "${CMAKE_CURRENT_BINARY_DIR}/${MAIN_BINARY_NAME}"
+                       COMMENT "Creating symlink ${TOOL_NAME} -> ./${MAIN_BINARY_NAME}")
+    INSTALL(FILES       "${CMAKE_CURRENT_BINARY_DIR}/${TOOL_NAME}"
+            DESTINATION "bin")
+#    INSTALL(CODE "EXECUTE_PROCESS(COMMAND ${CMAKE_COMMAND} -E create_symlink
+#                                          ${CMAKE_INSTALL_PREFIX}/bin/${MAIN_BINARY_NAME}
+#                                          ${CMAKE_INSTALL_PREFIX}/bin/${BINARY_PREFIX}${TOOL}${VERSION_SUFFIX})")
 ENDFOREACH()
+ADD_CUSTOM_TARGET(versioned_links ALL DEPENDS ${TOOLS_VERSIONED})
 
 # Packaging
 SET(CPACK_PACKAGE_VERSION_MAJOR ${CL_RSBAG_TOOLS_VERSION_MAJOR})
@@ -145,18 +170,17 @@ IF(CMAKE_SYSTEM_NAME STREQUAL "Linux")
         SET(PRERM_SCRIPT    "${CMAKE_CURRENT_BINARY_DIR}/prerm")
         FILE(WRITE "${POSTINST_SCRIPT}" "#!/bin/sh\n\n")
         FILE(WRITE "${PRERM_SCRIPT}"    "#!/bin/sh\n\n")
-        FOREACH(IMAGE ${IMAGES})
-            FILE(RELATIVE_PATH NAME "${CMAKE_CURRENT_BINARY_DIR}" "${IMAGE}")
+        FOREACH(TOOL ${TOOLS})
             FILE(APPEND "${POSTINST_SCRIPT}"
                         "update-alternatives --install                       \\
-                           /usr/bin/${BINARY_PREFIX}${NAME}                  \\
-                           ${BINARY_PREFIX}${NAME}                           \\
-                           /usr/bin/${BINARY_PREFIX}${NAME}${VERSION_SUFFIX} \\
+                           /usr/bin/${BINARY_PREFIX}${TOOL}                  \\
+                           ${BINARY_PREFIX}${TOOL}                           \\
+                           /usr/bin/${BINARY_PREFIX}${TOOL}${VERSION_SUFFIX} \\
                            ${PACKAGE_ALT_PRIORITY}\n\n")
             FILE(APPEND "${PRERM_SCRIPT}"
                         "update-alternatives --remove                            \\
-                           ${BINARY_PREFIX}${NAME}                               \\
-                           /usr/bin/${BINARY_PREFIX}${NAME}${VERSION_SUFFIX}\n\n")
+                           ${BINARY_PREFIX}${TOOL}                               \\
+                           /usr/bin/${BINARY_PREFIX}${TOOL}${VERSION_SUFFIX}\n\n")
         ENDFOREACH()
         EXECUTE_PROCESS(COMMAND chmod +x "${POSTINST_SCRIPT}" "${PRERM_SCRIPT}")
 
