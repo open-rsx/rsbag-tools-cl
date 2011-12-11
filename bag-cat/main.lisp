@@ -20,26 +20,6 @@
 (in-package :rsbag.tools.cat)
 
 
-;;; Output protocol and implementation
-;;
-
-(defgeneric output (datum sink)
-  (:documentation
-   "Output DATUM to SINK."))
-
-(defmethod output ((datum simple-array) (sink stream))
-  (check-type datum (simple-array (unsigned-byte 8) (*)) "an octet-vector")
-
-  (write-sequence datum sink))
-
-(defmethod output ((datum string) (sink stream))
-  (fresh-line sink)
-  (write-sequence datum sink))
-
-(defmethod output ((datum event) (sink stream))
-  (output (event-data datum) sink))
-
-
 ;;; Help and main functions
 ;;
 
@@ -72,7 +52,11 @@ the names of which contain the string \"isr\".
 
   Output the data from all channels of the log file \"log.tide\" ~
 whose names end in either \"STRING\" or \"BYTES\".
-"
+
+~:*~A -y 'payload :separator (#\\Newline (:rule #\\-))' log.tide
+
+  Print event payloads separating payloads of different events by ~
+newlines and horizontal rules."
 	  "bag-cat"))
 
 (defun update-synopsis (&key
@@ -84,12 +68,12 @@ whose names end in either \"STRING\" or \"BYTES\".
    :item    (make-text :contents (make-help-string))
    :item    (make-common-options :show show)
    :item    (defgroup (:header "Printing Options")
-	      (stropt  :long-name     "entry-separator"
-		       :short-name    "p"
-		       :argument-name "STRING-OR-KEYWORD"
-		       :default-value ":newline"
+	      (stropt  :long-name     "style"
+		       :short-name    "y"
+		       :default-value "payload"
+		       :argument-name "SPEC"
 		       :description
-		       "A string that should be printing between each pair of entries. The special values :none and :newline disable printing of entry separators and cause a newline character to be used as entry separator respectively."))
+		       "TODO" #+no (make-style-help-string :show show)))
    :item    (defgroup (:header "Selection Options")
 	      (stropt  :long-name     "channel"
 		       :short-name    "c"
@@ -146,49 +130,41 @@ whose names end in either \"STRING\" or \"BYTES\".
   (unless (length= 1 (remainder))
     (error "~@<Specify input file.~@:>"))
 
-  (with-logged-warnings
+  (with-print-limits (*standard-output*)
+    (with-logged-warnings
 
-    ;; Create a reader and start the receiving and printing loop.
-    (bind ((input           (first (remainder)))
-	   (entry-separator (when-let ((string (getopt :long-name "entry-separator")))
-			      (if (starts-with #\: string)
-				  (read-from-string string)
-				  string)))
-	   (start-time      (getopt :long-name "start-time"))
-	   (start-index     (getopt :long-name "start-index"))
-	   (end-time        (getopt :long-name "end-time"))
-	   (end-index       (getopt :long-name "end-index"))
-	   (specs           (iter (for channel next (getopt :long-name "channel"))
-				  (while channel)
-				  (collect channel)))
-	   (channels        (or (make-channel-filter specs) t)))
+      ;; Create a reader and start the receiving and printing loop.
+      (bind ((input       (first (remainder)))
+	     (start-time  (getopt :long-name "start-time"))
+	     (start-index (getopt :long-name "start-index"))
+	     (end-time    (getopt :long-name "end-time"))
+	     (end-index   (getopt :long-name "end-index"))
+	     (specs       (iter (for channel next (getopt :long-name "channel"))
+				(while channel)
+				(collect channel)))
+	     (channels    (or (make-channel-filter specs) t))
+	     (style       (bind (((class &rest args)
+				  (parse-instantiation-spec
+				   (getopt :long-name "style"))))
+			    (apply #'make-instance (find-style-class class)
+				   args))))
 
-      (check-type entry-separator (or string (member :none :newline))
-		  ":none, :newline or a string not starting with \":\"")
-
-      (when (and start-time start-index)
-	(error "~@<The commandline options \"start-time\" and ~
+	(when (and start-time start-index)
+	  (error "~@<The commandline options \"start-time\" and ~
 \"start-index\" are mutually exclusive.~@:>"))
-      (when (and end-time end-index)
-	(error "~@<The commandline options \"end-time\" and ~
+	(when (and end-time end-index)
+	  (error "~@<The commandline options \"end-time\" and ~
 \"end-index\" are mutually exclusive.~@:>"))
 
-      (log1 :info "Using ~:[~*all channels~;channels matching ~@<~@;~{~S~^, ~}~@:>~]"
-	    (not (eq channels t)) specs)
+	(log1 :info "Using ~:[~*all channels~;channels matching ~@<~@;~{~S~^, ~}~@:>~]"
+	      (not (eq channels t)) specs)
 
-      (with-interactive-interrupt-exit ()
-	(with-bag (bag input :direction :input)
-	  (bind ((predicate (if (eq channels t) (constantly t) channels))
-		 (channels  (remove-if-not predicate (bag-channels bag)))
-		 (sequence  (make-serialized-view channels)))
-	    (iter (for datum each sequence
-		       :from (or start-index 0)
-		       :to   end-index)
-		  (unless (first-iteration-p)
-		    (cond
-		      ((stringp entry-separator)
-		       (princ entry-separator *standard-output*))
-		      ((eq entry-separator :newline)
-		       (terpri *standard-output*))))
-
-		  (output datum *standard-output*))))))))
+	(with-interactive-interrupt-exit ()
+	  (with-bag (bag input :direction :input)
+	    (bind ((predicate (if (eq channels t) (constantly t) channels))
+		   (channels  (remove-if-not predicate (bag-channels bag)))
+		   (sequence  (make-serialized-view channels)))
+	      (iter (for datum each sequence
+			 :from (or start-index 0)
+			 :to   end-index)
+		    (format-event datum style *standard-output*)))))))))

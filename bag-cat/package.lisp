@@ -39,7 +39,8 @@
    :rsbag.view
 
    :rsb ;;; TODO(jmoringe): currently for logging
-   :rsb.common) ;;; TODO(jmoringe): currently for commandline options
+   :rsb.common
+   :rsb.formatting)
 
   (:export
    :main)
