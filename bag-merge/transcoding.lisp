@@ -69,7 +69,8 @@
 	 (out-channels (map 'list #'clone-channel in-channels)))
     (iter (for in  each in-channels)
 	  (for out each out-channels)
-	  (apply #'transcode in out (remove-from-plist args :channels)))))
+	  (apply #'transcode in out
+		 (remove-from-plist args :channels :skip-empty-channels?)))))
 
 (defmethod transcode ((input sequence) (output bag)
 		      &rest args &key
