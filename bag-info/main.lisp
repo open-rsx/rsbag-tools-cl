@@ -65,42 +65,41 @@ Examples:
   (unless (length= 1 (remainder))
     (error "Specify exactly one log file."))
 
-  (with-logged-warnings
-    (bind (((input) (remainder))
-	   (sizes?  (getopt :long-name "compute-sizes"))
-	   (*print-right-margin* (com.dvlsoft.clon::stream-line-width *standard-output*))
-	   (*print-miser-width*  *print-right-margin*))
-      (with-bag (bag input :direction :input)
-	(format t "File ~S~&~2T~<~@;~@{~@(~8A~): ~
+  (with-print-limits (*standard-output*)
+    (with-logged-warnings
+      (bind (((input) (remainder))
+	     (sizes?  (getopt :long-name "compute-sizes")))
+	(with-bag (bag input :direction :input)
+	  (format t "File ~S~&~2T~<~@;~@{~@(~8A~): ~
 ~:[N/A~;~:*~,,',:D~]~^~&~}~:>~&~2T~@<~@;~:{Channel ~
 ~S~&~4T~@<~@;~{~@(~8A~): ~:[N/A~;~:*~,,',:D~]~^~&~}~:>~&~}~:>~&"
-		input
-		(bind (((:accessors-r/o (start rsbag:start)
-					(end   rsbag:end)) bag)
-		       (duration (when (and start end)
-				   (local-time:timestamp-difference
-				    end start))))
-		 `(:events ,(reduce #'+ (bag-channels bag) :key #'length)
-			   ,@(when sizes?
-				   `(:size ,(reduce #'+ (bag-channels bag)
-						    :key #'channel-size)))
-			   :start    ,(rsbag:start bag)
-			   :end      ,(rsbag:end   bag)
-			   :duration ,duration))
-		(iter (for channel each (bag-channels bag))
-		      (bind (((:accessors-r/o (length length)
-					      (start  rsbag:start)
-					      (end    rsbag:end)) channel)
-			     (duration (when (and start end)
-					 (local-time:timestamp-difference
-					  end start))))
-		       (collect (list (channel-name channel)
-				      `(:type     ,(meta-data channel :type)
-					:events   ,length
-					,@(when sizes?
-					    `(:size ,(channel-size channel)))
-					:start    ,start
-					:end      ,end
-					:duration ,duration
-					:rate     ,(when (and duration (plusp duration))
-						     (/ length duration))))))))))))
+		  input
+		  (bind (((:accessors-r/o (start rsbag:start)
+					  (end   rsbag:end)) bag)
+			 (duration (when (and start end)
+				     (local-time:timestamp-difference
+				      end start))))
+		    `(:events ,(reduce #'+ (bag-channels bag) :key #'length)
+			      ,@(when sizes?
+				      `(:size ,(reduce #'+ (bag-channels bag)
+						       :key #'channel-size)))
+			      :start    ,(rsbag:start bag)
+			      :end      ,(rsbag:end   bag)
+			      :duration ,duration))
+		  (iter (for channel each (bag-channels bag))
+			(bind (((:accessors-r/o (length length)
+						(start  rsbag:start)
+						(end    rsbag:end)) channel)
+			       (duration (when (and start end)
+					   (local-time:timestamp-difference
+					    end start))))
+			  (collect (list (channel-name channel)
+					 `(:type     ,(meta-data channel :type)
+					   :events   ,length
+					   ,@(when sizes?
+					       `(:size ,(channel-size channel)))
+					   :start    ,start
+					   :end      ,end
+					   :duration ,duration
+					   :rate     ,(when (and duration (plusp duration))
+						        (/ length duration)))))))))))))

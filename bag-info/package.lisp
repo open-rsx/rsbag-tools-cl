@@ -27,7 +27,8 @@
 
    :rsbag
 
-   :rsb.common)
+   :rsb.common
+   :rsb.formatting)
 
   (:export
    :main)
