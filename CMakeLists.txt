@@ -3,21 +3,24 @@ CMAKE_MINIMUM_REQUIRED(VERSION 2.8)
 # Project definition (version is grovelled from an asd system definition)
 PROJECT(cl-rsbag-tools)
 SET(VERSION_SYSTEM_NAME cl-rsbag-tools-info)
-EXECUTE_PROCESS(COMMAND         sh -c "cat ${CMAKE_SOURCE_DIR}/${VERSION_SYSTEM_NAME}.asd   \\
-                                         | grep -e 'defconstant +\\+version-major\\+'       \\
-                                         | sed -re 's/.*\\+version-major\\+ +([0-9]+)/\\1/'"
-                OUTPUT_VARIABLE CL_RSBAG_TOOLS_VERSION_MAJOR
-		OUTPUT_STRIP_TRAILING_WHITESPACE)
-EXECUTE_PROCESS(COMMAND         sh -c "cat ${CMAKE_SOURCE_DIR}/${VERSION_SYSTEM_NAME}.asd   \\
-                                         | grep -e 'defconstant +\\+version-minor\\+'       \\
-                                         | sed -re 's/.*\\+version-minor\\+ +([0-9]+)/\\1/'"
-                OUTPUT_VARIABLE CL_RSBAG_TOOLS_VERSION_MINOR
-		OUTPUT_STRIP_TRAILING_WHITESPACE)
-EXECUTE_PROCESS(COMMAND         sh -c "cat ${CMAKE_SOURCE_DIR}/${VERSION_SYSTEM_NAME}.asd      \\
-                                         | grep -e 'defconstant +\\+version-revision\\+'       \\
-                                         | sed -re 's/.*\\+version-revision\\+ +([0-9]+)/\\1/'"
-                OUTPUT_VARIABLE CL_RSBAG_TOOLS_VERSION_PATCH
-		OUTPUT_STRIP_TRAILING_WHITESPACE)
+EXECUTE_PROCESS(COMMAND sh -c "cat ${CMAKE_SOURCE_DIR}/${VERSION_SYSTEM_NAME}.asd \\
+                               | grep -e 'defconstant +\\+version-major\\+'"
+                OUTPUT_VARIABLE TEMP
+                OUTPUT_STRIP_TRAILING_WHITESPACE)
+STRING(REGEX REPLACE ".*\\+version-major\\+ +([0-9]+).*" "\\1"
+       CL_RSBAG_TOOLS_VERSION_MAJOR ${TEMP})
+EXECUTE_PROCESS(COMMAND sh -c "cat ${CMAKE_SOURCE_DIR}/${VERSION_SYSTEM_NAME}.asd \\
+                               | grep -e 'defconstant +\\+version-minor\\+'"
+                OUTPUT_VARIABLE TEMP
+                OUTPUT_STRIP_TRAILING_WHITESPACE)
+STRING(REGEX REPLACE ".*\\+version-minor\\+ +([0-9]+).*" "\\1"
+       CL_RSBAG_TOOLS_VERSION_MINOR ${TEMP})
+EXECUTE_PROCESS(COMMAND sh -c "cat ${CMAKE_SOURCE_DIR}/${VERSION_SYSTEM_NAME}.asd \\
+                               | grep -e 'defconstant +\\+version-revision\\+'"
+                OUTPUT_VARIABLE TEMP
+                OUTPUT_STRIP_TRAILING_WHITESPACE)
+STRING(REGEX REPLACE ".*\\+version-revision\\+ +([0-9]+).*" "\\1"
+       CL_RSBAG_TOOLS_VERSION_PATCH ${TEMP})
 
 # Find and check SBCL installation.
 SET(SBCL_HOME $ENV{SBCL_HOME})
