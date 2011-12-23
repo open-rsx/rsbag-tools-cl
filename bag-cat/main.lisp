@@ -17,7 +17,7 @@
 ;; You should have received a copy of the GNU General Public License
 ;; along with this program. If not, see <http://www.gnu.org/licenses>.
 
-(in-package :rsbag.tools.cat)
+(cl:in-package :rsbag.tools.cat)
 
 
 ;;; Help and main functions
@@ -73,7 +73,7 @@ newlines and horizontal rules."
 		       :default-value "payload"
 		       :argument-name "SPEC"
 		       :description
-		       "TODO" #+no (make-style-help-string :show show)))
+		       (make-style-help-string :show show)))
    :item    (defgroup (:header "Selection Options")
 	      (stropt  :long-name     "channel"
 		       :short-name    "c"
