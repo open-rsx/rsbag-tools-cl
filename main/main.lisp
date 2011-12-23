@@ -43,5 +43,5 @@
 	(format *error-output* "~@<Invoke as ~{~A~^ or ~}.~_~_This is ~
 usually done by creating symbolic links~_~_~:*~{~2T~A -> bag~_~}~_The ~
 following command can be used to achieve this:~:*~2&~2T~@<~@;~{ln -s ~
-bag ~A~^ && ~}~:>~@:>~%"
+bag ~A~^ \\~_~2T&& ~}~:>~@:>~%"
 		(map 'list #'car *filename->entry-point*)))))
