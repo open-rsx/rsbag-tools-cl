@@ -1,11 +1,12 @@
 (load-system :asdf-system-connections)
 
-(load-system :cl-ppcre) ;; for regex filter
+(load-system :cl-ppcre)    ;; for regex filter
 
 (load-system :cl-protobuf)
-(load-system :cl-spread) ;; for spread transport
+(load-system :cl-spread)   ;; for spread transport
+(load-system :usocket)     ;; for socket transport
 
-(load-system :swank) ;; for the lulz
+(load-system :swank)       ;; for the lulz
 
 (unless (asdf:find-system :cl-rsb-common nil)
   (ignore-errors (load-system :cl-rsb-tools)))
@@ -13,6 +14,7 @@
 (load-system :cl-rsbag-tools-main)
 
 (load-system :cl-rsbag-tidelog)
+(load-system :cl-rsbag-elan)
 
 (asdf:clear-source-registry)
 (asdf:clear-output-translations)
