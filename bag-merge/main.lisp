@@ -17,7 +17,7 @@
 ;; You should have received a copy of the GNU General Public License
 ;; along with this program. If not, see <http://www.gnu.org/licenses>.
 
-(in-package :rsbag.tools.merge)
+(cl:in-package :rsbag.tools.merge)
 
 (defun make-help-string ()
   "Return a help that explains the commandline option interface."
@@ -175,5 +175,5 @@ match any files.~@:>"
 		  (handler-case
 		      (close bag)
 		    (error (condition)
-		      (warn "~@<Error closing bag ~A: ~A~@;>"
+		      (warn "~@<Error closing bag ~A: ~A~@:>"
 			    bag condition))))))))))
