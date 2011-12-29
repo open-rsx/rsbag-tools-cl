@@ -2,25 +2,16 @@ CMAKE_MINIMUM_REQUIRED(VERSION 2.8)
 
 # Project definition (version is grovelled from an asd system definition)
 PROJECT(cl-rsbag-tools)
-SET(VERSION_SYSTEM_NAME cl-rsbag-tools-info)
-EXECUTE_PROCESS(COMMAND sh -c "cat ${CMAKE_SOURCE_DIR}/${VERSION_SYSTEM_NAME}.asd \\
-                               | grep -e 'defconstant +\\+version-major\\+'"
-                OUTPUT_VARIABLE TEMP
-                OUTPUT_STRIP_TRAILING_WHITESPACE)
-STRING(REGEX REPLACE ".*\\+version-major\\+ +([0-9]+).*" "\\1"
-       CL_RSBAG_TOOLS_VERSION_MAJOR ${TEMP})
-EXECUTE_PROCESS(COMMAND sh -c "cat ${CMAKE_SOURCE_DIR}/${VERSION_SYSTEM_NAME}.asd \\
-                               | grep -e 'defconstant +\\+version-minor\\+'"
-                OUTPUT_VARIABLE TEMP
-                OUTPUT_STRIP_TRAILING_WHITESPACE)
-STRING(REGEX REPLACE ".*\\+version-minor\\+ +([0-9]+).*" "\\1"
-       CL_RSBAG_TOOLS_VERSION_MINOR ${TEMP})
-EXECUTE_PROCESS(COMMAND sh -c "cat ${CMAKE_SOURCE_DIR}/${VERSION_SYSTEM_NAME}.asd \\
-                               | grep -e 'defconstant +\\+version-revision\\+'"
-                OUTPUT_VARIABLE TEMP
-                OUTPUT_STRIP_TRAILING_WHITESPACE)
-STRING(REGEX REPLACE ".*\\+version-revision\\+ +([0-9]+).*" "\\1"
-       CL_RSBAG_TOOLS_VERSION_PATCH ${TEMP})
+SET(SYSTEM_NAME "cl-rsbag-tools-info")
+MACRO(EXTRACT_COMPONENT NAME OUTPUT)
+    FILE(STRINGS "${CMAKE_SOURCE_DIR}/${SYSTEM_NAME}.asd" TEMP
+         REGEX   "defconstant +\\+version-${NAME}\\+")
+    STRING(REGEX REPLACE ".*\\+version-${NAME}\\+ +([0-9]+).*" "\\1"
+           CL_RSB_VERSION_${OUTPUT} ${TEMP})
+ENDMACRO()
+EXTRACT_COMPONENT(major    MAJOR)
+EXTRACT_COMPONENT(minor    MINOR)
+EXTRACT_COMPONENT(revision PATCH)
 
 # Find and check SBCL installation.
 SET(SBCL_HOME $ENV{SBCL_HOME})
@@ -29,7 +20,7 @@ IF(NOT SBCL_HOME)
 ENDIF()
 FIND_PROGRAM(SBCL_EXECUTABLE sbcl
              PATHS "${SBCL_HOME}/../../bin"
-	     NO_DEFAULT_PATH)
+             NO_DEFAULT_PATH)
 
 # Configure Lisp environment.
 SET(LISP_RUNTIME_OPTIONS "" CACHE STRING   "Runtime options to pass to the Lisp system.")
@@ -59,9 +50,9 @@ ADD_CUSTOM_COMMAND(OUTPUT  "${CMAKE_CURRENT_BINARY_DIR}/${MAIN_NAME}"
 ADD_CUSTOM_TARGET(binary ALL DEPENDS "${CMAKE_CURRENT_BINARY_DIR}/${MAIN_NAME}")
 
 # Create symlinks.
-FILE(GLOB TOOLS
-          RELATIVE "${CMAKE_CURRENT_SOURCE_DIR}"
-	  "bag-*")
+FILE(GLOB     TOOLS
+     RELATIVE "${CMAKE_CURRENT_SOURCE_DIR}"
+     "bag-*")
 FOREACH(TOOL ${TOOLS})
     ADD_CUSTOM_COMMAND(OUTPUT  "${CMAKE_CURRENT_BINARY_DIR}/${TOOL}"
                        COMMAND "${CMAKE_COMMAND}" -E create_symlink "./${MAIN_NAME}" "${CMAKE_CURRENT_BINARY_DIR}/${TOOL}"
