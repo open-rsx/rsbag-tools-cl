@@ -7,7 +7,7 @@ MACRO(EXTRACT_COMPONENT NAME OUTPUT)
     FILE(STRINGS "${CMAKE_SOURCE_DIR}/${SYSTEM_NAME}.asd" TEMP
          REGEX   "defconstant +\\+version-${NAME}\\+")
     STRING(REGEX REPLACE ".*\\+version-${NAME}\\+ +([0-9]+).*" "\\1"
-           CL_RSB_VERSION_${OUTPUT} ${TEMP})
+           CL_RSBAG_TOOLS_VERSION_${OUTPUT} ${TEMP})
 ENDMACRO()
 EXTRACT_COMPONENT(major    MAJOR)
 EXTRACT_COMPONENT(minor    MINOR)
