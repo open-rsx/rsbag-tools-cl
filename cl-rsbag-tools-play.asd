@@ -1,6 +1,6 @@
 ;;; rsbag-tools-play.asd --- System definition for the bag-play program.
 ;;
-;; Copyright (C) 2011 Jan Moringen
+;; Copyright (C) 2011, 2012 Jan Moringen
 ;;
 ;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 ;;
@@ -67,5 +67,7 @@
 		(:version :cl-rsb-common #.(version/string)))
   :components  ((:module     "bag-play"
 	         :components ((:file       "package")
+			      (:file       "help"
+			       :depends-on ("package"))
 			      (:file       "main"
-			       :depends-on ("package"))))))
+			       :depends-on ("package" "help"))))))
