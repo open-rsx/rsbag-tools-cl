@@ -54,6 +54,7 @@ FILE(GLOB     TOOLS
      RELATIVE "${CMAKE_CURRENT_SOURCE_DIR}"
      "bag-*")
 FOREACH(TOOL ${TOOLS})
+    MESSAGE(STATUS "Configuring tool ${TOOL}")
     ADD_CUSTOM_COMMAND(OUTPUT  "${CMAKE_CURRENT_BINARY_DIR}/${TOOL}"
                        COMMAND "${CMAKE_COMMAND}" -E create_symlink "./${MAIN_NAME}" "${CMAKE_CURRENT_BINARY_DIR}/${TOOL}"
                        DEPENDS "${CMAKE_CURRENT_BINARY_DIR}/${MAIN_NAME}"
