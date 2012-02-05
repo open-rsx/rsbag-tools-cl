@@ -1,6 +1,6 @@
 ;;; main.lisp --- Main function of the bag-merge program.
 ;;
-;; Copyright (C) 2011 Jan Moringen
+;; Copyright (C) 2011, 2012 Jan Moringen
 ;;
 ;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 ;;
@@ -38,7 +38,7 @@ formats are supported:~{~&+ ~4A (extension: \".~(~:*~A~)\")~}.
 
 (defun make-example-string (&key
 			    (program-name "bag-merge" #+later (progname)))
-  "TODO(jmoringe): document"
+  "Make and return a string containing usage examples of the program."
   (format nil "~A -o bla.tide '/vol/my-separate-logs/*.tide'
 
   Merge all log files matching the glob expression ~
@@ -123,7 +123,7 @@ match any files.~@:>"
     ((t)
      (fresh-line *standard-output*))
     (t
-     (format *standard-output* "~C[~28A::~48A] -> [~28A::~48A] ~6,2,2F % ~9:D/~9:D"
+     (format *standard-output* "~C[~28A|~48A] -> [~28A|~48A] ~6,2,2F % ~9:D/~9:D"
 	     #\Return
 	     input-bag  (channel-name input-channel)
 	     output-bag (channel-name output-channel)
