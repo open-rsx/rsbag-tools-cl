@@ -90,10 +90,10 @@
 		       timestamp)
   "Print the progress of the current replay onto the stream that is
 the value of `*standard-output*'."
-  (format *standard-output* "~C~A ~6,2F % ~9:D [~9:D,~9:D]"
+  (format *standard-output* "~C~A ~6,2,2F % ~9:D [~9:D,~9:D]"
 	  #\Return
 	  timestamp
-	  (* 100 progress)
+	  progress
 	  index start-index end-index)
   (force-output *standard-output*))
 
@@ -153,11 +153,12 @@ the value of `*standard-output*'."
 
 	(log1 :info "Connection ~A" connection)
 
-	(with-interactive-interrupt-exit ()
-	  (replay connection (connection-strategy connection)
-		  :progress (case progress
-			      (:line #'print-progress))))
-	(unless (eq progress :none)
-	  (terpri *standard-output*))
+	(unwind-protect
+	     (with-interactive-interrupt-exit ()
+	       (replay connection (connection-strategy connection)
+		       :progress (case progress
+				   (:line #'print-progress))))
+	  (close connection))
 
-	(close connection)))))
+	(unless (eq progress :none)
+	  (terpri *standard-output*))))))
