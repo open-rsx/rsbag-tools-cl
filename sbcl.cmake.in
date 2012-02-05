@@ -14,6 +14,7 @@ EXECUTE_PROCESS(COMMAND           "@SBCL_EXECUTABLE@"
                                   --load "@SCRIPT@"
                 WORKING_DIRECTORY "@CMAKE_CURRENT_BINARY_DIR@"
                 OUTPUT_FILE       "@CMAKE_CURRENT_BINARY_DIR@/@NAME@.log"
+                ERROR_FILE        "@CMAKE_CURRENT_BINARY_DIR@/@NAME@.log"
                 RESULT_VARIABLE   RESULT)
 IF(NOT ${RESULT} EQUAL 0)
     MESSAGE(FATAL_ERROR "Failed to dump image file @NAME@")
