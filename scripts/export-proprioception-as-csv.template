@@ -1,4 +1,7 @@
-${(floor create-unix-nsec 1000)}${(let* ((joints (rst.kinematics:proprioception-state-joints data)))
+${(floor create-unix-nsec 1000)}${(let ((joints (rst.kinematics:proprioception-state-joints data)))
      (with-output-to-string (stream)
        (iter (for joint each joints)
-             (format stream ",~A,~F" (sb-ext:octets-to-string (rst.kinematics:joint-state-name joint)) (rst.kinematics:joint-state-value joint)))))}
+             (format stream ",~A,~F"
+                     (sb-ext:octets-to-string
+                       (rst.kinematics:joint-state-name joint))
+                     (rst.kinematics:joint-state-value joint)))))}
