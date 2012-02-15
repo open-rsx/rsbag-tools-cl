@@ -1,6 +1,6 @@
 ;;; main.lisp --- Main function of the bag-cat program.
 ;;
-;; Copyright (C) 2011 Jan Moringen
+;; Copyright (C) 2011, 2012 Jan Moringen
 ;;
 ;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 ;;
@@ -117,7 +117,7 @@ newlines and horizontal rules."
 		specs))))
 
 (defun main ()
-  "Entry point function of the bag-play program."
+  "Entry point function of the bag-cat program."
   (update-synopsis)
   (local-time:enable-read-macros)
   (process-commandline-options
