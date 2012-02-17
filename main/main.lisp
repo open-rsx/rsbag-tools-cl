@@ -1,6 +1,6 @@
 ;;; main.lisp --- Dispatch function of the main bag program.
 ;;
-;; Copyright (C) 2011 Jan Moringen
+;; Copyright (C) 2011, 2012 Jan Moringen
 ;;
 ;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 ;;
@@ -17,7 +17,7 @@
 ;; You should have received a copy of the GNU General Public License
 ;; along with this program. If not, see <http://www.gnu.org/licenses>.
 
-(in-package :rsbag.tools.main)
+(cl:in-package :rsbag.tools.main)
 
 (defvar *filename->entry-point*
   '(("bag-record" . rsbag.tools.record:main)
@@ -31,17 +31,19 @@
   "Entry point function of the main bag program."
   (make-synopsis)
   (let* ((pathname (pathname (first (com.dvlsoft.clon::cmdline))))
-	 (name     (concatenate 'string
-				(pathname-name pathname)
-				"."
-				(pathname-type pathname)))
+	 (name     (apply #'concatenate
+			  'string
+			  (pathname-name pathname)
+			  (when (pathname-type pathname)
+			    (list "." (pathname-type pathname)))))
 	 (entry    (cdr (assoc name *filename->entry-point*
 			       :test #'(lambda (name entry)
 					 (search entry name))))))
     (if entry
 	(funcall entry)
-	(format *error-output* "~@<Invoke as ~{~A~^ or ~}.~_~_This is ~
-usually done by creating symbolic links~_~_~:*~{~2T~A -> bag~_~}~_The ~
-following command can be used to achieve this:~:*~2&~2T~@<~@;~{ln -s ~
-bag ~A~^ \\~_~2T&& ~}~:>~@:>~%"
-		(map 'list #'car *filename->entry-point*)))))
+	(format *error-output* "~@<Invoke as ~{~A~^ or ~} (not ~
+~A).~_~_This is usually done by creating symbolic links~_~_~2:*~{~2T~A ~
+-> bag~_~}~_The following command can be used to achieve ~
+this:~:*~2&~2T~@<~@;~{ln -s bag ~A~^ \\~_~2T&& ~}~:>~@:>~%"
+		(map 'list #'car *filename->entry-point*)
+		name))))
