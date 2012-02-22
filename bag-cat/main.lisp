@@ -160,8 +160,11 @@ newlines and horizontal rules."
 	      (not (eq channels t)) specs)
 
 	(with-interactive-interrupt-exit ()
-	  (with-bag (bag input :direction :input)
-	    (bind ((predicate (if (eq channels t) (constantly t) channels))
+	  (with-bag (bag input
+			 :direction :input
+			 :transform `(&from-source
+				      :converter ,(default-converter 'rsb:octet-vector)))
+	    (let* ((predicate (if (eq channels t) (constantly t) channels))
 		   (channels  (remove-if-not predicate (bag-channels bag)))
 		   (sequence  (make-serialized-view channels)))
 	      (iter (for datum each sequence
