@@ -1,0 +1,456 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ANNOTATION_DOCUMENT AUTHOR="unspecified" DATE="2004-08-25T16:13:18+01:00" FORMAT="2.2" VERSION="2.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://www.mpi.nl/tools/elan/EAFv2.2.xsd">
+    <HEADER MEDIA_FILE="" TIME_UNITS="milliseconds">
+            <MEDIA_DESCRIPTOR MEDIA_URL="file://SSL_JI_int_b.mpg" MIME_TYPE="video/mpeg"/>
+            <MEDIA_DESCRIPTOR MEDIA_URL="file://SSL_JI_int_f.mpg" MIME_TYPE="video/mpeg"/>
+            </HEADER>
+    <TIME_ORDER>
+        <TIME_SLOT TIME_SLOT_ID="ts1" TIME_VALUE="500"/>
+        <TIME_SLOT TIME_SLOT_ID="ts2" TIME_VALUE="500"/>
+        <TIME_SLOT TIME_SLOT_ID="ts3" TIME_VALUE="3013"/>
+        <TIME_SLOT TIME_SLOT_ID="ts4" TIME_VALUE="3013"/>
+        <TIME_SLOT TIME_SLOT_ID="ts5" TIME_VALUE="3130"/>
+        <TIME_SLOT TIME_SLOT_ID="ts6" TIME_VALUE="3130"/>
+        <TIME_SLOT TIME_SLOT_ID="ts7" TIME_VALUE="7807"/>
+        <TIME_SLOT TIME_SLOT_ID="ts8" TIME_VALUE="7807"/>
+        <TIME_SLOT TIME_SLOT_ID="ts9" TIME_VALUE="8043"/>
+        <TIME_SLOT TIME_SLOT_ID="ts10" TIME_VALUE="8043"/>
+        <TIME_SLOT TIME_SLOT_ID="ts11" TIME_VALUE="10327"/>
+        <TIME_SLOT TIME_SLOT_ID="ts12" TIME_VALUE="10327"/>
+        <TIME_SLOT TIME_SLOT_ID="ts13" TIME_VALUE="11197"/>
+        <TIME_SLOT TIME_SLOT_ID="ts14" TIME_VALUE="11197"/>
+        <TIME_SLOT TIME_SLOT_ID="ts15" TIME_VALUE="22677"/>
+        <TIME_SLOT TIME_SLOT_ID="ts16" TIME_VALUE="22677"/>
+        <TIME_SLOT TIME_SLOT_ID="ts17" TIME_VALUE="23399"/>
+        <TIME_SLOT TIME_SLOT_ID="ts18" TIME_VALUE="23399"/>
+        <TIME_SLOT TIME_SLOT_ID="ts19" TIME_VALUE="26237"/>
+        <TIME_SLOT TIME_SLOT_ID="ts20" TIME_VALUE="26237"/>
+        <TIME_SLOT TIME_SLOT_ID="ts21" TIME_VALUE="27169"/>
+        <TIME_SLOT TIME_SLOT_ID="ts22" TIME_VALUE="27169"/>
+        <TIME_SLOT TIME_SLOT_ID="ts23" TIME_VALUE="27617"/>
+        <TIME_SLOT TIME_SLOT_ID="ts24" TIME_VALUE="27617"/>
+        <TIME_SLOT TIME_SLOT_ID="ts25" TIME_VALUE="27697"/>
+        <TIME_SLOT TIME_SLOT_ID="ts26" TIME_VALUE="27697"/>
+        <TIME_SLOT TIME_SLOT_ID="ts27" TIME_VALUE="28356"/>
+        <TIME_SLOT TIME_SLOT_ID="ts28" TIME_VALUE="28356"/>
+        <TIME_SLOT TIME_SLOT_ID="ts29" TIME_VALUE="29327"/>
+        <TIME_SLOT TIME_SLOT_ID="ts30" TIME_VALUE="29327"/>
+        <TIME_SLOT TIME_SLOT_ID="ts31" TIME_VALUE="31316"/>
+        <TIME_SLOT TIME_SLOT_ID="ts32" TIME_VALUE="31316"/>
+        <TIME_SLOT TIME_SLOT_ID="ts33" TIME_VALUE="32206"/>
+        <TIME_SLOT TIME_SLOT_ID="ts34" TIME_VALUE="32206"/>
+        <TIME_SLOT TIME_SLOT_ID="ts35" TIME_VALUE="33766"/>
+        <TIME_SLOT TIME_SLOT_ID="ts36" TIME_VALUE="33766"/>
+        <TIME_SLOT TIME_SLOT_ID="ts37" TIME_VALUE="34066"/>
+        <TIME_SLOT TIME_SLOT_ID="ts38" TIME_VALUE="34066"/>
+        <TIME_SLOT TIME_SLOT_ID="ts39" TIME_VALUE="34456"/>
+        <TIME_SLOT TIME_SLOT_ID="ts40" TIME_VALUE="34456"/>
+        <TIME_SLOT TIME_SLOT_ID="ts41" TIME_VALUE="34682"/>
+        <TIME_SLOT TIME_SLOT_ID="ts42" TIME_VALUE="34682"/>
+        <TIME_SLOT TIME_SLOT_ID="ts43" TIME_VALUE="41936"/>
+        <TIME_SLOT TIME_SLOT_ID="ts44" TIME_VALUE="41936"/>
+        <TIME_SLOT TIME_SLOT_ID="ts45" TIME_VALUE="42692"/>
+        <TIME_SLOT TIME_SLOT_ID="ts46" TIME_VALUE="42692"/>
+        <TIME_SLOT TIME_SLOT_ID="ts47" TIME_VALUE="50586"/>
+        <TIME_SLOT TIME_SLOT_ID="ts48" TIME_VALUE="50586"/>
+        <TIME_SLOT TIME_SLOT_ID="ts49" TIME_VALUE="51797"/>
+        <TIME_SLOT TIME_SLOT_ID="ts50" TIME_VALUE="51797"/>
+        <TIME_SLOT TIME_SLOT_ID="ts51" TIME_VALUE="53181"/>
+        <TIME_SLOT TIME_SLOT_ID="ts52" TIME_VALUE="53181"/>
+        <TIME_SLOT TIME_SLOT_ID="ts53" TIME_VALUE="55027"/>
+        <TIME_SLOT TIME_SLOT_ID="ts54" TIME_VALUE="55027"/>
+        <TIME_SLOT TIME_SLOT_ID="ts55" TIME_VALUE="55081"/>
+        <TIME_SLOT TIME_SLOT_ID="ts56" TIME_VALUE="55081"/>
+        <TIME_SLOT TIME_SLOT_ID="ts57" TIME_VALUE="55811"/>
+        <TIME_SLOT TIME_SLOT_ID="ts58" TIME_VALUE="55811"/>
+        <TIME_SLOT TIME_SLOT_ID="ts59" TIME_VALUE="65289"/>
+        <TIME_SLOT TIME_SLOT_ID="ts60" TIME_VALUE="65289"/>
+        <TIME_SLOT TIME_SLOT_ID="ts61" TIME_VALUE="65891"/>
+        <TIME_SLOT TIME_SLOT_ID="ts62" TIME_VALUE="65891"/>
+        <TIME_SLOT TIME_SLOT_ID="ts63" TIME_VALUE="82779"/>
+        <TIME_SLOT TIME_SLOT_ID="ts64" TIME_VALUE="82779"/>
+        <TIME_SLOT TIME_SLOT_ID="ts65" TIME_VALUE="82827"/>
+        <TIME_SLOT TIME_SLOT_ID="ts66" TIME_VALUE="82827"/>
+        <TIME_SLOT TIME_SLOT_ID="ts67" TIME_VALUE="84663"/>
+        <TIME_SLOT TIME_SLOT_ID="ts68" TIME_VALUE="84663"/>
+        <TIME_SLOT TIME_SLOT_ID="ts69" TIME_VALUE="86187"/>
+        <TIME_SLOT TIME_SLOT_ID="ts70" TIME_VALUE="86187"/>
+        <TIME_SLOT TIME_SLOT_ID="ts71" TIME_VALUE="86663"/>
+        <TIME_SLOT TIME_SLOT_ID="ts72" TIME_VALUE="86663"/>
+        <TIME_SLOT TIME_SLOT_ID="ts73" TIME_VALUE="87156"/>
+        <TIME_SLOT TIME_SLOT_ID="ts74" TIME_VALUE="87156"/>
+        <TIME_SLOT TIME_SLOT_ID="ts75" TIME_VALUE="91023"/>
+        <TIME_SLOT TIME_SLOT_ID="ts76" TIME_VALUE="91023"/>
+        <TIME_SLOT TIME_SLOT_ID="ts77" TIME_VALUE="91816"/>
+        <TIME_SLOT TIME_SLOT_ID="ts78" TIME_VALUE="91816"/>
+        <TIME_SLOT TIME_SLOT_ID="ts79" TIME_VALUE="99333"/>
+        <TIME_SLOT TIME_SLOT_ID="ts80" TIME_VALUE="99333"/>
+        <TIME_SLOT TIME_SLOT_ID="ts81" TIME_VALUE="100373"/>
+        <TIME_SLOT TIME_SLOT_ID="ts82" TIME_VALUE="100373"/>
+        <TIME_SLOT TIME_SLOT_ID="ts83" TIME_VALUE="102539"/>
+        <TIME_SLOT TIME_SLOT_ID="ts84" TIME_VALUE="102539"/>
+        <TIME_SLOT TIME_SLOT_ID="ts85" TIME_VALUE="103659"/>
+        <TIME_SLOT TIME_SLOT_ID="ts86" TIME_VALUE="103659"/>
+        <TIME_SLOT TIME_SLOT_ID="ts87" TIME_VALUE="103823"/>
+        <TIME_SLOT TIME_SLOT_ID="ts88" TIME_VALUE="103823"/>
+        <TIME_SLOT TIME_SLOT_ID="ts89" TIME_VALUE="104429"/>
+        <TIME_SLOT TIME_SLOT_ID="ts90" TIME_VALUE="104429"/>
+        <TIME_SLOT TIME_SLOT_ID="ts91" TIME_VALUE="120149"/>
+        <TIME_SLOT TIME_SLOT_ID="ts92" TIME_VALUE="120149"/>
+        <TIME_SLOT TIME_SLOT_ID="ts93" TIME_VALUE="120427"/>
+        <TIME_SLOT TIME_SLOT_ID="ts94" TIME_VALUE="120427"/>
+        <TIME_SLOT TIME_SLOT_ID="ts95" TIME_VALUE="125148"/>
+        <TIME_SLOT TIME_SLOT_ID="ts96" TIME_VALUE="125148"/>
+        <TIME_SLOT TIME_SLOT_ID="ts97" TIME_VALUE="125297"/>
+        <TIME_SLOT TIME_SLOT_ID="ts98" TIME_VALUE="125297"/>
+        <TIME_SLOT TIME_SLOT_ID="ts99" TIME_VALUE="139168"/>
+        <TIME_SLOT TIME_SLOT_ID="ts100" TIME_VALUE="139168"/>
+        <TIME_SLOT TIME_SLOT_ID="ts101" TIME_VALUE="139934"/>
+        <TIME_SLOT TIME_SLOT_ID="ts102" TIME_VALUE="139934"/>
+        <TIME_SLOT TIME_SLOT_ID="ts103" TIME_VALUE="153397"/>
+        <TIME_SLOT TIME_SLOT_ID="ts104" TIME_VALUE="153397"/>
+        <TIME_SLOT TIME_SLOT_ID="ts105" TIME_VALUE="153454"/>
+        <TIME_SLOT TIME_SLOT_ID="ts106" TIME_VALUE="153454"/>
+        <TIME_SLOT TIME_SLOT_ID="ts107" TIME_VALUE="156820"/>
+        <TIME_SLOT TIME_SLOT_ID="ts108" TIME_VALUE="156820"/>
+        <TIME_SLOT TIME_SLOT_ID="ts109" TIME_VALUE="157957"/>
+        <TIME_SLOT TIME_SLOT_ID="ts110" TIME_VALUE="157957"/>
+        <TIME_SLOT TIME_SLOT_ID="ts111" TIME_VALUE="172860"/>
+        <TIME_SLOT TIME_SLOT_ID="ts112" TIME_VALUE="172860"/>
+        <TIME_SLOT TIME_SLOT_ID="ts113" TIME_VALUE="172955"/>
+        <TIME_SLOT TIME_SLOT_ID="ts114" TIME_VALUE="172955"/>
+        <TIME_SLOT TIME_SLOT_ID="ts115" TIME_VALUE="185285"/>
+        <TIME_SLOT TIME_SLOT_ID="ts116" TIME_VALUE="185285"/>
+        <TIME_SLOT TIME_SLOT_ID="ts117" TIME_VALUE="185600"/>
+        <TIME_SLOT TIME_SLOT_ID="ts118" TIME_VALUE="185600"/>
+        <TIME_SLOT TIME_SLOT_ID="ts119" TIME_VALUE="186860"/>
+        <TIME_SLOT TIME_SLOT_ID="ts120" TIME_VALUE="186860"/>
+        <TIME_SLOT TIME_SLOT_ID="ts121" TIME_VALUE="187010"/>
+        <TIME_SLOT TIME_SLOT_ID="ts122" TIME_VALUE="187010"/>
+        <TIME_SLOT TIME_SLOT_ID="ts123" TIME_VALUE="187630"/>
+        <TIME_SLOT TIME_SLOT_ID="ts124" TIME_VALUE="187630"/>
+    </TIME_ORDER>
+    <TIER DEFAULT_LOCALE="sv" LINGUISTIC_TYPE_REF="Default" PARTICIPANT="" TIER_ID="Translation English A">
+        <ANNOTATION>
+            <ALIGNABLE_ANNOTATION ANNOTATION_ID="a1" TIME_SLOT_REF1="ts4" TIME_SLOT_REF2="ts10">
+                <ANNOTATION_VALUE>My name is Jenny Ingvarsson and this is my name sign. </ANNOTATION_VALUE>
+            </ALIGNABLE_ANNOTATION>
+        </ANNOTATION>
+        <ANNOTATION>
+            <ALIGNABLE_ANNOTATION ANNOTATION_ID="a2" TIME_SLOT_REF1="ts12" TIME_SLOT_REF2="ts16">
+                <ANNOTATION_VALUE>Well, first of all it indicates my curly hair, and when I was a small I always emphasized the “y” when I fingerspelled my name “j e n n y”, with real emphasis. My preschool teachers wanted to have a sign that only indicated my curly hair, but I wanted to add the “y” so that is the combination.</ANNOTATION_VALUE>
+            </ALIGNABLE_ANNOTATION>
+        </ANNOTATION>
+        <ANNOTATION>
+            <ALIGNABLE_ANNOTATION ANNOTATION_ID="a3" TIME_SLOT_REF1="ts20" TIME_SLOT_REF2="ts24">
+                <ANNOTATION_VALUE>I was born in Stockholm.</ANNOTATION_VALUE>
+            </ALIGNABLE_ANNOTATION>
+        </ANNOTATION>
+        <ANNOTATION>
+            <ALIGNABLE_ANNOTATION ANNOTATION_ID="a4" TIME_SLOT_REF1="ts28" TIME_SLOT_REF2="ts32">
+                <ANNOTATION_VALUE>Yes, I grew up in Stockholm and I still live in Stockholm.</ANNOTATION_VALUE>
+            </ALIGNABLE_ANNOTATION>
+        </ANNOTATION>
+        <ANNOTATION>
+            <ALIGNABLE_ANNOTATION ANNOTATION_ID="a5" TIME_SLOT_REF1="ts36" TIME_SLOT_REF2="ts40">
+                <ANNOTATION_VALUE>Yes.</ANNOTATION_VALUE>
+            </ALIGNABLE_ANNOTATION>
+        </ANNOTATION>
+        <ANNOTATION>
+            <ALIGNABLE_ANNOTATION ANNOTATION_ID="a6" TIME_SLOT_REF1="ts44" TIME_SLOT_REF2="ts48">
+                <ANNOTATION_VALUE>Well, my father is hard of hearing and my mother is deaf. I have two brothers, one who is eighteen who is deaf, and one who is fifteen who is hearing.</ANNOTATION_VALUE>
+            </ALIGNABLE_ANNOTATION>
+        </ANNOTATION>
+        <ANNOTATION>
+            <ALIGNABLE_ANNOTATION ANNOTATION_ID="a7" TIME_SLOT_REF1="ts52" TIME_SLOT_REF2="ts58">
+                <ANNOTATION_VALUE>Sure, everybody is fluent in sign language.</ANNOTATION_VALUE>
+            </ALIGNABLE_ANNOTATION>
+        </ANNOTATION>
+        <ANNOTATION>
+            <ALIGNABLE_ANNOTATION ANNOTATION_ID="a8" TIME_SLOT_REF1="ts60" TIME_SLOT_REF2="ts64">
+                <ANNOTATION_VALUE>Yes, I went to the Manilla school.  First I lived very close to town, so I used to go every day to the Manilla School.  And when I was thirteen, we moved into one of the suburbs and bought a house there. So we lived there and I went to the Manilla school for about ten years. And then four years in Örebro in the high school for the deaf there. And then I came back to Stockholm.</ANNOTATION_VALUE>
+            </ALIGNABLE_ANNOTATION>
+        </ANNOTATION>
+        <ANNOTATION>
+            <ALIGNABLE_ANNOTATION ANNOTATION_ID="a9" TIME_SLOT_REF1="ts68" TIME_SLOT_REF2="ts72">
+                <ANNOTATION_VALUE>No, I still live with my parents. </ANNOTATION_VALUE>
+            </ALIGNABLE_ANNOTATION>
+        </ANNOTATION>
+        <ANNOTATION>
+            <ALIGNABLE_ANNOTATION ANNOTATION_ID="a10" TIME_SLOT_REF1="ts76" TIME_SLOT_REF2="ts80">
+                <ANNOTATION_VALUE>I work at the Manilla school for the deaf as a resource teacher. The semester is just finished, so this fall I am starting teacher’s training college.</ANNOTATION_VALUE>
+            </ALIGNABLE_ANNOTATION>
+        </ANNOTATION>
+        <ANNOTATION>
+            <ALIGNABLE_ANNOTATION ANNOTATION_ID="a11" TIME_SLOT_REF1="ts84" TIME_SLOT_REF2="ts86">
+                <ANNOTATION_VALUE>Yes, I do. </ANNOTATION_VALUE>
+            </ALIGNABLE_ANNOTATION>
+        </ANNOTATION>
+        <ANNOTATION>
+            <ALIGNABLE_ANNOTATION ANNOTATION_ID="a12" TIME_SLOT_REF1="ts90" TIME_SLOT_REF2="ts92">
+                <ANNOTATION_VALUE>I stayed in Australia for a year and I worked as a teacher’s assistant there in a school for the deaf in a city called Melbourne. I was there for a year and then I came back and I worked at the Manilla school for a year. I feel that, yes, being a teacher is what I really want, so I am starting my studies this fall and that is really going to be interesting. </ANNOTATION_VALUE>
+            </ALIGNABLE_ANNOTATION>
+        </ANNOTATION>
+        <ANNOTATION>
+            <ALIGNABLE_ANNOTATION ANNOTATION_ID="a13" TIME_SLOT_REF1="ts96" TIME_SLOT_REF2="ts100">
+                <ANNOTATION_VALUE>Yes, of course, that was the best trip I ever did. A whole year! I learnt a lot. I made new experiences, I made new friends, I became more self-relying. I really learnt a lot. It was truly the best trip I have ever done, that one to Australia. </ANNOTATION_VALUE>
+            </ALIGNABLE_ANNOTATION>
+        </ANNOTATION>
+        <ANNOTATION>
+            <ALIGNABLE_ANNOTATION ANNOTATION_ID="a14" TIME_SLOT_REF1="ts102" TIME_SLOT_REF2="ts106">
+                <ANNOTATION_VALUE>And also I travelled around a lot and I stayed there so long. I worked there and then in the summer vacation, I went to New Zeeland. I went to New Zeeland and I stayed there for a while, then I came back to Australia and I travelled round Australia. It was really great. I will never forget that trip. </ANNOTATION_VALUE>
+            </ALIGNABLE_ANNOTATION>
+        </ANNOTATION>
+        <ANNOTATION>
+            <ALIGNABLE_ANNOTATION ANNOTATION_ID="a15" TIME_SLOT_REF1="ts108" TIME_SLOT_REF2="ts112">
+                <ANNOTATION_VALUE>Oh, I guess then that would have to be from when we were in New Zeeland. It was Christmas and New Year. And I was there in a skirt and only a tank top. And there we were. New Years Eve! It was summer and we were camping and we were lying on the beach, and at the same time it was New Years Eve!  That was really a strange feeling, also because it was not like a holiday trip.</ANNOTATION_VALUE>
+            </ALIGNABLE_ANNOTATION>
+        </ANNOTATION>
+        <ANNOTATION>
+            <ALIGNABLE_ANNOTATION ANNOTATION_ID="a16" TIME_SLOT_REF1="ts114" TIME_SLOT_REF2="ts116">
+                <ANNOTATION_VALUE>And it was not just a vacation. I lived in Australia for a year. That was like, OK, so this is what it is like to have New Year in the summer. I was used to all those things in Sweden with snow and everything, so that was really a strange experience.</ANNOTATION_VALUE>
+            </ALIGNABLE_ANNOTATION>
+        </ANNOTATION>
+        <ANNOTATION>
+            <ALIGNABLE_ANNOTATION ANNOTATION_ID="a17" TIME_SLOT_REF1="ts120" TIME_SLOT_REF2="ts124">
+                <ANNOTATION_VALUE>Yes. </ANNOTATION_VALUE>
+            </ALIGNABLE_ANNOTATION>
+        </ANNOTATION>
+    </TIER>
+    <TIER DEFAULT_LOCALE="sv" LINGUISTIC_TYPE_REF="Default" PARTICIPANT="" TIER_ID="Translation Swedish A">
+        <ANNOTATION>
+            <ALIGNABLE_ANNOTATION ANNOTATION_ID="a18" TIME_SLOT_REF1="ts3" TIME_SLOT_REF2="ts9">
+                <ANNOTATION_VALUE>Jag heter Jenny Ingvarsson och mitt persontecken ser ut så här.</ANNOTATION_VALUE>
+            </ALIGNABLE_ANNOTATION>
+        </ANNOTATION>
+        <ANNOTATION>
+            <ALIGNABLE_ANNOTATION ANNOTATION_ID="a19" TIME_SLOT_REF1="ts11" TIME_SLOT_REF2="ts15">
+                <ANNOTATION_VALUE>Ja, dels har jag ju lockigt hår, och sen när jag var liten och skulle bokstavera mitt namn så överdrev jag alltid rörelsen i y:et på slutet. När mina förskollärare föreslog att mitt persontecken skulle se ut så här för att jag hade lockigt hår, så jag att nej, y:et ska vara med och därför blev det så.</ANNOTATION_VALUE>
+            </ALIGNABLE_ANNOTATION>
+        </ANNOTATION>
+        <ANNOTATION>
+            <ALIGNABLE_ANNOTATION ANNOTATION_ID="a20" TIME_SLOT_REF1="ts19" TIME_SLOT_REF2="ts23">
+                <ANNOTATION_VALUE>Jag är född här i Stockholm.</ANNOTATION_VALUE>
+            </ALIGNABLE_ANNOTATION>
+        </ANNOTATION>
+        <ANNOTATION>
+            <ALIGNABLE_ANNOTATION ANNOTATION_ID="a21" TIME_SLOT_REF1="ts27" TIME_SLOT_REF2="ts31">
+                <ANNOTATION_VALUE>Ja, uppvuxen här i Stockholm, bor fortfarande i Stockholm.</ANNOTATION_VALUE>
+            </ALIGNABLE_ANNOTATION>
+        </ANNOTATION>
+        <ANNOTATION>
+            <ALIGNABLE_ANNOTATION ANNOTATION_ID="a22" TIME_SLOT_REF1="ts35" TIME_SLOT_REF2="ts39">
+                <ANNOTATION_VALUE>Ja, det kan man väl göra.</ANNOTATION_VALUE>
+            </ALIGNABLE_ANNOTATION>
+        </ANNOTATION>
+        <ANNOTATION>
+            <ALIGNABLE_ANNOTATION ANNOTATION_ID="a23" TIME_SLOT_REF1="ts43" TIME_SLOT_REF2="ts47">
+                <ANNOTATION_VALUE>Ja, min pappa är hörselskadad, min mamma är döv och så har jag två bröder, en som är arton år och som är döv och en som är femton år och som är hörande.</ANNOTATION_VALUE>
+            </ALIGNABLE_ANNOTATION>
+        </ANNOTATION>
+        <ANNOTATION>
+            <ALIGNABLE_ANNOTATION ANNOTATION_ID="a24" TIME_SLOT_REF1="ts51" TIME_SLOT_REF2="ts57">
+                <ANNOTATION_VALUE>Jadå, allihopa är fullt teckenspråkiga. Vi tecknar hela tiden. </ANNOTATION_VALUE>
+            </ALIGNABLE_ANNOTATION>
+        </ANNOTATION>
+        <ANNOTATION>
+            <ALIGNABLE_ANNOTATION ANNOTATION_ID="a25" TIME_SLOT_REF1="ts59" TIME_SLOT_REF2="ts63">
+                <ANNOTATION_VALUE>Ja, jag åkte fram och tillbaka varje dag. Vi bodde ganska nära stan först. Sedan när jag var tretton flyttade vi till en villa utanför Stockholm, men jag gick fortfarande i Manilla och åkte varje dag i tio år. Sen gick jag fyra år i Örebro på gymnasiet och sen flyttade jag tillbaka till Stockholm. </ANNOTATION_VALUE>
+            </ALIGNABLE_ANNOTATION>
+        </ANNOTATION>
+        <ANNOTATION>
+            <ALIGNABLE_ANNOTATION ANNOTATION_ID="a26" TIME_SLOT_REF1="ts67" TIME_SLOT_REF2="ts71">
+                <ANNOTATION_VALUE>Jag bor kvar hos mina föräldrar. </ANNOTATION_VALUE>
+            </ALIGNABLE_ANNOTATION>
+        </ANNOTATION>
+        <ANNOTATION>
+            <ALIGNABLE_ANNOTATION ANNOTATION_ID="a27" TIME_SLOT_REF1="ts75" TIME_SLOT_REF2="ts79">
+                <ANNOTATION_VALUE>Ja, just nu är jag på Manillaskolan som resurslärare. Skolan har ju precis slutat och till hösten ska jag börja utbilda mig till lärare. </ANNOTATION_VALUE>
+            </ALIGNABLE_ANNOTATION>
+        </ANNOTATION>
+        <ANNOTATION>
+            <ALIGNABLE_ANNOTATION ANNOTATION_ID="a28" TIME_SLOT_REF1="ts83" TIME_SLOT_REF2="ts85">
+                <ANNOTATION_VALUE>Ja, absolut. </ANNOTATION_VALUE>
+            </ALIGNABLE_ANNOTATION>
+        </ANNOTATION>
+        <ANNOTATION>
+            <ALIGNABLE_ANNOTATION ANNOTATION_ID="a29" TIME_SLOT_REF1="ts89" TIME_SLOT_REF2="ts91">
+                <ANNOTATION_VALUE>Jag har ju bott i Australien ett år också och jobbade som lärarassistent där i en dövskola i Melbourne. Jag jobbade med det ett år då. Sen kom jag hem och så har jag jobbat på Manilla ett år. Jo, jag känner att det är absolut rätt för mig. Jag vill bli lärare. Det ska bli jättespännande att börja utbildningen till hösten.</ANNOTATION_VALUE>
+            </ALIGNABLE_ANNOTATION>
+        </ANNOTATION>
+        <ANNOTATION>
+            <ALIGNABLE_ANNOTATION ANNOTATION_ID="a30" TIME_SLOT_REF1="ts95" TIME_SLOT_REF2="ts99">
+                <ANNOTATION_VALUE>Ja absolut, den resan är den absolut bästa jag gjort någon gång. Ett helt år. Jag lärde mig massor, jag fick nya erfarenheter, jag fick nya vänner, jag fick lära mig att vara självständig, jag fick lära mig ta vara på mig själv. Jag har lärt mig massor. </ANNOTATION_VALUE>
+            </ALIGNABLE_ANNOTATION>
+        </ANNOTATION>
+        <ANNOTATION>
+            <ALIGNABLE_ANNOTATION ANNOTATION_ID="a31" TIME_SLOT_REF1="ts101" TIME_SLOT_REF2="ts105">
+                <ANNOTATION_VALUE>Jag tog ledigt, åkte till Nya Zeeland och var där ett tag, åkte tillbaka till Australien och reste runt där. Det var en fantastisk resa som jag aldrig glömmer.</ANNOTATION_VALUE>
+            </ALIGNABLE_ANNOTATION>
+        </ANNOTATION>
+        <ANNOTATION>
+            <ALIGNABLE_ANNOTATION ANNOTATION_ID="a32" TIME_SLOT_REF1="ts107" TIME_SLOT_REF2="ts111">
+                <ANNOTATION_VALUE>Ja, en märklig grej som hände då var jag på nya Zeeland. Det var under jul och nyår. Och liksom, jul och jättevarmt och soligt och kort kjol och linne. På nyårsafton då var jag och ett gäng kompisar och kampade nere vid stranden och badade och så var det nyårsafton. Det var en jättekonstig känsla. </ANNOTATION_VALUE>
+            </ALIGNABLE_ANNOTATION>
+        </ANNOTATION>
+        <ANNOTATION>
+            <ALIGNABLE_ANNOTATION ANNOTATION_ID="a33" TIME_SLOT_REF1="ts113" TIME_SLOT_REF2="ts115">
+                <ANNOTATION_VALUE>Och det var ju inte semester. Jag bodde ju där ett helt år. Ja, nyår mitt i sommaren. Det kändes jättekonstig. Jag var ju van vid att det skulle vara snö och så. Så det minns jag jätteväl.</ANNOTATION_VALUE>
+            </ALIGNABLE_ANNOTATION>
+        </ANNOTATION>
+        <ANNOTATION>
+            <ALIGNABLE_ANNOTATION ANNOTATION_ID="a34" TIME_SLOT_REF1="ts119" TIME_SLOT_REF2="ts123">
+                <ANNOTATION_VALUE>Ja verkligen. </ANNOTATION_VALUE>
+            </ALIGNABLE_ANNOTATION>
+        </ANNOTATION>
+    </TIER>
+    <TIER DEFAULT_LOCALE="sv" LINGUISTIC_TYPE_REF="Default" PARTICIPANT="" TIER_ID="Translation English B">
+        <ANNOTATION>
+            <ALIGNABLE_ANNOTATION ANNOTATION_ID="a35" TIME_SLOT_REF1="ts2" TIME_SLOT_REF2="ts6">
+                <ANNOTATION_VALUE>So, what is your name?</ANNOTATION_VALUE>
+            </ALIGNABLE_ANNOTATION>
+        </ANNOTATION>
+        <ANNOTATION>
+            <ALIGNABLE_ANNOTATION ANNOTATION_ID="a36" TIME_SLOT_REF1="ts8" TIME_SLOT_REF2="ts14">
+                <ANNOTATION_VALUE>Oh, how come? Why that particular name sign? </ANNOTATION_VALUE>
+            </ALIGNABLE_ANNOTATION>
+        </ANNOTATION>
+        <ANNOTATION>
+            <ALIGNABLE_ANNOTATION ANNOTATION_ID="a37" TIME_SLOT_REF1="ts18" TIME_SLOT_REF2="ts22">
+                <ANNOTATION_VALUE>Oh, it looks nice. Where are you from?  </ANNOTATION_VALUE>
+            </ALIGNABLE_ANNOTATION>
+        </ANNOTATION>
+        <ANNOTATION>
+            <ALIGNABLE_ANNOTATION ANNOTATION_ID="a38" TIME_SLOT_REF1="ts26" TIME_SLOT_REF2="ts30">
+                <ANNOTATION_VALUE>Did you grow up here?</ANNOTATION_VALUE>
+            </ALIGNABLE_ANNOTATION>
+        </ANNOTATION>
+        <ANNOTATION>
+            <ALIGNABLE_ANNOTATION ANNOTATION_ID="a39" TIME_SLOT_REF1="ts34" TIME_SLOT_REF2="ts38">
+                <ANNOTATION_VALUE>So you are a real Stockholmer then?</ANNOTATION_VALUE>
+            </ALIGNABLE_ANNOTATION>
+        </ANNOTATION>
+        <ANNOTATION>
+            <ALIGNABLE_ANNOTATION ANNOTATION_ID="a40" TIME_SLOT_REF1="ts42" TIME_SLOT_REF2="ts46">
+                <ANNOTATION_VALUE>Could you tell us a bit about your family and the time when you grew up?</ANNOTATION_VALUE>
+            </ALIGNABLE_ANNOTATION>
+        </ANNOTATION>
+        <ANNOTATION>
+            <ALIGNABLE_ANNOTATION ANNOTATION_ID="a41" TIME_SLOT_REF1="ts50" TIME_SLOT_REF2="ts54">
+                <ANNOTATION_VALUE>That means you were all signing at home? </ANNOTATION_VALUE>
+            </ALIGNABLE_ANNOTATION>
+        </ANNOTATION>
+        <ANNOTATION>
+            <ALIGNABLE_ANNOTATION ANNOTATION_ID="a42" TIME_SLOT_REF1="ts56" TIME_SLOT_REF2="ts62">
+                <ANNOTATION_VALUE>The whole family. A bit more about your background. You went to the Manilla school, right?</ANNOTATION_VALUE>
+            </ALIGNABLE_ANNOTATION>
+        </ANNOTATION>
+        <ANNOTATION>
+            <ALIGNABLE_ANNOTATION ANNOTATION_ID="a43" TIME_SLOT_REF1="ts66" TIME_SLOT_REF2="ts70">
+                <ANNOTATION_VALUE>Do you live alone or with your parents?</ANNOTATION_VALUE>
+            </ALIGNABLE_ANNOTATION>
+        </ANNOTATION>
+        <ANNOTATION>
+            <ALIGNABLE_ANNOTATION ANNOTATION_ID="a44" TIME_SLOT_REF1="ts74" TIME_SLOT_REF2="ts78">
+                <ANNOTATION_VALUE>So what do you work with now? </ANNOTATION_VALUE>
+            </ALIGNABLE_ANNOTATION>
+        </ANNOTATION>
+        <ANNOTATION>
+            <ALIGNABLE_ANNOTATION ANNOTATION_ID="a45" TIME_SLOT_REF1="ts82" TIME_SLOT_REF2="ts88">
+                <ANNOTATION_VALUE>Oh, that is good. So you want to be a teacher?</ANNOTATION_VALUE>
+            </ALIGNABLE_ANNOTATION>
+        </ANNOTATION>
+        <ANNOTATION>
+            <ALIGNABLE_ANNOTATION ANNOTATION_ID="a46" TIME_SLOT_REF1="ts94" TIME_SLOT_REF2="ts98">
+                <ANNOTATION_VALUE>That is good. May be you could tell us something about travels, maybe from that trip to Australia, right? </ANNOTATION_VALUE>
+            </ALIGNABLE_ANNOTATION>
+        </ANNOTATION>
+        <ANNOTATION>
+            <ALIGNABLE_ANNOTATION ANNOTATION_ID="a47" TIME_SLOT_REF1="ts104" TIME_SLOT_REF2="ts110">
+                <ANNOTATION_VALUE>Maybe there is something special, something short, that you would like to share with us? </ANNOTATION_VALUE>
+            </ALIGNABLE_ANNOTATION>
+        </ANNOTATION>
+        <ANNOTATION>
+            <ALIGNABLE_ANNOTATION ANNOTATION_ID="a48" TIME_SLOT_REF1="ts118" TIME_SLOT_REF2="ts122">
+                <ANNOTATION_VALUE>Well, it sounds like a nice experience. </ANNOTATION_VALUE>
+            </ALIGNABLE_ANNOTATION>
+        </ANNOTATION>
+    </TIER>
+    <TIER DEFAULT_LOCALE="sv" LINGUISTIC_TYPE_REF="Default" PARTICIPANT="" TIER_ID="Translation Swedish B">
+        <ANNOTATION>
+            <ALIGNABLE_ANNOTATION ANNOTATION_ID="a49" TIME_SLOT_REF1="ts1" TIME_SLOT_REF2="ts5">
+                <ANNOTATION_VALUE>Ja, vad heter du då?</ANNOTATION_VALUE>
+            </ALIGNABLE_ANNOTATION>
+        </ANNOTATION>
+        <ANNOTATION>
+            <ALIGNABLE_ANNOTATION ANNOTATION_ID="a50" TIME_SLOT_REF1="ts7" TIME_SLOT_REF2="ts13">
+                <ANNOTATION_VALUE>Jaha, vad kommer det sig? Varför ser det ut så?</ANNOTATION_VALUE>
+            </ALIGNABLE_ANNOTATION>
+        </ANNOTATION>
+        <ANNOTATION>
+            <ALIGNABLE_ANNOTATION ANNOTATION_ID="a51" TIME_SLOT_REF1="ts17" TIME_SLOT_REF2="ts21">
+                <ANNOTATION_VALUE>Fint tecken! Var kommer du ifrån då?</ANNOTATION_VALUE>
+            </ALIGNABLE_ANNOTATION>
+        </ANNOTATION>
+        <ANNOTATION>
+            <ALIGNABLE_ANNOTATION ANNOTATION_ID="a52" TIME_SLOT_REF1="ts25" TIME_SLOT_REF2="ts29">
+                <ANNOTATION_VALUE>Uppvuxen här?</ANNOTATION_VALUE>
+            </ALIGNABLE_ANNOTATION>
+        </ANNOTATION>
+        <ANNOTATION>
+            <ALIGNABLE_ANNOTATION ANNOTATION_ID="a53" TIME_SLOT_REF1="ts33" TIME_SLOT_REF2="ts37">
+                <ANNOTATION_VALUE>En äkta stockholmare.</ANNOTATION_VALUE>
+            </ALIGNABLE_ANNOTATION>
+        </ANNOTATION>
+        <ANNOTATION>
+            <ALIGNABLE_ANNOTATION ANNOTATION_ID="a54" TIME_SLOT_REF1="ts41" TIME_SLOT_REF2="ts45">
+                <ANNOTATION_VALUE>Kan du berätta lite om din familj och din uppväxt?</ANNOTATION_VALUE>
+            </ALIGNABLE_ANNOTATION>
+        </ANNOTATION>
+        <ANNOTATION>
+            <ALIGNABLE_ANNOTATION ANNOTATION_ID="a55" TIME_SLOT_REF1="ts49" TIME_SLOT_REF2="ts53">
+                <ANNOTATION_VALUE>Ja, då använde ni teckenspråk hemma då?</ANNOTATION_VALUE>
+            </ALIGNABLE_ANNOTATION>
+        </ANNOTATION>
+        <ANNOTATION>
+            <ALIGNABLE_ANNOTATION ANNOTATION_ID="a56" TIME_SLOT_REF1="ts55" TIME_SLOT_REF2="ts61">
+                <ANNOTATION_VALUE>Hela familjen.   Någonting annat om din hemmiljö, din bakgrund, din uppväxt? Du gick Manillaskolan eller?</ANNOTATION_VALUE>
+            </ALIGNABLE_ANNOTATION>
+        </ANNOTATION>
+        <ANNOTATION>
+            <ALIGNABLE_ANNOTATION ANNOTATION_ID="a57" TIME_SLOT_REF1="ts65" TIME_SLOT_REF2="ts69">
+                <ANNOTATION_VALUE>Bor du ensam eller bor du kvar hos dina föräldrar? </ANNOTATION_VALUE>
+            </ALIGNABLE_ANNOTATION>
+        </ANNOTATION>
+        <ANNOTATION>
+            <ALIGNABLE_ANNOTATION ANNOTATION_ID="a58" TIME_SLOT_REF1="ts73" TIME_SLOT_REF2="ts77">
+                <ANNOTATION_VALUE>Och vad jobbar du med nu?</ANNOTATION_VALUE>
+            </ALIGNABLE_ANNOTATION>
+        </ANNOTATION>
+        <ANNOTATION>
+            <ALIGNABLE_ANNOTATION ANNOTATION_ID="a59" TIME_SLOT_REF1="ts81" TIME_SLOT_REF2="ts87">
+                <ANNOTATION_VALUE>Jaha, vad kul. Är du intresserad av att bli lärare?</ANNOTATION_VALUE>
+            </ALIGNABLE_ANNOTATION>
+        </ANNOTATION>
+        <ANNOTATION>
+            <ALIGNABLE_ANNOTATION ANNOTATION_ID="a60" TIME_SLOT_REF1="ts93" TIME_SLOT_REF2="ts97">
+                <ANNOTATION_VALUE>Ja, kanske du kan berätta något reseminne. Det kanske blir från Australien då eller? </ANNOTATION_VALUE>
+            </ALIGNABLE_ANNOTATION>
+        </ANNOTATION>
+        <ANNOTATION>
+            <ALIGNABLE_ANNOTATION ANNOTATION_ID="a61" TIME_SLOT_REF1="ts103" TIME_SLOT_REF2="ts109">
+                <ANNOTATION_VALUE>Har du liten kort grej som du kan berätta, något litet minne?</ANNOTATION_VALUE>
+            </ALIGNABLE_ANNOTATION>
+        </ANNOTATION>
+        <ANNOTATION>
+            <ALIGNABLE_ANNOTATION ANNOTATION_ID="a62" TIME_SLOT_REF1="ts117" TIME_SLOT_REF2="ts121">
+                <ANNOTATION_VALUE>Ja, en härlig upplevelse. </ANNOTATION_VALUE>
+            </ALIGNABLE_ANNOTATION>
+        </ANNOTATION>
+    </TIER>
+    <LINGUISTIC_TYPE GRAPHIC_REFERENCES="false" LINGUISTIC_TYPE_ID="Default" TIME_ALIGNABLE="true"/>
+    <LOCALE COUNTRY_CODE="SE" LANGUAGE_CODE="sv"/>
+    <CONSTRAINT DESCRIPTION="Time subdivision of parent annotation&apos;s time interval, no time gaps allowed within this interval" STEREOTYPE="Time_Subdivision"/>
+    <CONSTRAINT DESCRIPTION="Symbolic subdivision of a parent annotation. Annotations refering to the same parent are ordered" STEREOTYPE="Symbolic_Subdivision"/>
+    <CONSTRAINT DESCRIPTION="1-1 association with a parent annotation" STEREOTYPE="Symbolic_Association"/>
+</ANNOTATION_DOCUMENT>

@@ -76,30 +76,31 @@ FOREACH(TOOL ${TOOLS})
              COMMAND "${CMAKE_CURRENT_BINARY_DIR}/${TOOL}" --version)
 ENDFOREACH()
 
-FILE(GLOB TIDE_FILES
-     "${DATA_DIR}/*.tide")
+FILE(GLOB TIDE_FILES "${DATA_DIR}/0.6/*.tide")
+FILE(GLOB VERSIONS   RELATIVE "${DATA_DIR}" "${DATA_DIR}/0.6")
+FILE(GLOB ELAN_FILES "${DATA_DIR}/elan/*.eaf")
 
-FOREACH(TIDE_FILE ${TIDE_FILES})
-    FILE(RELATIVE_PATH NAME "${DATA_DIR}" "${TIDE_FILE}")
+MESSAGE(${DATA_DIR} ${VERSIONS} ${TIDE_FILES} ${ELAN_FILES})
+
+FOREACH(FILE ${TIDE_FILES} ${ELAN_FILES})
+    FILE(RELATIVE_PATH NAME "${DATA_DIR}" "${FILE}")
     ADD_TEST(NAME    "bag-info${NAME}"
-             COMMAND "${CMAKE_CURRENT_BINARY_DIR}/bag-info"
-                     "${TIDE_FILE}")
-ENDFOREACH()
-
-FOREACH(TIDE_FILE ${TIDE_FILES})
-    FILE(RELATIVE_PATH NAME "${DATA_DIR}" "${TIDE_FILE}")
+             COMMAND "${CMAKE_CURRENT_BINARY_DIR}/bag-info" --debug
+                     "${FILE}")
     ADD_TEST(NAME    "bag-cat${NAME}"
-             COMMAND "${CMAKE_CURRENT_BINARY_DIR}/bag-cat"
-                     "${TIDE_FILE}")
+             COMMAND "${CMAKE_CURRENT_BINARY_DIR}/bag-cat" --debug
+                     "${FILE}")
 ENDFOREACH()
 
-FOREACH(TIDE_FILE "${DATA_DIR}/empty.tide"
-                  "${DATA_DIR}/empty-channel.tide"
-                  "${DATA_DIR}/single-event.tide")
-    FILE(RELATIVE_PATH NAME "${DATA_DIR}" "${TIDE_FILE}")
-    ADD_TEST(NAME    "bag-play${NAME}"
-             COMMAND "${CMAKE_CURRENT_BINARY_DIR}/bag-play"
-                     "${TIDE_FILE}" inprocess:)
+FOREACH(VERSION ${VERSIONS})
+    FOREACH(FILE "${DATA_DIR}/${VERSION}/empty.tide"
+                 "${DATA_DIR}/${VERSION}/empty-channel.tide"
+                 "${DATA_DIR}/${VERSION}/single-event.tide")
+        FILE(RELATIVE_PATH NAME "${DATA_DIR}" "${FILE}")
+        ADD_TEST(NAME    "bag-play${NAME}"
+                 COMMAND "${CMAKE_CURRENT_BINARY_DIR}/bag-play" --debug
+                         "${FILE}" inprocess:)
+    ENDFOREACH()
 ENDFOREACH()
 
 # Installation
