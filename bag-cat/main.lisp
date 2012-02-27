@@ -104,6 +104,8 @@ newlines and horizontal rules."
 		       :argument-name "INDEX"
 		       :description
 		       "Mutually exclusive with --end-time."))
+   ;; Append IDL options.
+   :item    (make-idl-options)
    ;; Append examples.
    :item    (defgroup (:header "Examples")
 	      (make-text :contents (make-examples-string)))))
@@ -132,6 +134,8 @@ newlines and horizontal rules."
 
   (with-print-limits (*standard-output*)
     (with-logged-warnings
+      ;; Load IDLs as specified on the commandline.
+      (process-idl-options)
 
       ;; Create a reader and start the receiving and printing loop.
       (bind ((input       (first (remainder)))
