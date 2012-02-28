@@ -52,4 +52,4 @@
 				 :if-exists         :overwrite
 				 :if-does-not-exist :create
 				 :element-type      '(unsigned-byte 8))
-      (format-payload (pb:unpack data 'rst.vision:image) style stream))))
+      (format-payload data style stream))))
