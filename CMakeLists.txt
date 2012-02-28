@@ -76,11 +76,10 @@ FOREACH(TOOL ${TOOLS})
              COMMAND "${CMAKE_CURRENT_BINARY_DIR}/${TOOL}" --version)
 ENDFOREACH()
 
-FILE(GLOB TIDE_FILES "${DATA_DIR}/0.6/*.tide")
-FILE(GLOB VERSIONS   RELATIVE "${DATA_DIR}" "${DATA_DIR}/0.6")
+FILE(GLOB TIDE_FILES "${DATA_DIR}/?.?/*.tide")
+FILE(GLOB VERSIONS   RELATIVE "${DATA_DIR}" "${DATA_DIR}/?.?")
 FILE(GLOB ELAN_FILES "${DATA_DIR}/elan/*.eaf")
 
-MESSAGE(${DATA_DIR} ${VERSIONS} ${TIDE_FILES} ${ELAN_FILES})
 
 FOREACH(FILE ${TIDE_FILES} ${ELAN_FILES})
     FILE(RELATIVE_PATH NAME "${DATA_DIR}" "${FILE}")
@@ -101,6 +100,12 @@ FOREACH(VERSION ${VERSIONS})
                  COMMAND "${CMAKE_CURRENT_BINARY_DIR}/bag-play" --debug
                          "${FILE}" inprocess:)
     ENDFOREACH()
+ENDFOREACH()
+FOREACH(FILE ${ELAN_FILES})
+    FILE(RELATIVE_PATH NAME "${DATA_DIR}" "${FILE}")
+    ADD_TEST(NAME    "bag-play${NAME}"
+            COMMAND "${CMAKE_CURRENT_BINARY_DIR}/bag-play" --debug
+                    "${FILE}" inprocess:)
 ENDFOREACH()
 
 # Installation
