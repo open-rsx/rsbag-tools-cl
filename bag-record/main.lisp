@@ -97,6 +97,8 @@ CONNECTION while THUNK executes."
    :item    (make-options
 	     :show? (or (eq show t)
 			(and (listp show) (member :rsb show))))
+   ;; Append IDL options.
+   :item    (make-idl-options)
    ;; Append examples.
    :item    (defgroup (:header "Examples")
 	      (make-text :contents (make-examples-string)))))
@@ -117,6 +119,9 @@ CONNECTION while THUNK executes."
 recorded.~@:>"))
 
   (with-logged-warnings
+    ;; Load IDLs as specified on the commandline.
+    (process-idl-options)
+
     (rsb.formatting:with-print-limits (*standard-output*)
 	;; Create a reader and start the receiving and printing loop.
 	(bind ((control-uri   (when-let ((string (getopt :long-name "control-uri")))
