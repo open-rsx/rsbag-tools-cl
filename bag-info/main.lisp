@@ -1,6 +1,6 @@
 ;;; main.lisp --- Main function of the bag-info program.
 ;;
-;; Copyright (C) 2011 Jan Moringen
+;; Copyright (C) 2011, 2012 Jan Moringen
 ;;
 ;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 ;;
@@ -46,7 +46,13 @@ Examples:
 	      (flag :long-name  "compute-sizes"
 		    :short-name "s"
 		    :description
-		    "Compute the sizes of the content of the whole log file and individual channels. This may take some time for large files."))))
+		    "Compute the sizes of the content of the whole log file and individual channels. This may take some time for large files.")
+	      (enum :long-name     "print-format"
+		    :short-name    "f"
+		    :enum          '(:no :short :full)
+		    :default-value :short
+		    :description
+		    "Print format information for each channel."))))
 
 (defun channel-size (channel)
   "Return the size of the content of CHANNEL in bytes."
@@ -68,7 +74,8 @@ Examples:
   (with-print-limits (*standard-output*)
     (with-logged-warnings
       (bind (((input) (remainder))
-	     (sizes?  (getopt :long-name "compute-sizes")))
+	     (sizes?  (getopt :long-name "compute-sizes"))
+	     (format? (getopt :long-name "print-format")))
 	(with-bag (bag input :direction :input)
 	  (format t "File ~S~&~2T~<~@;~@{~@(~8A~): ~
 ~:[N/A~;~:*~,,',:D~]~^~&~}~:>~&~2T~@<~@;~:{Channel ~
@@ -83,9 +90,9 @@ Examples:
 			      ,@(when sizes?
 				      `(:size ,(reduce #'+ (bag-channels bag)
 						       :key #'channel-size)))
-			      :start    ,(rsbag:start bag)
-			      :end      ,(rsbag:end   bag)
-			      :duration ,duration))
+		      :start    ,(rsbag:start bag)
+		      :end      ,(rsbag:end   bag)
+		      :duration ,duration))
 		  (iter (for channel each (bag-channels bag))
 			(bind (((:accessors-r/o (length length)
 						(start  rsbag:start)
@@ -95,6 +102,15 @@ Examples:
 					    end start))))
 			  (collect (list (channel-name channel)
 					 `(:type     ,(meta-data channel :type)
+					   :format   ,(when-let ((format (meta-data channel :format)))
+							(case format?
+							  (:short
+							   (apply #'concatenate 'string
+								  (subseq format 0 (min 100 (length format)))
+								  (when (> (length format) 100)
+								    (list "…"))))
+							  (:full
+							   format)))
 					   :events   ,length
 					   ,@(when sizes?
 					       `(:size ,(channel-size channel)))
@@ -103,3 +119,7 @@ Examples:
 					   :duration ,duration
 					   :rate     ,(when (and duration (plusp duration))
 						        (/ length duration)))))))))))))
+
+;; Local Variables:
+;; coding: utf-8
+;; End:
