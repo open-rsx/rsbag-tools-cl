@@ -80,31 +80,36 @@ FILE(GLOB TIDE_FILES "${DATA_DIR}/?.?/*.tide")
 FILE(GLOB VERSIONS   RELATIVE "${DATA_DIR}" "${DATA_DIR}/?.?")
 FILE(GLOB ELAN_FILES "${DATA_DIR}/elan/*.eaf")
 
-
+# bag-{info,cat} tests
 FOREACH(FILE ${TIDE_FILES} ${ELAN_FILES})
     FILE(RELATIVE_PATH NAME "${DATA_DIR}" "${FILE}")
     ADD_TEST(NAME    "bag-info${NAME}"
-             COMMAND "${CMAKE_CURRENT_BINARY_DIR}/bag-info" --debug
-                     "${FILE}")
+             COMMAND "${CMAKE_CURRENT_BINARY_DIR}/bag-info"
+                     --debug "${FILE}")
     ADD_TEST(NAME    "bag-cat${NAME}"
-             COMMAND "${CMAKE_CURRENT_BINARY_DIR}/bag-cat" --debug
-                     "${FILE}")
+             COMMAND "${CMAKE_CURRENT_BINARY_DIR}/bag-cat"
+                     --debug "${FILE}")
 ENDFOREACH()
 
+# bag-play test
 FOREACH(VERSION ${VERSIONS})
     FOREACH(FILE "${DATA_DIR}/${VERSION}/empty.tide"
                  "${DATA_DIR}/${VERSION}/empty-channel.tide"
                  "${DATA_DIR}/${VERSION}/single-event.tide")
         FILE(RELATIVE_PATH NAME "${DATA_DIR}" "${FILE}")
         ADD_TEST(NAME    "bag-play${NAME}"
-                 COMMAND "${CMAKE_CURRENT_BINARY_DIR}/bag-play" --debug
+                 COMMAND "${CMAKE_CURRENT_BINARY_DIR}/bag-play"
+                         --debug
+                         --replay-strategy as-fast-as-possible
                          "${FILE}" inprocess:)
     ENDFOREACH()
 ENDFOREACH()
 FOREACH(FILE ${ELAN_FILES})
     FILE(RELATIVE_PATH NAME "${DATA_DIR}" "${FILE}")
     ADD_TEST(NAME    "bag-play${NAME}"
-            COMMAND "${CMAKE_CURRENT_BINARY_DIR}/bag-play" --debug
+            COMMAND "${CMAKE_CURRENT_BINARY_DIR}/bag-play"
+                    --debug
+                    --replay-strategy as-fast-as-possible
                     "${FILE}" inprocess:)
 ENDFOREACH()
 
