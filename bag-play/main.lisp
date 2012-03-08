@@ -37,25 +37,27 @@
 		       :typespec      '(or real local-time:timestamp)
 		       :argument-name "TIMESTAMP-OR-SECONDS"
 		       :description
-		       "Start replaying events at the point in time indicated by TIMESTAMP-OR-SECONDS. When the value should be parsed as a timestamp, the syntax @[YYYY-MM-DDT]HH:MM:SS has to be used. A single real number is interpreted as time in seconds relative to the beginning of the replay. Mutually exclusive with --start-index. NOT IMPLEMENTED YET.")
+		       "Start replaying events at the point in time indicated by TIMESTAMP-OR-SECONDS. When the value should be parsed as a timestamp, the syntax @[YYYY-MM-DDT]HH:MM:SS has to be used. A single real number is interpreted as time in seconds relative to the beginning of the replay. Mutually exclusive with --start-index.")
 	      (lispobj :long-name     "start-index"
 		       :short-name    "S"
 		       :typespec      'non-negative-integer
 		       :argument-name "INDEX"
 		       :description
-		       "Mutually exclusive with --start-time.")
+		       "Index of the event at which the replay should
+start. Mutually exclusive with --start-time.")
 	      (lispobj :long-name     "end-time"
 		       :short-name    "e"
 		       :typespec      '(or real local-time:timestamp)
 		       :argument-name "TIMESTAMP-OR-SECONDS"
 		       :description
-		       "Stop replaying events at the point in time indicated by TIMESTAMP-OR-SECONDS. When the value should be parsed as a timestamp, the syntax @[YYYY-MM-DDT]HH:MM:SS has to be used. A single real number is interpreted as time in seconds relative to the beginning of the replay. Mutually exclusive with --end-index. NOT IMPLEMENTED YET.")
+		       "Stop replaying events at the point in time indicated by TIMESTAMP-OR-SECONDS. When the value should be parsed as a timestamp, the syntax @[YYYY-MM-DDT]HH:MM:SS has to be used. A single real number is interpreted as time in seconds relative to the beginning of the replay. Mutually exclusive with --end-index.")
 	      (lispobj :long-name     "end-index"
 		       :short-name    "E"
 		       :typespec      'non-negative-integer
 		       :argument-name "INDEX"
 		       :description
-		       "Mutually exclusive with --end-time.")
+		       "Index of the event at which the replay should
+end. Mutually exclusive with --end-time.")
 	      (stropt  :long-name     "replay-strategy"
 		       :short-name    "r"
 		       :default-value "recorded-timing"
@@ -97,11 +99,33 @@ the value of `*standard-output*'."
 	  index start-index end-index)
   (force-output *standard-output*))
 
+(defun process-bounds-options ()
+  "Retrieve values or {start,end}-{time,index} commandline options,
+check their consistency and return them as four values:
+1. start-time:  `local-time:timestamp' or nil
+2. start-index: `non-negative-integer' or nil
+3. end-time:    `local-time:timestamp' or nil
+4. end-index:   `non-negative-integer' or nil"
+  (bind (((start-time start-index end-time end-index)
+	  (let ((*readtable* (copy-readtable *readtable*)))
+	    (local-time:enable-read-macros)
+	    (map 'list (curry #'getopt :long-name)
+		 '("start-time" "start-index"
+		   "end-time"   "end-index")))))
+    ;; Check mutually exclusive options.
+    (when (and start-time start-index)
+      (error "~@<The commandline options \"start-time\" and ~
+\"start-index\" are mutually exclusive.~@:>"))
+    (when (and end-time end-index)
+      (error "~@<The commandline options \"end-time\" and ~
+\"end-index\" are mutually exclusive.~@:>"))
+
+    (values start-time start-index end-time end-index)))
+
 (defun main ()
   "Entry point function of the bag-play program."
   (update-synopsis)
   (setf *default-configuration* (options-from-default-sources))
-  (local-time:enable-read-macros)
   (process-commandline-options
    :version         (cl-rsbag-tools-play-system:version/list)
    :more-versions   (list :rsbag         (cl-rsbag-system:version/list)
@@ -116,14 +140,12 @@ the value of `*standard-output*'."
 
     ;; Create a reader and start the receiving and printing loop.
     (bind (((input &optional (base-uri "/")) (remainder))
-	   (start-time       (getopt :long-name "start-time"))
-	   (start-index      (getopt :long-name "start-index"))
-	   (end-time         (getopt :long-name "end-time"))
-	   (end-index        (getopt :long-name "end-index"))
 	   (channel-specs    (iter (for channel next (getopt :long-name "channel"))
 				   (while channel)
 				   (collect channel)))
 	   (channels         (or (make-channel-filter channel-specs) t))
+	   ((:values start-time start-index end-time end-index)
+	    (process-bounds-options))
 	   (replay-strategy  (parse-instantiation-spec
 			      (getopt :long-name "replay-strategy")))
 	   (progress         (getopt :long-name "show-progress")))
