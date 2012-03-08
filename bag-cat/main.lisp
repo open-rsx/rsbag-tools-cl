@@ -53,7 +53,7 @@ the names of which contain the string \"isr\".
   Output the data from all channels of the log file \"log.tide\" ~
 whose names end in either \"STRING\" or \"BYTES\".
 
-~:*~A -y 'payload :separator (#\\Newline (:rule #\\-))' log.tide
+~:*~A --style 'payload :separator (#\\Newline (:rule #\\-))' log.tide
 
   Print event payloads separating payloads of different events by ~
 newlines and horizontal rules."
@@ -69,7 +69,6 @@ newlines and horizontal rules."
    :item    (make-common-options :show show)
    :item    (defgroup (:header "Printing Options")
 	      (stropt  :long-name     "style"
-		       :short-name    "y"
 		       :default-value "payload"
 		       :argument-name "SPEC"
 		       :description
