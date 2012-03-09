@@ -107,11 +107,9 @@ check their consistency and return them as four values:
 3. end-time:    `local-time:timestamp' or nil
 4. end-index:   `non-negative-integer' or nil"
   (bind (((start-time start-index end-time end-index)
-	  (let ((*readtable* (copy-readtable *readtable*)))
-	    (local-time:enable-read-macros)
-	    (map 'list (curry #'getopt :long-name)
-		 '("start-time" "start-index"
-		   "end-time"   "end-index")))))
+	  (map 'list (curry #'getopt :long-name)
+	       '("start-time" "start-index"
+		 "end-time"   "end-index"))))
     ;; Check mutually exclusive options.
     (when (and start-time start-index)
       (error "~@<The commandline options \"start-time\" and ~
@@ -126,12 +124,14 @@ check their consistency and return them as four values:
   "Entry point function of the bag-play program."
   (update-synopsis)
   (setf *default-configuration* (options-from-default-sources))
-  (process-commandline-options
-   :version         (cl-rsbag-tools-play-system:version/list)
-   :more-versions   (list :rsbag         (cl-rsbag-system:version/list)
-			  :rsbag-tidelog (cl-rsbag-system:version/list))
-   :update-synopsis #'update-synopsis
-   :return          #'(lambda () (return-from main)))
+  (let ((*readtable* (copy-readtable *readtable*)))
+    (local-time:enable-read-macros)
+    (process-commandline-options
+     :version         (cl-rsbag-tools-play-system:version/list)
+     :more-versions   (list :rsbag         (cl-rsbag-system:version/list)
+			    :rsbag-tidelog (cl-rsbag-system:version/list))
+     :update-synopsis #'update-synopsis
+     :return          #'(lambda () (return-from main))))
 
   (unless (<= 1 (length (remainder)) 2)
     (error "~@<Specify input file and, optionally, base URI.~@:>"))
