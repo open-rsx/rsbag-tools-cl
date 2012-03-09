@@ -67,42 +67,13 @@ newlines and horizontal rules."
    :postfix "INPUT-FILE-OR--"
    :item    (make-text :contents (make-help-string))
    :item    (make-common-options :show show)
-   :item    (defgroup (:header "Printing Options")
+   :item    (make-replay-options :show show)
+   :item    (defgroup (:header "Output Options")
 	      (stropt  :long-name     "style"
 		       :default-value "payload"
 		       :argument-name "SPEC"
 		       :description
 		       (make-style-help-string :show show)))
-   :item    (defgroup (:header "Selection Options")
-	      (stropt  :long-name     "channel"
-		       :short-name    "c"
-		       :argument-name "NAME-OR-REGEXP"
-		       :description
-		       "Select the channels matching NAME-OR-REGEXP for replay. This option can be specified multiple times.")
-	      (lispobj :long-name     "start-time"
-		       :short-name    "s"
-		       :typespec      '(or real local-time:timestamp)
-		       :argument-name "TIMESTAMP-OR-SECONDS"
-		       :description
-		       "Start replaying events at the point in time indicated by TIMESTAMP-OR-SECONDS. When the value should be parsed as a timestamp, the syntax @[YYYY-MM-DDT]HH:MM:SS has to be used. A single real number is interpreted as time in seconds relative to the beginning of the replay. Mutually exclusive with --start-index. NOT IMPLEMENTED YET.")
-	      (lispobj :long-name     "start-index"
-		       :short-name    "S"
-		       :typespec      'non-negative-integer
-		       :argument-name "INDEX"
-		       :description
-		       "Mutually exclusive with --start-time.")
-	      (lispobj :long-name     "end-time"
-		       :short-name    "e"
-		       :typespec      '(or real local-time:timestamp)
-		       :argument-name "TIMESTAMP-OR-SECONDS"
-		       :description
-		       "Stop replaying events at the point in time indicated by TIMESTAMP-OR-SECONDS. When the value should be parsed as a timestamp, the syntax @[YYYY-MM-DDT]HH:MM:SS has to be used. A single real number is interpreted as time in seconds relative to the beginning of the replay. Mutually exclusive with --end-index. NOT IMPLEMENTED YET.")
-	      (lispobj :long-name     "end-index"
-		       :short-name    "E"
-		       :typespec      'non-negative-integer
-		       :argument-name "INDEX"
-		       :description
-		       "Mutually exclusive with --end-time."))
    ;; Append IDL options.
    :item    (make-idl-options)
    ;; Append examples.
@@ -138,27 +109,18 @@ newlines and horizontal rules."
       (process-idl-options)
 
       ;; Create a reader and start the receiving and printing loop.
-      (bind ((input       (first (remainder)))
-	     (start-time  (getopt :long-name "start-time"))
-	     (start-index (getopt :long-name "start-index"))
-	     (end-time    (getopt :long-name "end-time"))
-	     (end-index   (getopt :long-name "end-index"))
-	     (specs       (iter (for channel next (getopt :long-name "channel"))
-				(while channel)
-				(collect channel)))
-	     (channels    (or (make-channel-filter specs) t))
-	     (style       (bind (((class &rest args)
-				  (parse-instantiation-spec
-				   (getopt :long-name "style"))))
-			    (apply #'make-instance (find-style-class class)
-				   args))))
-
-	(when (and start-time start-index)
-	  (error "~@<The commandline options \"start-time\" and ~
-\"start-index\" are mutually exclusive.~@:>"))
-	(when (and end-time end-index)
-	  (error "~@<The commandline options \"end-time\" and ~
-\"end-index\" are mutually exclusive.~@:>"))
+      (bind ((input    (first (remainder)))
+	     ((:values start-time start-index end-time end-index)
+	      (process-bounds-options))
+	     (specs    (iter (for channel next (getopt :long-name "channel"))
+			     (while channel)
+			     (collect channel)))
+	     (channels (or (make-channel-filter specs) t))
+	     (style    (bind (((class &rest args)
+			       (parse-instantiation-spec
+				(getopt :long-name "style"))))
+			 (apply #'make-instance (find-style-class class)
+				args))))
 
 	(log1 :info "Using ~:[~*all channels~;channels matching ~@<~@;~{~S~^, ~}~@:>~]"
 	      (not (eq channels t)) specs)

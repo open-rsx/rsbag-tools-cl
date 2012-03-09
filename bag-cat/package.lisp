@@ -1,6 +1,6 @@
 ;;; package.lisp --- Package definition for the bag-cat program.
 ;;
-;; Copyright (C) 2011 Jan Moringen
+;; Copyright (C) 2011, 2012 Jan Moringen
 ;;
 ;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 ;;
@@ -35,12 +35,13 @@
    :iterate
    :com.dvlsoft.clon
 
-   :rsbag
-   :rsbag.view
-
    :rsb ;;; TODO(jmoringe): currently for logging
    :rsb.common
-   :rsb.formatting)
+   :rsb.formatting
+
+   :rsbag
+   :rsbag.view
+   :rsbag.common)
 
   (:export
    :main)

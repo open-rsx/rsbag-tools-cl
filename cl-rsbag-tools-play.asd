@@ -61,10 +61,11 @@
   :description "A tool that replays events stored in rsbag log files."
   :depends-on  (:cl-ppcre
 
-		(:version :cl-rsbag      #.(version/string))
+		(:version :cl-rsbag          #.(version/string))
+		(:version :cl-rsbag-common   #.(version/string))
 
-		(:version :cl-rsb        #.(version/string))
-		(:version :cl-rsb-common #.(version/string)))
+		(:version :cl-rsb            #.(version/string))
+		(:version :cl-rsb-common     #.(version/string)))
   :components  ((:module     "bag-play"
 	         :components ((:file       "package")
 			      (:file       "help"

@@ -40,37 +40,6 @@ filename. Currently, the following file formats are supported:~{~&+ ~
 	    (map 'list #'car (rsbag.backend:backend-classes))
 	    "bag-play")))
 
-(defun make-replay-strategy-help-string (&key
-					 (show :default))
-  "Return a help string that explains how to specify replay strategies
-and lists the available replay strategies."
-  (with-output-to-string (stream)
-    (format stream "Replay events form the specified input file ~
-according to SPEC which has to be of the form
-
-  KIND KEY1 VALUE1 KEY2 VALUE2 ...
-
-where keys and values depend on KIND and are optional in most ~
-cases. Examples (note that the single quotes have to be included only ~
-when used within a shell):
-
-  --replay-strategy recorded-timing
-  -r as-fast-as-possible
-  --replay-strategy 'fixed-rate :rate 10'
-  -r 'remote-controlled :uri \"spread://localhost:4803/myplayback/control\"'
-
-")
-    (with-abbreviation (stream :strategies show)
-      (format stream "Currently, the following strategies are supported:
-
-" )
-      (print-classes-help-string
-       (replay-strategy-classes) stream
-       :initarg-blacklist '(:start-index :end-index
-			    :start-time  :end-time
-			    :error-policy
-			    :stream :previous-command)))))
-
 (defun make-examples-string (&key
 			     (program-name "bag-play"))
   "Make and return a string containing usage examples of the program."
