@@ -120,13 +120,14 @@ newlines and horizontal rules."
 (defun main ()
   "Entry point function of the bag-cat program."
   (update-synopsis)
-  (local-time:enable-read-macros)
-  (process-commandline-options
-   :version         (cl-rsbag-tools-cat-system:version/list)
-   :more-versions   (list :rsbag         (cl-rsbag-system:version/list)
-			  :rsbag-tidelog (cl-rsbag-system:version/list))
-   :update-synopsis #'update-synopsis
-   :return          #'(lambda () (return-from main)))
+  (let ((*readtable* (copy-readtable *readtable*)))
+    (local-time:enable-read-macros)
+    (process-commandline-options
+     :version         (cl-rsbag-tools-cat-system:version/list)
+     :more-versions   (list :rsbag         (cl-rsbag-system:version/list)
+			    :rsbag-tidelog (cl-rsbag-system:version/list))
+     :update-synopsis #'update-synopsis
+     :return          #'(lambda () (return-from main))))
 
   (unless (length= 1 (remainder))
     (error "~@<Specify input file.~@:>"))
