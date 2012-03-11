@@ -30,7 +30,8 @@
 (defun main ()
   "Entry point function of the main bag program."
   (make-synopsis)
-  (let* ((pathname (pathname (first (com.dvlsoft.clon::cmdline))))
+  (let* ((args     (com.dvlsoft.clon::cmdline))
+	 (pathname (pathname (first args)))
 	 (name     (apply #'concatenate
 			  'string
 			  (pathname-name pathname)
@@ -39,11 +40,50 @@
 	 (entry    (cdr (assoc name *filename->entry-point*
 			       :test #'(lambda (name entry)
 					 (search entry name))))))
-    (if entry
-	(funcall entry)
-	(format *error-output* "~@<Invoke as ~{~A~^ or ~} (not ~
-~A).~_~_This is usually done by creating symbolic links~_~_~2:*~{~2T~A ~
--> bag~_~}~_The following command can be used to achieve ~
-this:~:*~2&~2T~@<~@;~{ln -s bag ~A~^ \\~_~2T&& ~}~:>~@:>~%"
-		(map 'list #'car *filename->entry-point*)
-		name))))
+    (cond
+      ;; If we found an entry point, use it.
+      (entry
+       (funcall entry))
+
+      ;; If the program has been called with the "create-links"
+      ;; commandline option, create symbolic links for entry points as
+      ;; necessary.
+      ((string= "create-links" (second args))
+       (%maybe-create-links name))
+
+      ;; Otherwise display information regarding entry points and
+      ;; symbolic links and offer to create these automatically if
+      ;; necessary.
+      (t
+       (format *error-output* "~@<Invoke this program as~_~_~4T~A ~
+create-links~{~_ or ~A~}~_~_(not ~2:*~A). The latter invocations are ~
+usually done by creating symbolic links~_~_~{~2T~A -> bag~_~}~@:>~%"
+	       name
+	       (map 'list #'car *filename->entry-point*))
+       (unless (every (compose #'probe-file #'car) *filename->entry-point*)
+	 (format *query-io* "Create missing links now [yes/no]? ")
+	 (finish-output *query-io*)
+	 (when (member (read-line *query-io*) '("y" "yes")
+		       :test #'equal)
+	   (%maybe-create-links name)))))))
+
+
+;;; Utility functions
+;;
+
+(defun %maybe-create-link (target name)
+  "If NAME does not designate a filesystem object, create a symbolic
+link to TARGET named NAME. Note that existing filesystem objects named
+NAME can prevent the creation of the symbolic link."
+  (unless (probe-file name)
+    (format t "~@<Creating symbolic link ~A -> ~A~@:>~%"
+	    name target)
+    #+sbcl (sb-posix:symlink target name)
+    #-sbcl (error "~@<Don't know how to create symlinks in this ~
+implementation-platform combination.~@:>")))
+
+(defun %maybe-create-links (target)
+  "Create symbolic links to TARGET for each entry in
+`*filename->entry-point*', if necessary."
+  (let ((names (map 'list #'car *filename->entry-point*)))
+    (map nil #'%maybe-create-link (circular-list target) names)))
