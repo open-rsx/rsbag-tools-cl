@@ -135,7 +135,8 @@ ENDFOREACH()
 ADD_CUSTOM_TARGET(versioned_links ALL DEPENDS ${TOOLS_VERSIONED})
 # Install scripts
 INSTALL(DIRECTORY   "scripts"
-        DESTINATION "share/rsbag/")
+        DESTINATION "share/rsbag/"
+        PATTERN     ".svn" EXCLUDE)
 
 # Packaging
 SET(CPACK_PACKAGE_VERSION_MAJOR ${CL_RSBAG_TOOLS_VERSION_MAJOR})
