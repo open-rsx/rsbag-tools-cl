@@ -20,7 +20,8 @@
 (cl:in-package :rsbag.common)
 
 (defun make-replay-options (&key
-			    (show :default))
+			    (show                    :default)
+                            (replay-strategy-default "recorded-timing"))
   "Return a `clon:group' instance containing replay-related
 commandline options:
 + channel
@@ -63,7 +64,7 @@ start. Mutually exclusive with --start-time.")
 end. Mutually exclusive with --end-time.")
     (stropt  :long-name     "replay-strategy"
 	     :short-name    "r"
-	     :default-value "recorded-timing"
+	     :default-value replay-strategy-default
 	     :argument-name "SPEC"
 	     :description
 	     (make-replay-strategy-help-string :show show))
