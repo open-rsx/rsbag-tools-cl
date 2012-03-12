@@ -1,6 +1,6 @@
 ;;; package.lisp --- Package definition for the bag-play program.
 ;;
-;; Copyright (C) 2011 Jan Moringen
+;; Copyright (C) 2011, 2012 Jan Moringen
 ;;
 ;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 ;;
@@ -39,7 +39,8 @@
    :rsb.common
 
    :rsbag
-   :rsbag.rsb)
+   :rsbag.rsb
+   :rsbag.common)
 
   (:export
    :main)

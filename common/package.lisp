@@ -1,4 +1,4 @@
-;;; package.lisp --- Package definition for the bag-cat program.
+;;; package.lisp --- Package definition for common module.
 ;;
 ;; Copyright (C) 2011, 2012 Jan Moringen
 ;;
@@ -17,35 +17,26 @@
 ;; You should have received a copy of the GNU General Public License
 ;; along with this program. If not, see <http://www.gnu.org/licenses>.
 
-(cl:defpackage :rsbag.tools.cat
-  (:shadowing-import-from :rsbag
-   :direction
-
-   :meta-data
-   :meta-data-count
-   :meta-data-keys
-   :meta-data-values
-   :meta-data-plist
-   :meta-data-alist)
-
+(cl:defpackage :rsbag.common
   (:use
    :cl
    :alexandria
-   :bind
-   :iterate
+   :metabang-bind
+
    :com.dvlsoft.clon
 
-   :rsbag
-   :rsbag.view
-   :rsbag.rsb
-   :rsbag.common
+   :rsb.common)
 
-   :rsb ;;; TODO(jmoringe): currently for logging
-   :rsb.common
-   :rsb.formatting)
-
+  ;; Commandline options
   (:export
-   :main)
+   :make-replay-options
+   :process-bounds-options)
+
+  ;; Help text generation
+  (:export
+   :make-replay-strategy-help-string)
 
   (:documentation
-   "Package definition for the bag-cat program."))
+   "This package contains some common utility functions for RSBag:
++ Commandline option definition and processing
++ Help text generation"))

@@ -26,49 +26,7 @@
    :postfix "INPUT-FILE [BASE-URI]"
    :item    (make-text :contents (make-help-string :show show))
    :item    (make-common-options :show show)
-   :item    (defgroup (:header "Playback Options")
-	      (stropt  :long-name     "channel"
-		       :short-name    "c"
-		       :argument-name "NAME-OR-REGEXP"
-		       :description
-		       "Select the channels matching NAME-OR-REGEXP for replay. This option can be specified multiple times.")
-	      (lispobj :long-name     "start-time"
-		       :short-name    "s"
-		       :typespec      '(or real local-time:timestamp)
-		       :argument-name "TIMESTAMP-OR-SECONDS"
-		       :description
-		       "Start replaying events at the point in time indicated by TIMESTAMP-OR-SECONDS. When the value should be parsed as a timestamp, the syntax @[YYYY-MM-DDT]HH:MM:SS has to be used. A single real number is interpreted as time in seconds relative to the beginning of the replay. Mutually exclusive with --start-index. NOT IMPLEMENTED YET.")
-	      (lispobj :long-name     "start-index"
-		       :short-name    "S"
-		       :typespec      'non-negative-integer
-		       :argument-name "INDEX"
-		       :description
-		       "Mutually exclusive with --start-time.")
-	      (lispobj :long-name     "end-time"
-		       :short-name    "e"
-		       :typespec      '(or real local-time:timestamp)
-		       :argument-name "TIMESTAMP-OR-SECONDS"
-		       :description
-		       "Stop replaying events at the point in time indicated by TIMESTAMP-OR-SECONDS. When the value should be parsed as a timestamp, the syntax @[YYYY-MM-DDT]HH:MM:SS has to be used. A single real number is interpreted as time in seconds relative to the beginning of the replay. Mutually exclusive with --end-index. NOT IMPLEMENTED YET.")
-	      (lispobj :long-name     "end-index"
-		       :short-name    "E"
-		       :typespec      'non-negative-integer
-		       :argument-name "INDEX"
-		       :description
-		       "Mutually exclusive with --end-time.")
-	      (stropt  :long-name     "replay-strategy"
-		       :short-name    "r"
-		       :default-value "recorded-timing"
-		       :argument-name "SPEC"
-		       :description
-		       (make-replay-strategy-help-string :show show))
-	      (enum    :long-name     "show-progress"
-		       :short-name    "p"
-		       :enum          '(:none :line)
-		       :default-value :line
-		       :argument-name "STYLE"
-		       :description
-		       "Indicate progress of the ongoing playback using style STYLE."))
+   :item    (make-replay-options :show show)
    ;; Append RSB options.
    :item    (make-options
 	     :show? (or (eq show t)
@@ -101,13 +59,14 @@ the value of `*standard-output*'."
   "Entry point function of the bag-play program."
   (update-synopsis)
   (setf *default-configuration* (options-from-default-sources))
-  (local-time:enable-read-macros)
-  (process-commandline-options
-   :version         (cl-rsbag-tools-play-system:version/list)
-   :more-versions   (list :rsbag         (cl-rsbag-system:version/list)
-			  :rsbag-tidelog (cl-rsbag-system:version/list))
-   :update-synopsis #'update-synopsis
-   :return          #'(lambda () (return-from main)))
+  (let ((*readtable* (copy-readtable *readtable*)))
+    (local-time:enable-read-macros)
+    (process-commandline-options
+     :version         (cl-rsbag-tools-play-system:version/list)
+     :more-versions   (list :rsbag         (cl-rsbag-system:version/list)
+			    :rsbag-tidelog (cl-rsbag-system:version/list))
+     :update-synopsis #'update-synopsis
+     :return          #'(lambda () (return-from main))))
 
   (unless (<= 1 (length (remainder)) 2)
     (error "~@<Specify input file and, optionally, base URI.~@:>"))
@@ -116,24 +75,15 @@ the value of `*standard-output*'."
 
     ;; Create a reader and start the receiving and printing loop.
     (bind (((input &optional (base-uri "/")) (remainder))
-	   (start-time       (getopt :long-name "start-time"))
-	   (start-index      (getopt :long-name "start-index"))
-	   (end-time         (getopt :long-name "end-time"))
-	   (end-index        (getopt :long-name "end-index"))
 	   (channel-specs    (iter (for channel next (getopt :long-name "channel"))
 				   (while channel)
 				   (collect channel)))
 	   (channels         (or (make-channel-filter channel-specs) t))
+	   ((:values start-time start-index end-time end-index)
+	    (process-bounds-options))
 	   (replay-strategy  (parse-instantiation-spec
 			      (getopt :long-name "replay-strategy")))
 	   (progress         (getopt :long-name "show-progress")))
-
-      (when (and start-time start-index)
-	(error "~@<The commandline options \"start-time\" and ~
-\"start-index\" are mutually exclusive.~@:>"))
-      (when (and end-time end-index)
-	(error "~@<The commandline options \"end-time\" and ~
-\"end-index\" are mutually exclusive.~@:>"))
 
       (log1 :info "Using ~:[~*all channels~;channels matching ~@<~@;~{~S~^, ~}~@:>~]"
 	    (not (eq channels t)) channel-specs)
