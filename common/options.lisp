@@ -38,7 +38,7 @@ commandline options:
 	     "Select the channels matching NAME-OR-REGEXP for replay. This option can be specified multiple times.")
     (lispobj :long-name     "start-time"
 	     :short-name    "s"
-	     :typespec      '(or real local-time:timestamp)
+	     :typespec      'range-boundary/timestamp
 	     :argument-name "TIMESTAMP-OR-SECONDS"
 	     :description
 	     "Start replaying events at the point in time indicated by TIMESTAMP-OR-SECONDS. When the value should be parsed as a timestamp, the syntax @[YYYY-MM-DDT]HH:MM:SS has to be used. A single real number is interpreted as time in seconds relative to the beginning of the replay. Mutually exclusive with --start-index.")
@@ -51,7 +51,7 @@ commandline options:
 start. Mutually exclusive with --start-time.")
     (lispobj :long-name     "end-time"
 	     :short-name    "e"
-	     :typespec      '(or real local-time:timestamp)
+	     :typespec      'range-boundary/timestamp
 	     :argument-name "TIMESTAMP-OR-SECONDS"
 	     :description
 	     "Stop replaying events at the point in time indicated by TIMESTAMP-OR-SECONDS. When the value should be parsed as a timestamp, the syntax @[YYYY-MM-DDT]HH:MM:SS has to be used. A single real number is interpreted as time in seconds relative to the beginning of the replay. Mutually exclusive with --end-index.")

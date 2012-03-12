@@ -80,37 +80,31 @@ FILE(GLOB TIDE_FILES "${DATA_DIR}/?.?/*.tide")
 FILE(GLOB VERSIONS   RELATIVE "${DATA_DIR}" "${DATA_DIR}/?.?")
 FILE(GLOB ELAN_FILES "${DATA_DIR}/elan/*.eaf")
 
-# bag-{info,cat} tests
+# bag-{info,cat,play} tests
 FOREACH(FILE ${TIDE_FILES} ${ELAN_FILES})
     FILE(RELATIVE_PATH NAME "${DATA_DIR}" "${FILE}")
     ADD_TEST(NAME    "bag-info${NAME}"
              COMMAND "${CMAKE_CURRENT_BINARY_DIR}/bag-info"
                      --debug "${FILE}")
-    ADD_TEST(NAME    "bag-cat${NAME}"
-             COMMAND "${CMAKE_CURRENT_BINARY_DIR}/bag-cat"
-                     --debug "${FILE}")
-ENDFOREACH()
-
-# bag-play test
-FOREACH(VERSION ${VERSIONS})
-    FOREACH(FILE "${DATA_DIR}/${VERSION}/empty.tide"
-                 "${DATA_DIR}/${VERSION}/empty-channel.tide"
-                 "${DATA_DIR}/${VERSION}/single-event.tide")
-        FILE(RELATIVE_PATH NAME "${DATA_DIR}" "${FILE}")
-        ADD_TEST(NAME    "bag-play${NAME}"
-                 COMMAND "${CMAKE_CURRENT_BINARY_DIR}/bag-play"
+    FOREACH(RANGE_OPTION ""
+                         "--start-index=0" "--start-time=0" "--start-time=-1e-9"
+                         "--end-index=0"   "--end-time=0"   "--end-time=-1e-9")
+        STRING(REGEX REPLACE "--([-a-z]+)[ =]+(.*)" "\\1/\\2"
+               TAG "${RANGE_OPTION}")
+        ADD_TEST(NAME    "bag-cat${NAME}/${TAG}"
+                 COMMAND "${CMAKE_CURRENT_BINARY_DIR}/bag-cat"
                          --debug
-                         --replay-strategy as-fast-as-possible
-                         "${FILE}" inprocess:)
+                         ${RANGE_OPTION}
+                         "${FILE}")
+        IF(FILE MATCHES "(.*\\.eaf$|empty\\.tide|empty-channel\\.tide|single-event\\.tide)")
+            ADD_TEST(NAME    "bag-play${NAME}/${TAG}"
+                     COMMAND "${CMAKE_CURRENT_BINARY_DIR}/bag-play"
+                             --debug
+                             ${RANGE_OPTION}
+                             --replay-strategy as-fast-as-possible
+                             "${FILE}" inprocess:)
+        ENDIF()
     ENDFOREACH()
-ENDFOREACH()
-FOREACH(FILE ${ELAN_FILES})
-    FILE(RELATIVE_PATH NAME "${DATA_DIR}" "${FILE}")
-    ADD_TEST(NAME    "bag-play${NAME}"
-            COMMAND "${CMAKE_CURRENT_BINARY_DIR}/bag-play"
-                    --debug
-                    --replay-strategy as-fast-as-possible
-                    "${FILE}" inprocess:)
 ENDFOREACH()
 
 # Installation

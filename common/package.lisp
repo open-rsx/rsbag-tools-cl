@@ -25,6 +25,8 @@
 
    :com.dvlsoft.clon
 
+   :rsbag.rsb.replay
+
    :rsb.common)
 
   ;; Commandline options
