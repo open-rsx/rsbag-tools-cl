@@ -67,7 +67,8 @@ newlines and horizontal rules."
    :postfix "INPUT-FILE-OR--"
    :item    (make-text :contents (make-help-string))
    :item    (make-common-options :show show)
-   :item    (make-replay-options :show show)
+   :item    (make-replay-options :show show
+				 :replay-strategy-default "as-fast-as-possible")
    :item    (defgroup (:header "Output Options")
 	      (stropt  :long-name     "style"
 		       :default-value "payload"
@@ -108,32 +109,45 @@ newlines and horizontal rules."
       ;; Load IDLs as specified on the commandline.
       (process-idl-options)
 
-      ;; Create a reader and start the receiving and printing loop.
-      (bind ((input    (first (remainder)))
+      ;; Gather the following things from commandline options:
+      ;; + input file(s)
+      ;; + selected channels for replay
+      ;; + temporal/index range for replay
+      ;; + formatting style
+      ;; Pass all of these to `bag->events' for and start the
+      ;; resulting connection.
+      (bind ((input         (first (remainder)))
+	     (channel-specs (iter (for channel next (getopt :long-name "channel"))
+				  (while channel)
+				  (collect channel)))
+	     (channels      (or (make-channel-filter channel-specs) t))
 	     ((:values start-time start-index end-time end-index)
 	      (process-bounds-options))
-	     (specs    (iter (for channel next (getopt :long-name "channel"))
-			     (while channel)
-			     (collect channel)))
-	     (channels (or (make-channel-filter specs) t))
-	     (style    (bind (((class &rest args)
-			       (parse-instantiation-spec
-				(getopt :long-name "style"))))
-			 (apply #'make-instance (find-style-class class)
-				args))))
-
-	(log1 :info "Using ~:[~*all channels~;channels matching ~@<~@;~{~S~^, ~}~@:>~]"
-	      (not (eq channels t)) specs)
-
-	(with-interactive-interrupt-exit ()
-	  (with-bag (bag input
-			 :direction :input
-			 :transform `(&from-source
-				      :converter ,(default-converter 'rsb:octet-vector)))
-	    (let* ((predicate (if (eq channels t) (constantly t) channels))
-		   (channels  (remove-if-not predicate (bag-channels bag)))
-		   (sequence  (make-serialized-view channels)))
-	      (iter (for datum each sequence
-			 :from (or start-index 0)
-			 :to   end-index)
-		    (format-event datum style *standard-output*)))))))))
+	     (replay-strategy (parse-instantiation-spec
+			       (getopt :long-name "replay-strategy")))
+	     (style           (bind (((class &rest args)
+				      (parse-instantiation-spec
+				       (getopt :long-name "style"))))
+				(apply #'make-instance (find-style-class class)
+				       args)))
+	     (sink            #'(lambda (datum)
+				  (format-event datum style *standard-output*)))
+	     (connection
+	      (apply #'bag->events input sink
+		     :channels        channels
+		     :transform       `(&from-source
+					:converter ,(default-converter 'rsb:octet-vector))
+		     :replay-strategy replay-strategy
+		     (append (when start-time
+			       (list :start-time start-time))
+			     (when start-index
+			       (list :start-index start-index))
+			     (when end-time
+			       (list :end-time end-time))
+			     (when end-index
+			       (list :end-index end-index))))))
+	(log1 :info "Replaying using connection ~A" connection)
+	(unwind-protect
+	     (with-interactive-interrupt-exit ()
+	       (replay connection (connection-strategy connection)))
+	  (close connection))))))

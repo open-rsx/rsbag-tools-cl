@@ -41,6 +41,7 @@
 
    :rsbag
    :rsbag.view
+   :rsbag.rsb
    :rsbag.common)
 
   (:export
