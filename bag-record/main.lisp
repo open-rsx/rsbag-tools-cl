@@ -137,7 +137,8 @@ recorded.~@:>"))
 						    (parse-instantiation-spec spec)))))
 	       (connection    (events->bag uris output
 					   :channel-strategy channel-alloc
-					   :filters          filters))
+					   :filters          filters
+					   :start?           (not control-uri)))
 	       ((:flet recording-loop ())
 		(unwind-protect
 		     (with-interactive-interrupt-exit ()
