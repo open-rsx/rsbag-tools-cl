@@ -55,6 +55,10 @@ CONNECTION while THUNK executes."
 		       :description
 		       (format nil "Name of the file into which captured events should be written. The file format is determined based on the file type (extension). Currently, the following file formats are supported:~{~&+ ~4A (extension: \".~(~:*~A~)\")~}."
 			       (map 'list #'car (rsbag.backend:backend-classes))))
+	      (switch  :long-name     "force"
+		       :default-value nil
+		       :description
+		       "Should the output file be overwritten in case it already exists?")
 	      (stropt  :long-name     "channel-allocation"
 		       :short-name    "a"
 		       :default-value "scope-and-type"
@@ -126,16 +130,19 @@ recorded.~@:>"))
 	       (uris          (map 'list #'puri:parse-uri (remainder)))
 	       (output        (or (getopt :long-name "output-file")
 				  (error "~@<Specify output file.~@:>")))
+	       (force         (getopt :long-name "force"))
 	       (channel-alloc (parse-instantiation-spec
 			       (getopt :long-name "channel-allocation")))
 	       (filters       (iter (for spec next (getopt :long-name "filter"))
 				    (while spec)
 				    (collect (apply #'rsb.filter:filter
 						    (parse-instantiation-spec spec)))))
-	       (connection    (events->bag uris output
-					   :channel-strategy channel-alloc
-					   :filters          filters
-					   :start?           (not control-uri)))
+	       (connection    (events->bag
+			       uris output
+			       :channel-strategy channel-alloc
+			       :filters          filters
+			       :start?           (not control-uri)
+			       :if-exists        (if force :overwrite :error)))
 	       ((:flet recording-loop ())
 		(unwind-protect
 		     (with-interactive-interrupt-exit ()
