@@ -142,7 +142,7 @@ recorded.~@:>"))
 			       :channel-strategy channel-alloc
 			       :filters          filters
 			       :start?           (not control-uri)
-			       :if-exists        (if force :overwrite :error)))
+			       :if-exists        (if force :supersede :error)))
 	       ((:flet recording-loop ())
 		(unwind-protect
 		     (with-interactive-interrupt-exit ()
