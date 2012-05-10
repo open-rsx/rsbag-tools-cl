@@ -136,7 +136,7 @@ newlines and horizontal rules."
 	      (apply #'bag->events input sink
 		     :channels        channels
 		     :transform       `(&from-source
-					:converter ,(default-converter 'rsb:octet-vector))
+					:converter ,(default-converter 'nibbles:octet-vector))
 		     :replay-strategy replay-strategy
 		     (append (when start-time
 			       (list :start-time start-time))
