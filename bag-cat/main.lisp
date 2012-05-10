@@ -38,25 +38,32 @@ filename. Currently, the following file formats are supported:~{~&+ ~
 (defun make-examples-string ()
   "Make and return a string containing usage examples of the program."
   (format nil
-	  "~A /tmp/everything.tide
+	  "~2T~A /tmp/everything.tide
 
-  Output the data from all channels in the log file ~
+Output the data from all channels in the log file ~
 \"/tmp/everything.tide\" ordered by timestamps.
 
-~:*~A -c isr /tmp/nao.tide
+~2T~:*~A -c isr /tmp/nao.tide
 
-  Output the data from all channels of the log file \"/tmp/nao.tide\" ~
+Output the data from all channels of the log file \"/tmp/nao.tide\" ~
 the names of which contain the string \"isr\".
 
-~:*~A --channel 'STRING$' --channel 'BYTES$' log.tide
+~2T~:*~A --channel 'STRING$' --channel 'BYTES$' log.tide
 
-  Output the data from all channels of the log file \"log.tide\" ~
-whose names end in either \"STRING\" or \"BYTES\".
+Output the data from all channels of the log file \"log.tide\" whose ~
+names end in either \"STRING\" or \"BYTES\".
 
-~:*~A --style 'payload :separator (#\\Newline (:rule #\\-))' log.tide
+~2T~:*~A --style 'payload :separator (#\\Newline (:rule #\\-))' log.tide
 
-  Print event payloads separating payloads of different events by ~
-newlines and horizontal rules."
+Print event payloads separating payloads of different events by ~
+newlines and horizontal rules.
+
+~2T~:*~A --style 'programmable/template :template ~
+#P\"my-template-file.template\"' log.tide
+
+Format events in the log file \"log.tide\" by applying the template ~
+in \"my-template-file.template\" to each event. See output of ~
+--help-for styles for more information."
 	  "bag-cat"))
 
 (defun update-synopsis (&key
