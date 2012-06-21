@@ -70,6 +70,11 @@ CONNECTION while THUNK executes."
 		       :argument-name "SPEC"
 		       :description
 		       (make-filter-help-string :show show))
+	      (stropt  :long-name     "flush-strategy"
+		       :default-value "property-limit :property :length/bytes :limit 33554432"
+		       :argument-name "SPEC"
+		       :description
+		       (make-flush-strategy-help-string :show show))
 	      (stropt  :long-name     "control-uri"
 		       :short-name    "c"
 		       :argument-name "URI"
@@ -137,10 +142,13 @@ recorded.~@:>"))
 				    (while spec)
 				    (collect (apply #'rsb.filter:filter
 						    (parse-instantiation-spec spec)))))
+	       (flush-strategy (parse-instantiation-spec
+				(getopt :long-name "flush-strategy")))
 	       (connection    (events->bag
 			       uris output
 			       :channel-strategy channel-alloc
 			       :filters          filters
+			       :flush-strategy   flush-strategy
 			       :start?           (not control-uri)
 			       :if-exists        (if force :supersede :error)))
 	       ((:flet recording-loop ())

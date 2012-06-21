@@ -38,8 +38,8 @@ store the events exchanged in the corresponding RSB channels.
 
 (defun make-channel-strategy-help-string (&key
 					  (show :default))
-  "Return a help string that explains how to specify replay strategies
-and lists the available replay strategies."
+  "Return a help string that explains how to specify channel
+allocation strategies and lists the available strategies."
   (with-output-to-string (stream)
     (format stream "Allocate channels for received events in the ~
 output bag file according to the strategy designated by SPEC which has ~
@@ -87,6 +87,29 @@ when used within a shell):
 
 ")
       (print-filter-help stream))))
+
+(defun make-flush-strategy-help-string (&key
+					(show :default))
+  "Return a help string that explains how to specify flush strategies
+and lists the available strategies."
+  (with-output-to-string (stream)
+    (format stream "Flush buffers to background storage according to ~
+the strategy designated by SPEC which has to be of the form ~
+
+  KIND KEY1 VALUE1 KEY2 VALUE2 ...
+
+where keys and values depend on KIND and are optional in most ~
+cases. Examples (note that the single quotes have to be included only ~
+when used within a shell):
+
+  -f 'property-limit :property :length/bytes :limit 33554432'
+
+")
+    (with-abbreviation (stream :flush-strategies show)
+      (format stream "Currently, the following strategies are supported:
+
+" )
+      (print-classes-help-string (rsbag.backend:flush-strategy-classes) stream))))
 
 (defun make-examples-string (&key
 			     (program-name "bag-record"))
