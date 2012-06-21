@@ -86,19 +86,7 @@ CONNECTION while THUNK executes."
 + stop : void -> void
   Stop recording allowing it to be restarted later.
 + terminate : void -> void
-  Terminate the recording process and the program.")
-	      (lispobj :long-name     "max-buffer-size"
-		       :typespec      'positive-integer
-		       :description
-		       "The maximum amount of unwritten data that can be accumulated in memory before a disk write is forced. NOT IMPLEMENTED YET.")
-	      (lispobj :long-name     "max-buffer-count"
-		       :typespec      'positive-integer
-		       :description
-		       "The maximum number of unwritten events that can be accumulated in memory before a disk write is forced. NOT IMPLEMENTED YET.")
-	      (lispobj :long-name     "max-buffer-time"
-		       :typespec      'positive-real
-		       :description
-		       "The maximum age unwritten data in memory can reach before a disk write is forced. NOT IMPLEMENTED YET."))
+  Terminate the recording process and the program."))
    ;; Append RSB options.
    :item    (make-options
 	     :show? (or (eq show t)
