@@ -81,7 +81,14 @@ in \"my-template-file.template\" to each event. See output of ~
 		       :default-value "payload"
 		       :argument-name "SPEC"
 		       :description
-		       (make-style-help-string :show show)))
+		       (make-style-help-string :show show))
+	      (enum    :long-name     "target-stream"
+		       :enum          '(:stdout :standard-output
+					:stderr :error-output)
+		       :default-value :standard-output
+		       :argument-name "STREAM-NAME"
+		       :description
+		       "Stream to which produced output should be sent."))
    ;; Append IDL options.
    :item    (make-idl-options)
    ;; Append examples.
@@ -137,8 +144,11 @@ in \"my-template-file.template\" to each event. See output of ~
 				       (getopt :long-name "style"))))
 				(apply #'make-instance (find-style-class class)
 				       args)))
+	     (target          (ecase (getopt :long-name "target-stream")
+				((:stdout :standard-output) *standard-output*)
+				((:stderr :error-output)    *error-output*)))
 	     (sink            #'(lambda (datum)
-				  (format-event datum style *standard-output*)))
+				  (format-event datum style target)))
 	     (connection
 	      (apply #'bag->events input sink
 		     :channels        channels
