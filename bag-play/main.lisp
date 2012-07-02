@@ -47,13 +47,13 @@
 		       index start-index end-index
 		       timestamp)
   "Print the progress of the current replay onto the stream that is
-the value of `*standard-output*'."
-  (format *standard-output* "~C~A ~6,2,2F % ~9:D [~9:D,~9:D]"
+the value of `*info-output*'."
+  (format *info-output* "~C~A ~6,2,2F % ~9:D [~9:D,~9:D]"
 	  #\Return
 	  timestamp
 	  progress
 	  index start-index end-index)
-  (force-output *standard-output*))
+  (force-output *info-output*))
 
 (defun main ()
   "Entry point function of the bag-play program."
@@ -106,8 +106,9 @@ the value of `*standard-output*'."
 	(unwind-protect
 	     (with-interactive-interrupt-exit ()
 	       (replay connection (connection-strategy connection)
-		       :progress (case progress
-				   (:line #'print-progress))))
+		       :progress (when *info-output*
+				   (case progress
+				     (:line #'print-progress)))))
 	  (close connection))
 
 	(unless (eq progress :none)
