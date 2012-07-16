@@ -70,7 +70,11 @@ are supported:~{~&+ ~4A (extension: \".~(~:*~A~)\")~}."
 		       :short-name    "c"
 		       :argument-name "NAME-OR-REGEXP"
 		       :description
-		       "Select the channels matching NAME-OR-REGEXP for merging. This option can be specified multiple times."))
+		       "Select the channels matching NAME-OR-REGEXP for merging. This option can be specified multiple times.")
+              (stropt  :long-name "transform-timestamp"
+		       :argument-name "TIMESTAMP-NAME"
+		       :description   
+		       "Index events by TIMESTAMP-NAME instead of the create timestamp."))
    :item    (defgroup (:header "Examples")
 	      (make-text :contents (make-example-string)))))
 
@@ -148,15 +152,17 @@ match any files.~@:>"
 				  (while channel)
 				  (collect channel)))
 	     (channels      (or (make-channel-filter channel-specs) t))
+	     (transform/timestamp (when-let ((spec (getopt :long-name "transform-timestamp")))
+				    (read-from-string spec)))
 	     inputs
 	     output)
 	(unless output-file
 	  (error "~@<No output file specified.~@:>"))
 
-	;; Since `with-bag' only handles one bag, we have to handle
-	;; the possibility of unwinding with multiple open bags
-	;; manually.
-	(unwind-protect
+       ;; Since `with-bag' only handles one bag, we have to handle
+       ;; the possibility of unwinding with multiple open bags
+       ;; manually.
+       (unwind-protect
 	    (progn
 	      ;; Open files and store resulting bags successively to
 	      ;; ensure that open bags can be closed when unwinding.
@@ -167,13 +173,19 @@ match any files.~@:>"
 	      (setf output (open-bag output-file))
 
 	      ;; Transcode individual input files into output file.
-	      (transcode inputs output
-			 :channels channels
-			 :progress #'print-progress))
-	  (iter (for bag in (cons output inputs))
-		(when bag
-		  (handler-case
-		      (close bag)
-		    (error (condition)
-		      (warn "~@<Error closing bag ~A: ~A~@:>"
-			    bag condition))))))))))
+	      (apply #'transcode inputs output
+		     :channels channels
+		     :progress #'print-progress
+		     (etypecase transform/timestamp
+		       (null    nil)
+		       (keyword
+			(list :transform/timestamp
+			      #'(lambda (timestamp datum)
+				  (rsb:timestamp datum transform/timestamp)))))))
+	 (iter (for bag in (cons output inputs))
+	       (when bag
+		 (handler-case
+		     (close bag)
+		   (error (condition)
+		     (warn "~@<Error closing bag ~A: ~A~@:>"
+			   bag condition))))))))))

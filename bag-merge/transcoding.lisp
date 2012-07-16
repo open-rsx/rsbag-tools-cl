@@ -33,6 +33,10 @@
 (defmethod transcode ((input channel) (output channel)
 		      &key
 		      progress
+		      (transform           #'identity)
+		      (transform/timestamp #'(lambda (timestamp datum)
+					       (declare (ignore datum))
+					       timestamp))
 		      &allow-other-keys)
   (bind ((length (length input))
 	 ((:flet update-progress (i))
@@ -46,7 +50,8 @@
 		      (rsbag:channel-bag output) output)))))
     (iter (for (timestamp datum) each (channel-items input))
 	  (for i :from 0)
-	  (setf (entry output timestamp) datum)
+	  (setf (entry output (funcall transform/timestamp timestamp datum))
+		(funcall transform datum))	  
 	  (update-progress i))
     (update-progress t)))
 
