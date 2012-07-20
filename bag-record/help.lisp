@@ -102,7 +102,11 @@ where keys and values depend on KIND and are optional in most ~
 cases. Examples (note that the single quotes have to be included only ~
 when used within a shell):
 
-  -f 'property-limit :property :length/bytes :limit 33554432'
+  --flush-strategy 'property-limit :property :length/bytes :limit 33554432'
+  --flush-strategy 'property-limit :property :time-to-last-write :limit 5'
+  --flush-strategy 'or (:property-limit :property :time-to-last-write :limit 5)
+                       (:property-limit :property :length/bytes :limit 33554432)'
+
 
 ")
     (with-abbreviation (stream :flush-strategies show)
