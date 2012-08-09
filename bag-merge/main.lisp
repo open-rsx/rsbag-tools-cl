@@ -56,6 +56,7 @@ interpreting the glob expression.
    :postfix "GLOB-EXPRESSION | INPUT-FILE+"
    :item    (make-text :contents (make-help-string))
    :item    (make-common-options :show show)
+   :item    (make-error-handling-options :show show)
    :item    (defgroup (:header "Display Options")
 	      (path    :long-name     "output-file"
 		       :short-name    "o"
@@ -73,7 +74,7 @@ are supported:~{~&+ ~4A (extension: \".~(~:*~A~)\")~}."
 		       "Select the channels matching NAME-OR-REGEXP for merging. This option can be specified multiple times.")
               (stropt  :long-name "transform-timestamp"
 		       :argument-name "TIMESTAMP-NAME"
-		       :description   
+		       :description
 		       "Index events by TIMESTAMP-NAME instead of the create timestamp."))
    :item    (defgroup (:header "Examples")
 	      (make-text :contents (make-example-string)))))
@@ -145,8 +146,10 @@ match any files.~@:>"
    :return          #'(lambda () (return-from main)))
 
   (with-logged-warnings
-    (progn #+later with-print-limits
-      (bind ((input-files   (collect-input-files (remainder)))
+      (progn #+later with-print-limits
+      (bind ((error-policy  (maybe-relay-to-thread
+                             (process-error-handling-options)))
+	     (input-files   (collect-input-files (remainder)))
 	     (output-file   (getopt :long-name "output-file"))
 	     (channel-specs (iter (for channel next (getopt :long-name "channel"))
 				  (while channel)
@@ -159,33 +162,35 @@ match any files.~@:>"
 	(unless output-file
 	  (error "~@<No output file specified.~@:>"))
 
-       ;; Since `with-bag' only handles one bag, we have to handle
-       ;; the possibility of unwinding with multiple open bags
-       ;; manually.
-       (unwind-protect
-	    (progn
-	      ;; Open files and store resulting bags successively to
-	      ;; ensure that open bags can be closed when unwinding.
-	      (iter (for file in input-files)
-		    (format *standard-output* "Opening input file ~S~%" file)
-		    (push (open-bag file :direction :input) inputs))
-	      (format *standard-output* "Opening output file ~S~%" output-file)
-	      (setf output (open-bag output-file))
+	(with-error-policy (error-policy)
+	  ;; Since `with-bag' only handles one bag, we have to handle
+	  ;; the possibility of unwinding with multiple open bags
+	  ;; manually.
+	  (unwind-protect
+	       (progn
+		 ;; Open files and store resulting bags successively
+		 ;; to ensure that open bags can be closed when
+		 ;; unwinding.
+		 (iter (for file in input-files)
+		       (format *standard-output* "Opening input file ~S~%" file)
+		       (push (open-bag file :direction :input) inputs))
+		 (format *standard-output* "Opening output file ~S~%" output-file)
+		 (setf output (open-bag output-file))
 
-	      ;; Transcode individual input files into output file.
-	      (apply #'transcode inputs output
-		     :channels channels
-		     :progress #'print-progress
-		     (etypecase transform/timestamp
-		       (null    nil)
-		       (keyword
-			(list :transform/timestamp
-			      #'(lambda (timestamp datum)
-				  (rsb:timestamp datum transform/timestamp)))))))
-	 (iter (for bag in (cons output inputs))
-	       (when bag
-		 (handler-case
-		     (close bag)
-		   (error (condition)
-		     (warn "~@<Error closing bag ~A: ~A~@:>"
-			   bag condition))))))))))
+		 ;; Transcode individual input files into output file.
+		 (apply #'transcode inputs output
+			:channels channels
+			:progress #'print-progress
+			(etypecase transform/timestamp
+			  (null    nil)
+			  (keyword
+			   (list :transform/timestamp
+				 #'(lambda (timestamp datum)
+				     (rsb:timestamp datum transform/timestamp)))))))
+	    (iter (for bag in (cons output inputs))
+		  (when bag
+		    (handler-case
+			(close bag)
+		      (error (condition)
+			(warn "~@<Error closing bag ~A: ~A~@:>"
+			      bag condition)))))))))))

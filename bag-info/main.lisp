@@ -42,6 +42,7 @@ Examples:
    :postfix "BAG-FILE"
    :item    (make-text :contents (make-help-string))
    :item    (make-common-options :show show)
+   :item    (make-error-handling-options :show show)
    :item    (defgroup (:header "Display Options")
 	      (flag :long-name  "compute-sizes"
 		    :short-name "s"
@@ -73,52 +74,55 @@ Examples:
 
   (with-print-limits (*standard-output*)
     (with-logged-warnings
-      (bind (((input) (remainder))
+      (bind ((error-policy (maybe-relay-to-thread
+			    (process-error-handling-options)))
+	     ((input) (remainder))
 	     (sizes?  (getopt :long-name "compute-sizes"))
 	     (format? (getopt :long-name "print-format")))
-	(with-bag (bag input :direction :input)
-	  (format t "File ~S~&~2T~<~@;~@{~@(~8A~): ~
+	(with-error-policy (error-policy)
+	  (with-bag (bag input :direction :input)
+	    (format t "File ~S~&~2T~<~@;~@{~@(~8A~): ~
 ~:[N/A~;~:*~,,',:D~]~^~&~}~:>~&~2T~@<~@;~:{Channel ~
 ~S~&~4T~@<~@;~{~@(~8A~): ~:[N/A~;~:*~,,',:D~]~^~&~}~:>~&~}~:>~&"
-		  input
-		  (bind (((:accessors-r/o (start rsbag:start)
-					  (end   rsbag:end)) bag)
-			 (duration (when (and start end)
-				     (local-time:timestamp-difference
-				      end start))))
-		    `(:events ,(reduce #'+ (bag-channels bag) :key #'length)
-			      ,@(when sizes?
-				      `(:size ,(reduce #'+ (bag-channels bag)
-						       :key #'channel-size)))
-		      :start    ,(rsbag:start bag)
-		      :end      ,(rsbag:end   bag)
-		      :duration ,duration))
-		  (iter (for channel each (bag-channels bag))
-			(bind (((:accessors-r/o (length length)
-						(start  rsbag:start)
-						(end    rsbag:end)) channel)
-			       (duration (when (and start end)
-					   (local-time:timestamp-difference
-					    end start))))
-			  (collect (list (channel-name channel)
-					 `(:type     ,(meta-data channel :type)
-					   :format   ,(when-let ((format (meta-data channel :format)))
-							(case format?
-							  (:short
-							   (apply #'concatenate 'string
-								  (subseq format 0 (min 100 (length format)))
-								  (when (> (length format) 100)
-								    (list "…"))))
-							  (:full
-							   format)))
-					   :events   ,length
-					   ,@(when sizes?
-					       `(:size ,(channel-size channel)))
-					   :start    ,start
-					   :end      ,end
-					   :duration ,duration
-					   :rate     ,(when (and duration (plusp duration))
-						        (/ length duration)))))))))))))
+		    input
+		    (bind (((:accessors-r/o (start rsbag:start)
+					    (end   rsbag:end)) bag)
+			   (duration (when (and start end)
+				       (local-time:timestamp-difference
+					end start))))
+		      `(:events ,(reduce #'+ (bag-channels bag) :key #'length)
+				,@(when sizes?
+					`(:size ,(reduce #'+ (bag-channels bag)
+							 :key #'channel-size)))
+				:start    ,(rsbag:start bag)
+				:end      ,(rsbag:end   bag)
+				:duration ,duration))
+		    (iter (for channel each (bag-channels bag))
+			  (bind (((:accessors-r/o (length length)
+						  (start  rsbag:start)
+						  (end    rsbag:end)) channel)
+				 (duration (when (and start end)
+					     (local-time:timestamp-difference
+					      end start))))
+			    (collect (list (channel-name channel)
+					   `(:type     ,(meta-data channel :type)
+						       :format   ,(when-let ((format (meta-data channel :format)))
+									    (case format?
+									      (:short
+									       (apply #'concatenate 'string
+										      (subseq format 0 (min 100 (length format)))
+										      (when (> (length format) 100)
+											(list "…"))))
+									      (:full
+									       format)))
+						       :events   ,length
+						       ,@(when sizes?
+							       `(:size ,(channel-size channel)))
+						       :start    ,start
+						       :end      ,end
+						       :duration ,duration
+						       :rate     ,(when (and duration (plusp duration))
+									(/ length duration))))))))))))))
 
 ;; Local Variables:
 ;; coding: utf-8

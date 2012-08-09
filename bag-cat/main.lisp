@@ -74,6 +74,7 @@ in \"my-template-file.template\" to each event. See output of ~
    :postfix "INPUT-FILE-OR--"
    :item    (make-text :contents (make-help-string))
    :item    (make-common-options :show show)
+   :item    (make-error-handling-options :show show)
    :item    (make-replay-options :show show
 				 :replay-strategy-default "as-fast-as-possible")
    :item    (defgroup (:header "Output Options")
@@ -130,7 +131,9 @@ in \"my-template-file.template\" to each event. See output of ~
       ;; + formatting style
       ;; Pass all of these to `bag->events' for and start the
       ;; resulting connection.
-      (bind ((input         (first (remainder)))
+      (bind ((error-policy  (maybe-relay-to-thread
+                             (process-error-handling-options)))
+	     (input         (first (remainder)))
 	     (channel-specs (iter (for channel next (getopt :long-name "channel"))
 				  (while channel)
 				  (collect channel)))
@@ -148,23 +151,25 @@ in \"my-template-file.template\" to each event. See output of ~
 				((:stdout :standard-output) *standard-output*)
 				((:stderr :error-output)    *error-output*)))
 	     (sink            #'(lambda (datum)
-				  (format-event datum style target)))
-	     (connection
-	      (apply #'bag->events input sink
-		     :channels        channels
-		     :transform       `(&from-source
-					:converter ,(default-converter 'nibbles:octet-vector))
-		     :replay-strategy replay-strategy
-		     (append (when start-time
-			       (list :start-time start-time))
-			     (when start-index
-			       (list :start-index start-index))
-			     (when end-time
-			       (list :end-time end-time))
-			     (when end-index
-			       (list :end-index end-index))))))
-	(log1 :info "Replaying using connection ~A" connection)
-	(unwind-protect
-	     (with-interactive-interrupt-exit ()
-	       (replay connection (connection-strategy connection)))
-	  (close connection))))))
+				  (format-event datum style target))))
+	(with-interactive-interrupt-exit ()
+	  (with-error-policy (error-policy)
+	    (let ((connection
+		   (apply #'bag->events input sink
+			  :channels        channels
+			  :transform       `(&from-source
+					     :converter ,(default-converter 'nibbles:octet-vector))
+			  :replay-strategy replay-strategy
+			  (append (when start-time
+				    (list :start-time start-time))
+				  (when start-index
+				    (list :start-index start-index))
+				  (when end-time
+				    (list :end-time end-time))
+				  (when end-index
+				    (list :end-index end-index))))))
+	      (setf (rsb.ep:processor-error-policy connection) error-policy)
+	      (log1 :info "Replaying using connection ~A" connection)
+	      (unwind-protect
+		   (replay connection (connection-strategy connection))
+		(close connection)))))))))

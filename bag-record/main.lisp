@@ -48,6 +48,7 @@ CONNECTION while THUNK executes."
    :postfix "[URIS]"
    :item    (make-text :contents (make-help-string :show show))
    :item    (make-common-options :show show)
+   :item    (make-error-handling-options :show show)
    :item    (defgroup (:header "Recording Options")
 	      (path    :long-name     "output-file"
 		       :short-name    "o"
@@ -118,7 +119,9 @@ recorded.~@:>"))
 
     (rsb.formatting:with-print-limits (*standard-output*)
 	;; Create a reader and start the receiving and printing loop.
-	(bind ((control-uri   (when-let ((string (getopt :long-name "control-uri")))
+	(bind ((error-policy  (maybe-relay-to-thread
+			       (process-error-handling-options)))
+	       (control-uri   (when-let ((string (getopt :long-name "control-uri")))
 				(puri:parse-uri string)))
 	       (uris          (map 'list #'puri:parse-uri (remainder)))
 	       (output        (or (getopt :long-name "output-file")
@@ -140,6 +143,7 @@ recorded.~@:>"))
 			       :start?           (not control-uri)
 			       :if-exists        (if force :supersede :error)))
 	       ((:flet recording-loop ())
+		(setf (rsb.ep:processor-error-policy connection) error-policy)
 		(unwind-protect
 		     (with-interactive-interrupt-exit ()
 		       (iter (sleep 10)
@@ -149,7 +153,8 @@ recorded.~@:>"))
 		  (close connection))))
 
 	  (log1 :info "Using URIs ~@<~@;~{~A~^, ~}~@:>" uris)
-	  (if control-uri
-	      (invoke-with-control-service
-	       control-uri connection #'recording-loop)
-	      (recording-loop))))))
+	  (with-error-policy (error-policy)
+	    (if control-uri
+		(invoke-with-control-service
+		 control-uri connection #'recording-loop)
+		(recording-loop)))))))
