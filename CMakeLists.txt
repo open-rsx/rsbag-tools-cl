@@ -73,6 +73,7 @@ SET(DATA_DIR "${cl-rsbag-tools_SOURCE_DIR}/test/data/")
 
 ENABLE_TESTING()
 
+# --help, --help-all and --version for all binaries.
 FOREACH(TOOL ${TOOLS})
     ADD_TEST(NAME    "${TOOL}-help"
              COMMAND "${CMAKE_CURRENT_BINARY_DIR}/${TOOL}" --help)
@@ -86,9 +87,36 @@ FILE(GLOB TIDE_FILES "${DATA_DIR}/?.?/*.tide")
 FILE(GLOB VERSIONS   RELATIVE "${DATA_DIR}" "${DATA_DIR}/?.?")
 FILE(GLOB ELAN_FILES "${DATA_DIR}/elan/*.eaf")
 
+# All on-error policies for bag-{info,cat,play,record}
+SET(FILE "${DATA_DIR}/${CL_RSBAG_TOOLS_VERSION_MAJOR}.${CL_RSBAG_TOOLS_VERSION_MINOR}/empty.tide")
+FOREACH(POLICY continue abort)
+    ADD_TEST(NAME    "bag-info/on-error=${POLICY}"
+             COMMAND "${CMAKE_CURRENT_BINARY_DIR}/bag-info"
+                     --debug --on-error "${POLICY}" "${FILE}")
+    # bag-cat
+    ADD_TEST(NAME    "bag-cat/on-error=${POLICY}"
+             COMMAND "${CMAKE_CURRENT_BINARY_DIR}/bag-cat"
+                     --debug --on-error "${POLICY}"
+                     "${FILE}")
+    # bag-play
+    ADD_TEST(NAME    "bag-play/on-error=${POLICY}"
+             COMMAND "${CMAKE_CURRENT_BINARY_DIR}/bag-play"
+                     --debug --on-error "${POLICY}"
+                     --replay-strategy as-fast-as-possible
+                     "${FILE}" inprocess:)
+    # bag-record
+    ADD_TEST(NAME    "bag-record/on-error=${POLICY}"
+             COMMAND "${CMAKE_CURRENT_BINARY_DIR}/bag-record"
+                     --eval "(let ((timer (sb-ext:make-timer (lambda () (sb-ext:exit))))) (sb-ext:schedule-timer timer 3))"
+                     --debug --on-error "${POLICY}" --force
+                     -o "bag-record-on-error=${POLICY}.tide" inprocess:)
+ENDFOREACH()
+
 # bag-{info,cat,play} tests
 FOREACH(FILE ${TIDE_FILES} ${ELAN_FILES})
     FILE(RELATIVE_PATH NAME "${DATA_DIR}" "${FILE}")
+
+    # bag-info
     ADD_TEST(NAME    "bag-info${NAME}"
              COMMAND "${CMAKE_CURRENT_BINARY_DIR}/bag-info"
                      --debug "${FILE}")
@@ -97,11 +125,15 @@ FOREACH(FILE ${TIDE_FILES} ${ELAN_FILES})
                          "--end-index=0"   "--end-time=0"   "--end-time=-1e-9")
         STRING(REGEX REPLACE "--([-a-z]+)[ =]+(.*)" "\\1/\\2"
                TAG "${RANGE_OPTION}")
+
+        # bag-cat
         ADD_TEST(NAME    "bag-cat${NAME}/${TAG}"
                  COMMAND "${CMAKE_CURRENT_BINARY_DIR}/bag-cat"
                          --debug
                          ${RANGE_OPTION}
                          "${FILE}")
+
+        # bag-play
         IF(FILE MATCHES "(.*\\.eaf$|empty\\.tide|empty-channel\\.tide|single-event\\.tide)")
             ADD_TEST(NAME    "bag-play${NAME}/${TAG}"
                      COMMAND "${CMAKE_CURRENT_BINARY_DIR}/bag-play"
