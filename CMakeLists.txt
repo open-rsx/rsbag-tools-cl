@@ -115,11 +115,16 @@ ENDFOREACH()
 # bag-{info,cat,play} tests
 FOREACH(FILE ${TIDE_FILES} ${ELAN_FILES})
     FILE(RELATIVE_PATH NAME "${DATA_DIR}" "${FILE}")
+    IF(FILE MATCHES "(empty-channel\\.tide|unsupported-type\\.tide)")
+        SET(CONTINUE --on-error continue)
+    ELSE()
+        SET(CONTINUE)
+    ENDIF()
 
     # bag-info
     ADD_TEST(NAME    "bag-info${NAME}"
              COMMAND "${CMAKE_CURRENT_BINARY_DIR}/bag-info"
-                     --debug "${FILE}")
+                     --debug ${CONTINUE} "${FILE}")
     FOREACH(RANGE_OPTION ""
                          "--start-index=0" "--start-time=0" "--start-time=-1e-9"
                          "--end-index=0"   "--end-time=0"   "--end-time=-1e-9")
@@ -129,7 +134,7 @@ FOREACH(FILE ${TIDE_FILES} ${ELAN_FILES})
         # bag-cat
         ADD_TEST(NAME    "bag-cat${NAME}/${TAG}"
                  COMMAND "${CMAKE_CURRENT_BINARY_DIR}/bag-cat"
-                         --debug
+                         --debug ${CONTINUE}
                          ${RANGE_OPTION}
                          "${FILE}")
 
@@ -137,7 +142,7 @@ FOREACH(FILE ${TIDE_FILES} ${ELAN_FILES})
         IF(FILE MATCHES "(.*\\.eaf$|empty\\.tide|empty-channel\\.tide|single-event\\.tide)")
             ADD_TEST(NAME    "bag-play${NAME}/${TAG}"
                      COMMAND "${CMAKE_CURRENT_BINARY_DIR}/bag-play"
-                             --debug
+                             --debug ${CONTINUE}
                              ${RANGE_OPTION}
                              --replay-strategy as-fast-as-possible
                              "${FILE}" inprocess:)
