@@ -82,14 +82,14 @@ FOREACH(TIDE_FILE ${TIDE_FILES})
     FILE(RELATIVE_PATH NAME "${DATA_DIR}" "${TIDE_FILE}")
     ADD_TEST(NAME    "bag-info${NAME}"
              COMMAND "${CMAKE_CURRENT_BINARY_DIR}/bag-info"
-                     "${TIDE_FILE}")
+                     --debug "${TIDE_FILE}")
 ENDFOREACH()
 
 FOREACH(TIDE_FILE ${TIDE_FILES})
     FILE(RELATIVE_PATH NAME "${DATA_DIR}" "${TIDE_FILE}")
     ADD_TEST(NAME    "bag-cat${NAME}"
              COMMAND "${CMAKE_CURRENT_BINARY_DIR}/bag-cat"
-                     "${TIDE_FILE}")
+                     --debug "${TIDE_FILE}")
 ENDFOREACH()
 
 FOREACH(TIDE_FILE "${DATA_DIR}/empty.tide"
@@ -98,7 +98,7 @@ FOREACH(TIDE_FILE "${DATA_DIR}/empty.tide"
     FILE(RELATIVE_PATH NAME "${DATA_DIR}" "${TIDE_FILE}")
     ADD_TEST(NAME    "bag-play${NAME}"
              COMMAND "${CMAKE_CURRENT_BINARY_DIR}/bag-play"
-                     "${TIDE_FILE}" inprocess:)
+                     --debug "${TIDE_FILE}" inprocess:)
 ENDFOREACH()
 
 # Installation
