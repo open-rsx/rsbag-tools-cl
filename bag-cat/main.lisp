@@ -1,6 +1,6 @@
 ;;; main.lisp --- Main function of the bag-cat program.
 ;;
-;; Copyright (C) 2011 Jan Moringen
+;; Copyright (C) 2011, 2012 Jan Moringen
 ;;
 ;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 ;;
@@ -181,14 +181,19 @@ whose names end in either \"STRING\" or \"BYTES\".
 	  (bind ((predicate (if (eq channels t) (constantly t) channels))
 		 (channels  (remove-if-not predicate (bag-channels bag)))
 		 (sequence  (make-serialized-view channels)))
-	    (iter (for datum each sequence
-		       :from (or start-index 0)
-		       :to   end-index)
-		  (unless (first-iteration-p)
-		    (cond
-		      ((stringp entry-separator)
-		       (princ entry-separator *standard-output*))
-		      ((eq entry-separator :newline)
-		       (terpri *standard-output*))))
+	    (macrolet
+		((do-it (&optional end-index)
+		   `(iter (for datum each sequence
+			       :from (or start-index 0)
+			       ,@(when end-index `(:to ,end-index)))
+			  (unless (first-iteration-p)
+			    (cond
+			      ((stringp entry-separator)
+			       (princ entry-separator *standard-output*))
+			      ((eq entry-separator :newline)
+			       (terpri *standard-output*))))
 
-		  (output datum *standard-output*))))))))
+			  (output datum *standard-output*))))
+	      (if end-index
+		  (do-it end-index)
+		  (do-it)))))))))
