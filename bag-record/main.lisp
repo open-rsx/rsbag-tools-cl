@@ -17,7 +17,7 @@
 ;; You should have received a copy of the GNU General Public License
 ;; along with this program. If not, see <http://www.gnu.org/licenses>.
 
-(in-package :rsbag.tools.record)
+(cl:in-package :rsbag.tools.record)
 
 (defun invoke-with-control-service (uri connection thunk)
   "Expose an RPC server at URI that allows remote clients to control
