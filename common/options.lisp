@@ -84,7 +84,7 @@ check their consistency and return them as four values:
 2. start-index: `non-negative-integer' or nil
 3. end-time:    `local-time:timestamp' or nil
 4. end-index:   `non-negative-integer' or nil"
-  (bind (((start-time start-index end-time end-index)
+  (let+ (((start-time start-index end-time end-index)
 	  (map 'list (curry #'getopt :long-name)
 	       '("start-time" "start-index"
 		 "end-time"   "end-index"))))

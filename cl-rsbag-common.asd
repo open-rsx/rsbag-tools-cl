@@ -61,7 +61,7 @@
   :description "This system provides some common functions for
 RSBag-related systems."
   :depends-on  (:alexandria
-		:metabang-bind
+		:let-plus
 
 		(:version :cl-rsbag      #.(version/string))
 

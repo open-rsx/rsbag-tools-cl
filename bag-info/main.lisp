@@ -74,7 +74,7 @@ Examples:
 
   (with-print-limits (*standard-output*)
     (with-logged-warnings
-      (bind ((error-policy (maybe-relay-to-thread
+      (let+ ((error-policy (maybe-relay-to-thread
 			    (process-error-handling-options)))
 	     ((input) (remainder))
 	     (sizes?  (getopt :long-name "compute-sizes"))
@@ -85,7 +85,7 @@ Examples:
 ~:[N/A~;~:*~,,',:D~]~^~&~}~:>~&~2T~@<~@;~:{Channel ~
 ~S~&~4T~@<~@;~{~@(~8A~): ~:[N/A~;~:*~,,',:D~]~^~&~}~:>~&~}~:>~&"
 		    input
-		    (bind (((:accessors-r/o (start rsbag:start)
+		    (let+ (((&accessors-r/o (start rsbag:start)
 					    (end   rsbag:end)) bag)
 			   (duration (when (and start end)
 				       (local-time:timestamp-difference
@@ -98,7 +98,7 @@ Examples:
 				:end      ,(rsbag:end   bag)
 				:duration ,duration))
 		    (iter (for channel each (bag-channels bag))
-			  (bind (((:accessors-r/o (length length)
+			  (let+ (((&accessors-r/o (length length)
 						  (start  rsbag:start)
 						  (end    rsbag:end)) channel)
 				 (duration (when (and start end)

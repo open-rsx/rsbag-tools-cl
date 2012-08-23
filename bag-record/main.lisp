@@ -119,7 +119,7 @@ recorded.~@:>"))
 
     (rsb.formatting:with-print-limits (*standard-output*)
 	;; Create a reader and start the receiving and printing loop.
-	(bind ((error-policy  (maybe-relay-to-thread
+	(let+ ((error-policy  (maybe-relay-to-thread
 			       (process-error-handling-options)))
 	       (control-uri   (when-let ((string (getopt :long-name "control-uri")))
 				(puri:parse-uri string)))
@@ -142,15 +142,15 @@ recorded.~@:>"))
 			       :flush-strategy   flush-strategy
 			       :start?           (not control-uri)
 			       :if-exists        (if force :supersede :error)))
-	       ((:flet recording-loop ())
-		(setf (rsb.ep:processor-error-policy connection) error-policy)
-		(unwind-protect
-		     (with-interactive-interrupt-exit ()
-		       (iter (sleep 10)
-			     (format t "~A ~@<~@;~{~A~^, ~}~@:>~%"
-				     (local-time:now)
-				     (bag-channels (connection-bag connection)))))
-		  (close connection))))
+	       ((&flet recording-loop ()
+		  (setf (rsb.ep:processor-error-policy connection) error-policy)
+		  (unwind-protect
+		      (with-interactive-interrupt-exit ()
+		        (iter (sleep 10)
+			      (format t "~A ~@<~@;~{~A~^, ~}~@:>~%"
+				      (local-time:now)
+				      (bag-channels (connection-bag connection)))))
+		    (close connection)))))
 
 	  (log1 :info "Using URIs ~@<~@;~{~A~^, ~}~@:>" uris)
 	  (with-error-policy (error-policy)

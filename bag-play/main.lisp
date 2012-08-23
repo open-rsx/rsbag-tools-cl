@@ -75,14 +75,14 @@ the value of `*info-output*'."
   (with-logged-warnings
 
       ;; Create a reader and start the receiving and printing loop.
-      (bind ((error-policy (maybe-relay-to-thread
+      (let+ ((error-policy (maybe-relay-to-thread
 			    (process-error-handling-options)))
              ((input &optional (base-uri "/")) (remainder))
 	     (channel-specs    (iter (for channel next (getopt :long-name "channel"))
 				     (while channel)
 				     (collect channel)))
 	     (channels         (or (make-channel-filter channel-specs) t))
-	     ((:values start-time start-index end-time end-index)
+	     ((&values start-time start-index end-time end-index)
 	      (process-bounds-options))
 	     (replay-strategy  (parse-instantiation-spec
 				(getopt :long-name "replay-strategy")))

@@ -59,7 +59,9 @@
   :version     #.(version/string)
   :license     "GPL3; see COPYING file for details."
   :description "A tool that recats events stored in rsbag log files."
-  :depends-on  (:cl-ppcre ;; for regex-based channel selection
+  :depends-on  (:alexandria
+		:let-plus
+		:cl-ppcre ;; for regex-based channel selection
 
 		(:version :cl-rsbag          #.(version/string))
 		(:version :cl-rsbag-common   #.(version/string))

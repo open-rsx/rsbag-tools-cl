@@ -38,20 +38,20 @@
 					       (declare (ignore datum))
 					       timestamp))
 		      &allow-other-keys)
-  (bind ((length (length input))
-	 ((:flet update-progress (i))
-	  (cond
-	    ((not progress))
-	    ((eq i t)
-	     (funcall progress t))
-	    ((or (zerop (mod i 100)) (= i (1- length)))
-	     (funcall progress i length
-		      (rsbag:channel-bag input) input
-		      (rsbag:channel-bag output) output)))))
+  (let+ ((length (length input))
+	 ((&flet update-progress (i)
+	    (cond
+	     ((not progress))
+	     ((eq i t)
+	      (funcall progress t))
+	     ((or (zerop (mod i 100)) (= i (1- length)))
+	      (funcall progress i length
+		       (rsbag:channel-bag input) input
+		       (rsbag:channel-bag output) output))))))
     (iter (for (timestamp datum) each (channel-items input))
 	  (for i :from 0)
 	  (setf (entry output (funcall transform/timestamp timestamp datum))
-		(funcall transform datum))	  
+		(funcall transform datum))
 	  (update-progress i))
     (update-progress t)))
 
@@ -61,15 +61,15 @@
 		      channels
 		      skip-empty-channels?
 		      &allow-other-keys)
-  (bind (((:flet skip-channel? (channel))
-	  (or (and skip-empty-channels? (emptyp channel))
-	      (and (not (eq channels t))
-		   (not (funcall channels channel)))))
-	 ((:flet clone-channel (source))
-	  (bind ((name      (make-channel-name source))
-		 (meta-data (make-channel-meta-data source)))
-	    (or (bag-channel output name :if-does-not-exist nil)
-		(setf (bag-channel output name) meta-data))))
+  (let+ (((&flet skip-channel? (channel)
+	    (or (and skip-empty-channels? (emptyp channel))
+		(and (not (eq channels t))
+		     (not (funcall channels channel))))))
+	 ((&flet clone-channel (source)
+	    (let ((name      (make-channel-name source))
+		  (meta-data (make-channel-meta-data source)))
+	      (or (bag-channel output name :if-does-not-exist nil)
+		  (setf (bag-channel output name) meta-data)))))
 	 (in-channels  (remove-if #'skip-channel? (bag-channels input)))
 	 (out-channels (map 'list #'clone-channel in-channels))
 	 (other-args   (remove-from-plist

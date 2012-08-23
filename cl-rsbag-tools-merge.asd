@@ -1,6 +1,6 @@
 ;;; rsbag-tools-merge.asd --- System definition for merge program.
 ;;
-;; Copyright (C) 2011 Jan Moringen
+;; Copyright (C) 2011, 2012 Jan Moringen
 ;;
 ;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 ;;
@@ -61,7 +61,9 @@
   :description "A tool that merges one or more rsbag log file into a
 new rsbag log file, potentially transforming channels and/or entries
 in the process."
-  :depends-on  (:cl-ppcre
+  :depends-on  (:alexandria
+		:let-plus
+		:cl-ppcre
 
 		(:version :cl-rsbag      #.(version/string))
 

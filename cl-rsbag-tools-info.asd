@@ -1,6 +1,6 @@
 ;;; rsbag-tools-info.asd --- System definition for bag-info program.
 ;;
-;; Copyright (C) 2011 Jan Moringen
+;; Copyright (C) 2011, 2012 Jan Moringen
 ;;
 ;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 ;;
@@ -59,7 +59,10 @@
   :version     #.(version/string)
   :license     "GPL3; see COPYING file for details."
   :description "A tool that displays information about rsbag log files."
-  :depends-on  ((:version :cl-rsbag          #.(version/string))
+  :depends-on  (:alexandria
+		:let-plus
+
+		(:version :cl-rsbag          #.(version/string))
 
 		(:version :cl-rsb-common     #.(version/string))
 		(:version :cl-rsb-formatting #.(version/string)))

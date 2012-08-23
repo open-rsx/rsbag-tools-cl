@@ -1,6 +1,6 @@
 ;;; package.lisp --- Package definition for the main bag program.
 ;;
-;; Copyright (C) 2011 Jan Moringen
+;; Copyright (C) 2011, 2012 Jan Moringen
 ;;
 ;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 ;;
@@ -21,7 +21,6 @@
   (:use
    :cl
    :alexandria
-   :bind
    :iterate
    :com.dvlsoft.clon
 

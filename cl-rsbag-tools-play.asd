@@ -59,7 +59,9 @@
   :version     #.(version/string)
   :license     "GPL3; see COPYING file for details."
   :description "A tool that replays events stored in rsbag log files."
-  :depends-on  (:cl-ppcre
+  :depends-on  (:alexandria
+		:let-plus
+		:cl-ppcre
 
 		(:version :cl-rsbag          #.(version/string))
 		(:version :cl-rsbag-common   #.(version/string))

@@ -131,18 +131,18 @@ in \"my-template-file.template\" to each event. See output of ~
       ;; + formatting style
       ;; Pass all of these to `bag->events' for and start the
       ;; resulting connection.
-      (bind ((error-policy  (maybe-relay-to-thread
-                             (process-error-handling-options)))
+      (let+ ((error-policy  (maybe-relay-to-thread
+			     (process-error-handling-options)))
 	     (input         (first (remainder)))
 	     (channel-specs (iter (for channel next (getopt :long-name "channel"))
 				  (while channel)
 				  (collect channel)))
 	     (channels      (or (make-channel-filter channel-specs) t))
-	     ((:values start-time start-index end-time end-index)
+	     ((&values start-time start-index end-time end-index)
 	      (process-bounds-options))
 	     (replay-strategy (parse-instantiation-spec
 			       (getopt :long-name "replay-strategy")))
-	     (style           (bind (((class &rest args)
+	     (style           (let+ (((class &rest args)
 				      (parse-instantiation-spec
 				       (getopt :long-name "style"))))
 				(apply #'make-instance (find-style-class class)

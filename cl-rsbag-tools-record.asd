@@ -60,7 +60,10 @@
   :license     "GPL3; see COPYING file for details."
   :description "A tool that captures RSB events and stores them in
 rsbag log files."
-  :depends-on  ((:version :cl-rsbag          #.(version/string))
+  :depends-on  (:alexandria
+		:let-plus
+
+		(:version :cl-rsbag          #.(version/string))
 
 		(:version :cl-rsb            #.(version/string))
 		(:version :cl-rsb-common     #.(version/string))

@@ -92,10 +92,10 @@ are supported:~{~&+ ~4A (extension: \".~(~:*~A~)\")~}."
 ARGS can be
 + A designator of a wild pathname matching one or more files
 + A list of pathname designators of existing files"
-  (bind ((parsed (map 'list #'parse-namestring args))
-	 ((:flet existing-file (pathname))
-	  (when-let ((probed (probe-file pathname)))
-	    (and (pathname-name probed) (pathname-type probed)))))
+  (let+ ((parsed (map 'list #'parse-namestring args))
+	 ((&flet existing-file (pathname)
+	    (when-let ((probed (probe-file pathname)))
+	      (and (pathname-name probed) (pathname-type probed))))))
     (cond
       ;; Neither glob expression nor filenames
       ((null args)
@@ -146,9 +146,9 @@ match any files.~@:>"
    :return          #'(lambda () (return-from main)))
 
   (with-logged-warnings
-      (progn #+later with-print-limits
-      (bind ((error-policy  (maybe-relay-to-thread
-                             (process-error-handling-options)))
+    (progn #+later with-print-limits
+      (let+ ((error-policy  (maybe-relay-to-thread
+			     (process-error-handling-options)))
 	     (input-files   (collect-input-files (remainder)))
 	     (output-file   (getopt :long-name "output-file"))
 	     (channel-specs (iter (for channel next (getopt :long-name "channel"))
