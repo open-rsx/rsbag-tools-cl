@@ -32,7 +32,7 @@ Examples:
 
   ~A /tmp/everything.tide
 "
-	  (map 'list #'car (rsbag.backend:backend-classes))
+	  (mapcar #'car (rsbag.backend:backend-classes))
 	  program-name))
 
 (defun update-synopsis (&key

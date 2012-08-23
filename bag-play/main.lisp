@@ -39,9 +39,9 @@
 (defun make-channel-filter (specs)
   (when specs
     (apply #'disjoin
-	   (map 'list #'(lambda (spec)
-			  #'(lambda (channel)
-			      (cl-ppcre:scan spec (channel-name channel))))
+	   (mapcar #'(lambda (spec)
+		       #'(lambda (channel)
+			   (cl-ppcre:scan spec (channel-name channel))))
 		specs))))
 
 (defun print-progress (progress

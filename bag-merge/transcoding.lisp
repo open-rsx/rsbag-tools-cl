@@ -71,7 +71,7 @@
 	      (or (bag-channel output name :if-does-not-exist nil)
 		  (setf (bag-channel output name) meta-data)))))
 	 (in-channels  (remove-if #'skip-channel? (bag-channels input)))
-	 (out-channels (map 'list #'clone-channel in-channels))
+	 (out-channels (mapcar #'clone-channel in-channels))
 	 (other-args   (remove-from-plist
 			args :channels :skip-empty-channels?)))
     (iter (for in  each in-channels)

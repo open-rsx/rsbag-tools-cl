@@ -34,7 +34,7 @@ The file formats of input files and the output file are determined ~
 based on the file type (extension). Currently, the following file ~
 formats are supported:~{~&+ ~4A (extension: \".~(~:*~A~)\")~}.
 "
-	  (map 'list #'car (rsbag.backend:backend-classes))))
+	  (mapcar #'car (rsbag.backend:backend-classes))))
 
 (defun make-example-string (&key
 			    (program-name "bag-merge" #+later (progname)))
@@ -66,7 +66,7 @@ interpreting the glob expression.
 captured events should be written. The file format is determined based ~
 on the file type (extension). Currently, the following file formats ~
 are supported:~{~&+ ~4A (extension: \".~(~:*~A~)\")~}."
-			       (map 'list #'car (rsbag.backend:backend-classes))))
+			       (mapcar #'car (rsbag.backend:backend-classes))))
 	      (stropt  :long-name     "channel"
 		       :short-name    "c"
 		       :argument-name "NAME-OR-REGEXP"
@@ -82,17 +82,17 @@ are supported:~{~&+ ~4A (extension: \".~(~:*~A~)\")~}."
 (defun make-channel-filter (specs)
   (when specs
     (apply #'disjoin
-	   (map 'list #'(lambda (spec)
-			  #'(lambda (channel)
-			      (cl-ppcre:scan spec (channel-name channel))))
-		specs))))
+	   (mapcar #'(lambda (spec)
+		       #'(lambda (channel)
+			   (cl-ppcre:scan spec (channel-name channel))))
+		   specs))))
 
 (defun collect-input-files (args)
   "Collect and return a list of input files according to ARGS.
 ARGS can be
 + A designator of a wild pathname matching one or more files
 + A list of pathname designators of existing files"
-  (let+ ((parsed (map 'list #'parse-namestring args))
+  (let+ ((parsed (mapcar #'parse-namestring args))
 	 ((&flet existing-file (pathname)
 	    (when-let ((probed (probe-file pathname)))
 	      (and (pathname-name probed) (pathname-type probed))))))

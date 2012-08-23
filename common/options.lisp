@@ -85,9 +85,9 @@ check their consistency and return them as four values:
 3. end-time:    `local-time:timestamp' or nil
 4. end-index:   `non-negative-integer' or nil"
   (let+ (((start-time start-index end-time end-index)
-	  (map 'list (curry #'getopt :long-name)
-	       '("start-time" "start-index"
-		 "end-time"   "end-index"))))
+	  (mapcar (curry #'getopt :long-name)
+		  '("start-time" "start-index"
+		    "end-time"   "end-index"))))
     ;; Check mutually exclusive options.
     (when (and start-time start-index)
       (error "~@<The commandline options \"start-time\" and ~

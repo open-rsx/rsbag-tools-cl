@@ -55,7 +55,7 @@ CONNECTION while THUNK executes."
 		       :type          :file
 		       :description
 		       (format nil "Name of the file into which captured events should be written. The file format is determined based on the file type (extension). Currently, the following file formats are supported:~{~&+ ~4A (extension: \".~(~:*~A~)\")~}."
-			       (map 'list #'car (rsbag.backend:backend-classes))))
+			       (mapcar #'car (rsbag.backend:backend-classes))))
 	      (switch  :long-name     "force"
 		       :default-value nil
 		       :description
@@ -123,7 +123,7 @@ recorded.~@:>"))
 			       (process-error-handling-options)))
 	       (control-uri   (when-let ((string (getopt :long-name "control-uri")))
 				(puri:parse-uri string)))
-	       (uris          (map 'list #'puri:parse-uri (remainder)))
+	       (uris          (mapcar #'puri:parse-uri (remainder)))
 	       (output        (or (getopt :long-name "output-file")
 				  (error "~@<Specify output file.~@:>")))
 	       (force         (getopt :long-name "force"))

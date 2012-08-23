@@ -37,7 +37,7 @@ derived from BASE-URI.
 The file format of INPUT-FILE is guessed based on the ~
 filename. Currently, the following file formats are supported:~{~&+ ~
 ~4A (extension: \".~(~:*~A~)\")~}"
-	    (map 'list #'car (rsbag.backend:backend-classes))
+	    (mapcar #'car (rsbag.backend:backend-classes))
 	    "bag-play")))
 
 (defun make-examples-string (&key

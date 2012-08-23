@@ -33,7 +33,7 @@ output.
 The file format of INPUT-FILE is guessed based on the ~
 filename. Currently, the following file formats are supported:~{~&+ ~
 ~4A (extension: \".~(~:*~A~)\")~}"
-	  (map 'list #'car (rsbag.backend:backend-classes))))
+	  (mapcar #'car (rsbag.backend:backend-classes))))
 
 (defun make-examples-string ()
   "Make and return a string containing usage examples of the program."
@@ -99,10 +99,10 @@ in \"my-template-file.template\" to each event. See output of ~
 (defun make-channel-filter (specs)
   (when specs
     (apply #'disjoin
-	   (map 'list #'(lambda (spec)
-			  #'(lambda (channel)
-			      (cl-ppcre:scan spec (channel-name channel))))
-		specs))))
+	   (mapcar #'(lambda (spec)
+		       #'(lambda (channel)
+			   (cl-ppcre:scan spec (channel-name channel))))
+		   specs))))
 
 (defun main ()
   "Entry point function of the bag-cat program."
