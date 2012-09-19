@@ -63,9 +63,9 @@ the value of `*info-output*'."
   (let ((*readtable* (copy-readtable *readtable*)))
     (local-time:enable-read-macros)
     (process-commandline-options
-     :version         (cl-rsbag-tools-play-system:version/list)
-     :more-versions   (list :rsbag         (cl-rsbag-system:version/list)
-			    :rsbag-tidelog (cl-rsbag-system:version/list))
+     :version         (cl-rsbag-tools-play-system:version/list :commit? t)
+     :more-versions   (list :rsbag         (cl-rsbag-system:version/list :commit? t)
+			    :rsbag-tidelog (cl-rsbag-system:version/list :commit? t))
      :update-synopsis #'update-synopsis
      :return          #'(lambda () (return-from main))))
 

@@ -3,19 +3,17 @@ SET(ENV{SBCL_HOME} "@SBCL_HOME@")
 SET(ENV{CL_SOURCE_REGISTRY} "@CL_SOURCE_REGISTRY@")
 SET(ENV{ASDF_OUTPUT_TRANSLATIONS} "@ASDF_OUTPUT_TRANSLATIONS@")
 
-# Dump image.
-MESSAGE("Dumping image file @NAME@")
 EXECUTE_PROCESS(COMMAND           "@SBCL_EXECUTABLE@"
+                                  --noinform
                                   @LISP_RUNTIME_OPTIONS@
                                   --disable-debugger
-                                  --no-sysinit
+                                  --no-sysinit --no-userinit
                                   @LISP_INIT@
                                   --load "@CMAKE_CURRENT_SOURCE_DIR@/sbclrc"
-                                  --load "@SCRIPT@"
+                                  @DO@
                 WORKING_DIRECTORY "@CMAKE_CURRENT_BINARY_DIR@"
-                OUTPUT_FILE       "@CMAKE_CURRENT_BINARY_DIR@/@NAME@.log"
-                ERROR_FILE        "@CMAKE_CURRENT_BINARY_DIR@/@NAME@.log"
+                @REDIRECTIONS@
                 RESULT_VARIABLE   RESULT)
 IF(NOT ${RESULT} EQUAL 0)
-    MESSAGE(FATAL_ERROR "Failed to dump image file @NAME@")
+    MESSAGE(FATAL_ERROR "Failed to execute lisp process @NAME@")
 ENDIF()

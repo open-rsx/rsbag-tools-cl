@@ -1,31 +1,53 @@
 CMAKE_MINIMUM_REQUIRED(VERSION 2.8)
 
-# Project definition (version is grovelled from an asd system definition)
-PROJECT(cl-rsbag-tools)
-SET(SYSTEM_NAME "cl-rsbag-tools-info")
-MACRO(EXTRACT_COMPONENT NAME OUTPUT)
-    FILE(STRINGS "${CMAKE_SOURCE_DIR}/${SYSTEM_NAME}.asd" TEMP
-         REGEX   "defconstant +\\+version-${NAME}\\+")
-    STRING(REGEX REPLACE ".*\\+version-${NAME}\\+ +([0-9]+).*" "\\1"
-           CL_RSBAG_TOOLS_VERSION_${OUTPUT} ${TEMP})
+# Extract version components from an approximately "git describe"-like
+# formatted version string.
+MACRO(GIT_VERSION_COMPONENTS INPUT OUT_MAJOR OUT_MINOR OUT_REVISION OUT_COMMIT)
+    SET(REGEX "^[-.a-z0-9]*([0-9]+)\\.([0-9]+)[-.]([0-9]+)-?(g[a-f0-9]+(:?-dirty)?|)$")
+    STRING(REGEX REPLACE ${REGEX} "\\1" ${OUT_MAJOR}    "${INPUT}")
+    STRING(REGEX REPLACE ${REGEX} "\\2" ${OUT_MINOR}    "${INPUT}")
+    STRING(REGEX REPLACE ${REGEX} "\\3" ${OUT_REVISION} "${INPUT}")
+    STRING(REGEX REPLACE ${REGEX} "\\4" ${OUT_COMMIT}   "${INPUT}")
 ENDMACRO()
-EXTRACT_COMPONENT(major    MAJOR)
-EXTRACT_COMPONENT(minor    MINOR)
-EXTRACT_COMPONENT(revision PATCH)
+
+# Git-based version.
+FIND_PROGRAM(GIT_EXECUTABLE "git")
+IF(GIT_EXECUTABLE)
+    EXECUTE_PROCESS(COMMAND ${GIT_EXECUTABLE} describe --long --dirty=-dirty
+                    RESULT_VARIABLE RESULT
+                    OUTPUT_VARIABLE GIT_DESCRIBE_OUTPUT
+                    OUTPUT_STRIP_TRAILING_WHITESPACE
+                    ERROR_QUIET)
+    IF(RESULT EQUAL 0)
+        GIT_VERSION_COMPONENTS(${GIT_DESCRIBE_OUTPUT} IGN1 IGN2 REVISION COMMIT)
+        FILE(WRITE "${CMAKE_SOURCE_DIR}/version.sexp" "${REVISION} \"${COMMIT}\"")
+    ELSE()
+        MESSAGE(STATUS "Not a git repository: ${CMAKE_SOURCE_DIR}")
+    ENDIF()
+ELSE()
+    MESSAGE(STATUS "git executable not found")
+ENDIF()
 
 # Find and check SBCL installation.
 SET(SBCL_HOME $ENV{SBCL_HOME})
 IF(NOT SBCL_HOME)
-    MESSAGE(FATAL_ERROR "SBCL_HOME is not set. Set it.")
+    MESSAGE(STATUS "SBCL_HOME is not set. Trying to find SBCL on default path.")
+    FIND_PROGRAM(SBCL_EXECUTABLE sbcl)
+ELSE()
+    MESSAGE(STATUS "SBCL_HOME is set to ${SBCL_HOME}. Trying to find SBCL there.")
+    FIND_PROGRAM(SBCL_EXECUTABLE sbcl
+                 PATHS "${SBCL_HOME}/../../bin" ${SBCL_HOME}
+                 NO_DEFAULT_PATH)
 ENDIF()
-FIND_PROGRAM(SBCL_EXECUTABLE sbcl
-             PATHS "${SBCL_HOME}/../../bin"
-             NO_DEFAULT_PATH)
+MESSAGE(STATUS "SBCL executable: ${SBCL_EXECUTABLE}")
 
 # Configure Lisp environment.
-SET(LISP_RUNTIME_OPTIONS "" CACHE STRING   "Runtime options to pass to the Lisp system.")
-SET(LISP_INIT_FILE       "" CACHE FILEPATH "File to load as Lisp init file.")
-SET(LISP_INIT_CODE       "" CACHE STRING   "Lisp code to be evaulated during initialization.")
+SET(LISP_RUNTIME_OPTIONS "" CACHE STRING
+    "Runtime options to pass to the Lisp system.")
+SET(LISP_INIT_FILE       "" CACHE FILEPATH
+    "File to load as Lisp init file.")
+SET(LISP_INIT_CODE       "" CACHE STRING
+    "Lisp code to be evaulated during initialization.")
 SET(LISP_INIT "")
 IF(LISP_INIT_FILE)
     SET(LISP_INIT "${LISP_INIT} --userinit ${LISP_INIT_FILE}")
@@ -37,18 +59,50 @@ ENDIF()
 SET(CL_SOURCE_REGISTRY       "(:source-registry (:tree \\\"${CMAKE_CURRENT_SOURCE_DIR}\\\") :inherit-configuration)")
 SET(ASDF_OUTPUT_TRANSLATIONS "(:output-translations (t (\\\"${CMAKE_CURRENT_BINARY_DIR}/fasl-cache\\\" :implementation)) :ignore-inherited-configuration)")
 
+# Execute Lisp process
+MACRO(CONFIGURE_LISP NAME CODE)
+    SET(NAME "${NAME}")
+    SET(DO   "${CODE} --quit")
+    CONFIGURE_FILE("${CMAKE_CURRENT_SOURCE_DIR}/sbcl.cmake.in"
+                   "${CMAKE_CURRENT_BINARY_DIR}/sbcl.${NAME}.cmake"
+                   @ONLY)
+    SET(REDIRECTIONS)
+ENDMACRO()
+MACRO(CONFIGURE_LISP_REDIRECT NAME CODE)
+    SET(REDIRECTIONS "OUTPUT_FILE \"${CMAKE_CURRENT_BINARY_DIR}/${NAME}.out\"
+                      ERROR_FILE  \"${CMAKE_CURRENT_BINARY_DIR}/${NAME}.err\"")
+    CONFIGURE_LISP(${NAME} ${CODE})
+ENDMACRO()
+MACRO(EXECUTE_LISP NAME CODE OUTPUT_VARIABLE)
+    CONFIGURE_LISP(${NAME} "${CODE}")
+    MESSAGE(STATUS "Executing Lisp process \"${NAME}\"")
+    EXECUTE_PROCESS(COMMAND cmake -P "${CMAKE_CURRENT_BINARY_DIR}/sbcl.${NAME}.cmake"
+                    OUTPUT_VARIABLE ${OUTPUT_VARIABLE}
+                    OUTPUT_STRIP_TRAILING_WHITESPACE)
+ENDMACRO()
+
+# Project definition (version is grovelled from asd system definition
+# and, possibly in combination with version.sexp file written above).
+PROJECT(cl-rsbag-tools)
+SET(SYSTEM_NAME "cl-rsbag-tools-info")
+SET(REDIRECTIONS "ERROR_QUIET")
+EXECUTE_LISP("version"
+             "--eval \"(asdf:find-system :${SYSTEM_NAME})\"
+              --eval \"(princ (${SYSTEM_NAME}-system:version/string :commit? t))\""
+             VERSION_FROM_LISP)
+GIT_VERSION_COMPONENTS(${VERSION_FROM_LISP} RSBAG_TOOLS_VERSION_MAJOR
+                                            RSBAG_TOOLS_VERSION_MINOR
+                                            RSBAG_TOOLS_VERSION_PATCH
+                                            RSBAG_TOOLS_VERSION_COMMIT)
+MESSAGE(STATUS "Project is ${CMAKE_PROJECT_NAME} (${VERSION_FROM_LISP})")
+
 # Create binary.
-SET(SCRIPT    "${CMAKE_CURRENT_SOURCE_DIR}/main/dump.lisp")
+
 SET(MAIN_NAME "bag")
-IF(NOT CMAKE_SYSTEM_NAME STREQUAL "Windows")
-    SET(REDIRECTIONS "OUTPUT_FILE \"${CMAKE_CURRENT_BINARY_DIR}/${NAME}.log\"
-                      ERROR_FILE  \"${CMAKE_CURRENT_BINARY_DIR}/${NAME}.log\"")
-ENDIF()
-CONFIGURE_FILE("${CMAKE_CURRENT_SOURCE_DIR}/sbcl.cmake.in"
-               "${CMAKE_CURRENT_BINARY_DIR}/sbcl.cmake"
-               @ONLY)
+CONFIGURE_LISP_REDIRECT("${MAIN_NAME}"
+                        "--load \"${CMAKE_CURRENT_SOURCE_DIR}/main/dump.lisp\"")
 ADD_CUSTOM_COMMAND(OUTPUT  "${CMAKE_CURRENT_BINARY_DIR}/${MAIN_NAME}"
-                   COMMAND "${CMAKE_COMMAND}" -P "${CMAKE_CURRENT_BINARY_DIR}/sbcl.cmake"
+                   COMMAND "${CMAKE_COMMAND}" -P "${CMAKE_CURRENT_BINARY_DIR}/sbcl.${MAIN_NAME}.cmake"
                    DEPENDS "${SCRIPT}"
                    COMMENT "Creating Lisp image ${MAIN_NAME} (this can take a long time)")
 ADD_CUSTOM_TARGET(binary ALL DEPENDS "${CMAKE_CURRENT_BINARY_DIR}/${MAIN_NAME}")
@@ -88,7 +142,7 @@ FILE(GLOB VERSIONS   RELATIVE "${DATA_DIR}" "${DATA_DIR}/?.?")
 FILE(GLOB ELAN_FILES "${DATA_DIR}/elan/*.eaf")
 
 # All on-error policies for bag-{info,cat,play,record}
-SET(FILE "${DATA_DIR}/${CL_RSBAG_TOOLS_VERSION_MAJOR}.${CL_RSBAG_TOOLS_VERSION_MINOR}/empty.tide")
+SET(FILE "${DATA_DIR}/${RSBAG_TOOLS_VERSION_MAJOR}.${RSBAG_TOOLS_VERSION_MINOR}/empty.tide")
 FOREACH(POLICY continue abort)
     ADD_TEST(NAME    "bag-info/on-error=${POLICY}"
              COMMAND "${CMAKE_CURRENT_BINARY_DIR}/bag-info"
@@ -152,7 +206,7 @@ ENDFOREACH()
 
 # Installation
 SET(BINARY_PREFIX    "")
-SET(VERSION_SUFFIX   "cl${CL_RSBAG_TOOLS_VERSION_MAJOR}.${CL_RSBAG_TOOLS_VERSION_MINOR}")
+SET(VERSION_SUFFIX   "cl${RSBAG_TOOLS_VERSION_MAJOR}.${RSBAG_TOOLS_VERSION_MINOR}")
 SET(MAIN_BINARY_NAME ${BINARY_PREFIX}${MAIN_NAME}${VERSION_SUFFIX})
 INSTALL(PROGRAMS    "${CMAKE_CURRENT_BINARY_DIR}/${MAIN_NAME}"
         DESTINATION "bin"
@@ -184,9 +238,9 @@ INSTALL(DIRECTORY   "scripts"
 
 # Packaging
 SET(PACKAGE_BASE_NAME           "rsbag-bin-${VERSION_SUFFIX}")
-SET(CPACK_PACKAGE_VERSION_MAJOR ${CL_RSBAG_TOOLS_VERSION_MAJOR})
-SET(CPACK_PACKAGE_VERSION_MINOR ${CL_RSBAG_TOOLS_VERSION_MINOR})
-SET(CPACK_PACKAGE_VERSION_PATCH ${CL_RSBAG_TOOLS_VERSION_PATCH})
+SET(CPACK_PACKAGE_VERSION_MAJOR ${RSBAG_TOOLS_VERSION_MAJOR})
+SET(CPACK_PACKAGE_VERSION_MINOR ${RSBAG_TOOLS_VERSION_MINOR})
+SET(CPACK_PACKAGE_VERSION_PATCH ${RSBAG_TOOLS_VERSION_PATCH})
 SET(CPACK_PACKAGE_VERSION       "${CPACK_PACKAGE_VERSION_MAJOR}.${CPACK_PACKAGE_VERSION_MINOR}.${CPACK_PACKAGE_VERSION_PATCH}")
 SET(CPACK_PACKAGE_VENDOR        "CoR-Lab, Bielefeld University")
 SET(CPACK_RESOURCE_FILE_LICENSE "${CMAKE_SOURCE_DIR}/COPYING")
