@@ -97,7 +97,6 @@ GIT_VERSION_COMPONENTS(${VERSION_FROM_LISP} RSBAG_TOOLS_VERSION_MAJOR
 MESSAGE(STATUS "Project is ${CMAKE_PROJECT_NAME} (${VERSION_FROM_LISP})")
 
 # Create binary.
-
 SET(MAIN_NAME "bag")
 CONFIGURE_LISP_REDIRECT("${MAIN_NAME}"
                         "--load \"${CMAKE_CURRENT_SOURCE_DIR}/main/dump.lisp\"")
@@ -115,7 +114,7 @@ IF(NOT CMAKE_SYSTEM_NAME STREQUAL "Windows")
     FOREACH(TOOL ${TOOLS})
         MESSAGE(STATUS "Configuring tool ${TOOL}")
         ADD_CUSTOM_COMMAND(OUTPUT  "${CMAKE_CURRENT_BINARY_DIR}/${TOOL}"
-                           COMMAND "${CMAKE_COMMAND}" -E create_symlink "./${MAIN_NAME}" "${CMAKE_CURRENT_BINARY_DIR}/${TOOL}"
+                           COMMAND "${CMAKE_COMMAND}" -E create_symlink "${MAIN_NAME}" "${CMAKE_CURRENT_BINARY_DIR}/${TOOL}"
                            DEPENDS "${CMAKE_CURRENT_BINARY_DIR}/${MAIN_NAME}"
                            COMMENT "Creating symlink ${TOOL} -> ./${MAIN_NAME}")
     ENDFOREACH()
@@ -222,10 +221,10 @@ IF(NOT CMAKE_SYSTEM_NAME STREQUAL "Windows")
         SET(TOOLS_VERSIONED "${CMAKE_CURRENT_BINARY_DIR}/${TOOL_NAME};${TOOLS_VERSIONED}")
         INSTALL(CODE "MESSAGE(\"Creating symlink ${TOOL_NAME} -> ${MAIN_BINARY_NAME}\")")
         ADD_CUSTOM_COMMAND(OUTPUT  "${CMAKE_CURRENT_BINARY_DIR}/${TOOL_NAME}"
-                           COMMAND "${CMAKE_COMMAND}" -E create_symlink "./${MAIN_BINARY_NAME}" "${CMAKE_CURRENT_BINARY_DIR}/${TOOL_NAME}"
+                           COMMAND "${CMAKE_COMMAND}" -E create_symlink "${MAIN_BINARY_NAME}" "${CMAKE_CURRENT_BINARY_DIR}/${TOOL_NAME}"
                            DEPENDS "${CMAKE_CURRENT_BINARY_DIR}/${MAIN_NAME}"
                                    "${CMAKE_CURRENT_BINARY_DIR}/${MAIN_BINARY_NAME}"
-                           COMMENT "Creating symlink ${TOOL_NAME} -> ./${MAIN_BINARY_NAME}")
+                           COMMENT "Creating symlink ${TOOL_NAME} -> ${MAIN_BINARY_NAME}")
         INSTALL(FILES       "${CMAKE_CURRENT_BINARY_DIR}/${TOOL_NAME}"
                 DESTINATION "bin")
     ENDFOREACH()
