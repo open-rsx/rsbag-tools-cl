@@ -246,6 +246,15 @@ FOREACH(FILE ${TIDE_FILES} ${ELAN_FILES})
     ENDFOREACH()
 ENDFOREACH()
 
+# bag-cat formatting styles tests
+FOREACH(STYLE discard meta-data payload detailed
+              compact)
+    ADD_TEST(NAME    "bag-cat/style/${STYLE}"
+             COMMAND "${CMAKE_CURRENT_BINARY_DIR}/bag-cat"
+                     --debug --style "${STYLE}"
+                     "${DATA_DIR}/${RSBAG_TOOLS_VERSION_MAJOR}.${RSBAG_TOOLS_VERSION_MINOR}/single-event.tide")
+ENDFOREACH()
+
 # Installation
 SET(BINARY_PREFIX    "")
 SET(VERSION_SUFFIX   "cl${RSBAG_TOOLS_VERSION_MAJOR}.${RSBAG_TOOLS_VERSION_MINOR}")
