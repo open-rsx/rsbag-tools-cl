@@ -67,6 +67,10 @@ captured events should be written. The file format is determined based ~
 on the file type (extension). Currently, the following file formats ~
 are supported:~{~&+ ~4A (extension: \".~(~:*~A~)\")~}."
 			       (mapcar #'car (rsbag.backend:backend-classes))))
+	      (switch  :long-name     "force"
+		       :default-value nil
+		       :description
+		       "Should the output file be overwritten in case it already exists?")
 	      (stropt  :long-name     "channel"
 		       :short-name    "c"
 		       :argument-name "NAME-OR-REGEXP"
@@ -147,20 +151,20 @@ match any files.~@:>"
 
   (with-logged-warnings
     (progn #+later with-print-limits
-      (let+ ((error-policy  (maybe-relay-to-thread
-			     (process-error-handling-options)))
-	     (input-files   (collect-input-files (remainder)))
-	     (output-file   (getopt :long-name "output-file"))
-	     (channel-specs (iter (for channel next (getopt :long-name "channel"))
-				  (while channel)
-				  (collect channel)))
-	     (channels      (or (make-channel-filter channel-specs) t))
+      (let+ ((error-policy    (maybe-relay-to-thread
+			       (process-error-handling-options)))
+	     (input-files     (collect-input-files (remainder)))
+	     (output/pathname (or (getopt :long-name "output-file")
+				  (error "~@<No output file specified.~@:>")))
+	     (force           (getopt :long-name "force"))
+	     (channel-specs   (iter (for channel next (getopt :long-name "channel"))
+				    (while channel)
+				    (collect channel)))
+	     (channels        (or (make-channel-filter channel-specs) t))
 	     (transform/timestamp (when-let ((spec (getopt :long-name "transform-timestamp")))
 				    (read-from-string spec)))
 	     inputs
 	     output)
-	(unless output-file
-	  (error "~@<No output file specified.~@:>"))
 
 	(with-error-policy (error-policy)
 	  ;; Since `with-bag' only handles one bag, we have to handle
@@ -174,8 +178,11 @@ match any files.~@:>"
 		 (iter (for file in input-files)
 		       (format *standard-output* "Opening input file ~S~%" file)
 		       (push (open-bag file :direction :input) inputs))
-		 (format *standard-output* "Opening output file ~S~%" output-file)
-		 (setf output (open-bag output-file))
+		 (format *standard-output* "Opening output file ~S~%"
+			 output/pathname)
+		 (setf output (open-bag
+			       output/pathname
+			       :if-exists (if force :supersede :error)))
 
 		 ;; Transcode individual input files into output file.
 		 (apply #'transcode inputs output

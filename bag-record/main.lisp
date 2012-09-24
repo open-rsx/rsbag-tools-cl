@@ -119,29 +119,29 @@ recorded.~@:>"))
 
     (rsb.formatting:with-print-limits (*standard-output*)
 	;; Create a reader and start the receiving and printing loop.
-	(let+ ((error-policy  (maybe-relay-to-thread
-			       (process-error-handling-options)))
-	       (control-uri   (when-let ((string (getopt :long-name "control-uri")))
+	(let+ ((error-policy    (maybe-relay-to-thread
+				 (process-error-handling-options)))
+	       (control-uri     (when-let ((string (getopt :long-name "control-uri")))
 				(puri:parse-uri string)))
-	       (uris          (mapcar #'puri:parse-uri (remainder)))
-	       (output        (or (getopt :long-name "output-file")
-				  (error "~@<Specify output file.~@:>")))
-	       (force         (getopt :long-name "force"))
-	       (channel-alloc (parse-instantiation-spec
-			       (getopt :long-name "channel-allocation")))
-	       (filters       (iter (for spec next (getopt :long-name "filter"))
-				    (while spec)
-				    (collect (apply #'rsb.filter:filter
-						    (parse-instantiation-spec spec)))))
-	       (flush-strategy (parse-instantiation-spec
-				(getopt :long-name "flush-strategy")))
-	       (connection    (events->bag
-			       uris output
-			       :channel-strategy channel-alloc
-			       :filters          filters
-			       :flush-strategy   flush-strategy
-			       :start?           (not control-uri)
-			       :if-exists        (if force :supersede :error)))
+	       (uris            (mapcar #'puri:parse-uri (remainder)))
+	       (output/pathname (or (getopt :long-name "output-file")
+				    (error "~@<No output file specified.~@:>")))
+	       (force           (getopt :long-name "force"))
+	       (channel-alloc   (parse-instantiation-spec
+				 (getopt :long-name "channel-allocation")))
+	       (filters         (iter (for spec next (getopt :long-name "filter"))
+				      (while spec)
+				      (collect (apply #'rsb.filter:filter
+						      (parse-instantiation-spec spec)))))
+	       (flush-strategy  (parse-instantiation-spec
+				 (getopt :long-name "flush-strategy")))
+	       (connection      (events->bag
+				 uris output/pathname
+				 :channel-strategy channel-alloc
+				 :filters          filters
+				 :flush-strategy   flush-strategy
+				 :start?           (not control-uri)
+				 :if-exists        (if force :supersede :error)))
 	       ((&flet recording-loop ()
 		  (setf (rsb.ep:processor-error-policy connection) error-policy)
 		  (unwind-protect
