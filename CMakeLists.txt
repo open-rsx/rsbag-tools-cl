@@ -213,6 +213,14 @@ FOREACH(FILE ${TIDE_FILES} ${ELAN_FILES})
     ADD_TEST(NAME    "bag-info${NAME}"
              COMMAND "${CMAKE_CURRENT_BINARY_DIR}/bag-info"
                      --debug ${CONTINUE} "${FILE}")
+
+    # bag-merge
+    STRING(REGEX REPLACE "/" "" OUTPUT "${NAME}")
+    ADD_TEST(NAME    "bag-merge${NAME}"
+             COMMAND "${CMAKE_CURRENT_BINARY_DIR}/bag-merge"
+                     --debug ${CONTINUE} --force -o "${OUTPUT}"
+                     "${FILE}")
+
     FOREACH(RANGE_OPTION ""
                          "--start-index=0" "--start-time=0" "--start-time=-1e-9"
                          "--end-index=0"   "--end-time=0"   "--end-time=-1e-9")

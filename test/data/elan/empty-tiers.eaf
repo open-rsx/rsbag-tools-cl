@@ -1,9 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ANNOTATION_DOCUMENT AUTHOR="unspecified" DATE="2004-08-25T16:13:18+01:00" FORMAT="2.2" VERSION="2.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://www.mpi.nl/tools/elan/EAFv2.2.xsd">
     <HEADER MEDIA_FILE="" TIME_UNITS="milliseconds">
-            <MEDIA_DESCRIPTOR MEDIA_URL="file://SSL_JI_int_b.mpg" MIME_TYPE="video/mpeg"/>
-            <MEDIA_DESCRIPTOR MEDIA_URL="file://SSL_JI_int_f.mpg" MIME_TYPE="video/mpeg"/>
-            </HEADER>
+    </HEADER>
     <TIME_ORDER/>
     <TIER DEFAULT_LOCALE="sv" LINGUISTIC_TYPE_REF="Default" PARTICIPANT="" TIER_ID="Translation English A"/>
     <TIER DEFAULT_LOCALE="sv" LINGUISTIC_TYPE_REF="Default" PARTICIPANT="" TIER_ID="Translation Swedish A"/>
