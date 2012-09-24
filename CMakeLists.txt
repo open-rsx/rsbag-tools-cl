@@ -184,6 +184,22 @@ FOREACH(POLICY continue abort)
                      -o "bag-record-on-error=${POLICY}.tide" inprocess:)
 ENDFOREACH()
 
+FOREACH(FLUSH_STRATEGY_OPTION "property-limit :property :length/entries :limit 10"
+                              "property-limit :property :length/bytes :limit 10000000"
+                              "property-limit :property :time-to-last-write :limit 10.5")
+    STRING(REGEX REPLACE ".*:property ([^ ]*).*" "\\1"
+           TAG ${FLUSH_STRATEGY_OPTION})
+    STRING(REGEX REPLACE "[:/]" ""
+           TAG ${TAG})
+    ADD_TEST(NAME    "bag-record/${TAG}"
+             COMMAND "${CMAKE_CURRENT_BINARY_DIR}/bag-record"
+                     --debug
+                     --eval "(let ((timer (sb-ext:make-timer (lambda () (sb-ext:exit))))) (sb-ext:schedule-timer timer 3))"
+                     --flush-strategy ${FLUSH_STRATEGY_OPTION}
+                     --force
+                     -o output-${TAG}.tide inprocess:)
+ENDFOREACH()
+
 # bag-{info,cat,play} tests
 FOREACH(FILE ${TIDE_FILES} ${ELAN_FILES})
     FILE(RELATIVE_PATH NAME "${DATA_DIR}" "${FILE}")
