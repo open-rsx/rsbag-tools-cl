@@ -81,7 +81,8 @@ tools."
                 (:version :cl-rsbag-tools-info   #.(version/string))
                 (:version :cl-rsbag-tools-cat    #.(version/string))
                 (:version :cl-rsbag-tools-merge  #.(version/string))
-                (:version :cl-rsbag-tools-play   #.(version/string)))
+                (:version :cl-rsbag-tools-play   #.(version/string))
+                (:version :cl-rsbag-tools-server #.(version/string)))
   :components  ((:module     "main"
                  :components ((:file       "package")
                               (:file       "main"

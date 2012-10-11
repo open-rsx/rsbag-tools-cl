@@ -11,7 +11,8 @@
     ("bag-info"   . rsbag.tools.info:main)
     ("bag-merge"  . rsbag.tools.merge:main)
     ("bag-cat"    . rsbag.tools.cat:main)
-    ("bag-play"   . rsbag.tools.play:main))
+    ("bag-play"   . rsbag.tools.play:main)
+    ("bag-server" . rsbag.tools.server:main))
   "Stores a mapping from program names to entry point functions.")
 
 (defun main ()
