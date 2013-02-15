@@ -1,5 +1,7 @@
 (load-system :asdf-system-connections)
 
+(setf iterate::*always-declare-variables* t)
+
 (load-system :cl-ppcre)    ;; for regex filter
 
 (load-system :cl-protobuf)
