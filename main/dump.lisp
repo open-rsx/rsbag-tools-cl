@@ -27,5 +27,8 @@
 ;; Try to reload Spread library
 (network.spread:enable-reload-spread-library :if-fails #'warn)
 
+;; Restart rsbag threadpool
+(rsbag:enable-restart-threadpool)
+
 (com.dvlsoft.clon:dump "bag" rsbag.tools.main:main
 		       :compression :best)
