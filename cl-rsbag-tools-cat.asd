@@ -1,6 +1,6 @@
 ;;; rsbag-tools-cat.asd --- System definition for the bag-cat program.
 ;;
-;; Copyright (C) 2011, 2012 Jan Moringen
+;; Copyright (C) 2011, 2012, 2013 Jan Moringen
 ;;
 ;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 ;;
@@ -35,7 +35,7 @@
 (defparameter +version-major+ 0
   "Major component of version number.")
 
-(defparameter +version-minor+ 8
+(defparameter +version-minor+ 9
   "Minor component of version number.")
 
 (let* ((version-file (merge-pathnames "version.sexp" *load-truename*))
