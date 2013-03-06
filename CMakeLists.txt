@@ -21,28 +21,39 @@ cmake_minimum_required(VERSION 2.8)
 
 # Extract version components from an approximately "git describe"-like
 # formatted version string.
-macro(git_version_components INPUT OUT_MAJOR OUT_MINOR OUT_REVISION OUT_COMMIT)
+function(git_version_components INPUT OUT_MAJOR OUT_MINOR OUT_REVISION OUT_COMMIT)
     set(REGEX "^[-.a-z0-9]*([0-9]+)\\.([0-9]+)[-.]([0-9]+)-?(g[a-f0-9]+(:?-dirty)?|)$")
     string(REGEX REPLACE ${REGEX} "\\1" ${OUT_MAJOR}    "${INPUT}")
     string(REGEX REPLACE ${REGEX} "\\2" ${OUT_MINOR}    "${INPUT}")
     string(REGEX REPLACE ${REGEX} "\\3" ${OUT_REVISION} "${INPUT}")
     string(REGEX REPLACE ${REGEX} "\\4" ${OUT_COMMIT}   "${INPUT}")
-endmacro()
+    set(${OUT_MAJOR}    ${${OUT_MAJOR}}    PARENT_SCOPE)
+    set(${OUT_MINOR}    ${${OUT_MINOR}}    PARENT_SCOPE)
+    set(${OUT_REVISION} ${${OUT_REVISION}} PARENT_SCOPE)
+    set(${OUT_COMMIT}   ${${OUT_COMMIT}}   PARENT_SCOPE)
+endfunction()
 
-# Git-based version.
+# Git-based version: run git describe, parse the output and store the
+# "revision" and "commit" components into version.sexp.
 find_program(GIT_EXECUTABLE "git")
 if(GIT_EXECUTABLE)
-    execute_process(COMMAND ${GIT_EXECUTABLE} describe --long --dirty=-dirty
-                    RESULT_VARIABLE RESULT
-                    OUTPUT_VARIABLE GIT_DESCRIBE_OUTPUT
-                    OUTPUT_STRIP_TRAILING_WHITESPACE
-                    ERROR_QUIET)
-    if(RESULT EQUAL 0)
-        git_version_components(${GIT_DESCRIBE_OUTPUT} IGN1 IGN2 REVISION COMMIT)
-        file(WRITE "${CMAKE_SOURCE_DIR}/version.sexp" "${REVISION} \"${COMMIT}\"")
-    else()
-        message(STATUS "Not a git repository: ${CMAKE_SOURCE_DIR}")
-    endif()
+    function(git_based_version MAJOR MINOR)
+        math(EXPR MINOR_MINUS_ONE "${MINOR} - 1")
+        set(RELEASE_TAG "release-${MAJOR}.${MINOR_MINUS_ONE}")
+        execute_process(COMMAND ${GIT_EXECUTABLE} describe
+                                                  --long --dirty=-dirty
+                                                  --match "${RELEASE_TAG}"
+                        RESULT_VARIABLE RESULT
+                        OUTPUT_VARIABLE GIT_DESCRIBE_OUTPUT
+                        OUTPUT_STRIP_TRAILING_WHITESPACE
+                        ERROR_QUIET)
+        if(RESULT EQUAL 0)
+            git_version_components(${GIT_DESCRIBE_OUTPUT} IGN1 IGN2 REVISION COMMIT)
+            file(WRITE "${CMAKE_SOURCE_DIR}/version.sexp" "${REVISION} \"${COMMIT}\"")
+        else()
+            message(STATUS "git describe failed (not a git repository?) in ${CMAKE_SOURCE_DIR}")
+        endif()
+    endfunction()
 else()
     message(STATUS "git executable not found")
 endif()
@@ -78,32 +89,35 @@ endif()
 set(CL_SOURCE_REGISTRY       "(:source-registry (:tree \\\"${CMAKE_CURRENT_SOURCE_DIR}\\\") :inherit-configuration)")
 set(ASDF_OUTPUT_TRANSLATIONS "(:output-translations (t (\\\"${CMAKE_CURRENT_BINARY_DIR}/fasl-cache\\\" :implementation)) :ignore-inherited-configuration)")
 
-# Execute Lisp process
-macro(configure_lisp NAME CODE)
+# Execute Lisp processes, potentially with output redirection.
+function(configure_lisp NAME CODE)
     set(NAME "${NAME}")
     set(DO   "${CODE} --quit")
     configure_file("${CMAKE_CURRENT_SOURCE_DIR}/sbcl.cmake.in"
                    "${CMAKE_CURRENT_BINARY_DIR}/sbcl.${NAME}.cmake"
                    @ONLY)
     set(REDIRECTIONS)
-endmacro()
-macro(configure_lisp_redirect NAME CODE)
+endfunction()
+function(configure_lisp_redirect NAME CODE)
     set(REDIRECTIONS "OUTPUT_FILE \"${CMAKE_CURRENT_BINARY_DIR}/${NAME}.out\"
                       ERROR_FILE  \"${CMAKE_CURRENT_BINARY_DIR}/${NAME}.err\"")
     configure_lisp(${NAME} ${CODE})
-endmacro()
-macro(execute_lisp NAME CODE OUTPUT_VARIABLE)
+endfunction()
+function(execute_lisp NAME CODE OUTPUT_VARIABLE)
     configure_lisp(${NAME} "${CODE}")
     message(STATUS "Executing Lisp process \"${NAME}\"")
     execute_process(COMMAND cmake -P "${CMAKE_CURRENT_BINARY_DIR}/sbcl.${NAME}.cmake"
                     OUTPUT_VARIABLE ${OUTPUT_VARIABLE}
                     OUTPUT_STRIP_TRAILING_WHITESPACE)
-endmacro()
+    set(${OUTPUT_VARIABLE} ${${OUTPUT_VARIABLE}} PARENT_SCOPE)
+endfunction()
 
-# Project definition (version is grovelled from asd system definition
-# and, possibly in combination with version.sexp file written above).
+# Project definition (version is grovelled from asd system definition,
+# possibly in combination with version.sexp file written below).
 project(cl-rsbag-tools)
 set(SYSTEM_NAME "cl-rsbag-tools-info")
+
+# Determine at least major and minor version components.
 set(REDIRECTIONS "ERROR_QUIET")
 execute_lisp("version"
              "--eval \"(asdf:find-system :${SYSTEM_NAME})\"
@@ -113,6 +127,22 @@ git_version_components(${VERSION_FROM_LISP} RSBAG_TOOLS_VERSION_MAJOR
                                             RSBAG_TOOLS_VERSION_MINOR
                                             RSBAG_TOOLS_VERSION_PATCH
                                             RSBAG_TOOLS_VERSION_COMMIT)
+
+# If necessary, try to run git describe and determine remaining
+# version components.
+if(NOT RSBAG_TOOLS_VERSION_PATCH)
+    git_based_version(${RSBAG_TOOLS_VERSION_MAJOR} ${RSBAG_TOOLS_VERSION_MINOR})
+    set(REDIRECTIONS "ERROR_QUIET")
+    execute_lisp("version"
+                 "--eval \"(asdf:find-system :${SYSTEM_NAME})\"
+                  --eval \"(princ (${SYSTEM_NAME}-system:version/string :commit? t))\""
+                 VERSION_FROM_LISP)
+    git_version_components(${VERSION_FROM_LISP} RSBAG_TOOLS_VERSION_MAJOR
+                                                RSBAG_TOOLS_VERSION_MINOR
+                                                RSBAG_TOOLS_VERSION_PATCH
+                                                RSBAG_TOOLS_VERSION_COMMIT)
+endif()
+
 message(STATUS "Project is ${CMAKE_PROJECT_NAME} (${VERSION_FROM_LISP})")
 
 # Create binary.
