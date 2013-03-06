@@ -1,17 +1,83 @@
+# CMakeLists.txt --- CMake build description file.
+#
+# Copyright (C) 2012, 2013 Jan Moringen
+#
+# Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
+#
+# This file may be licensed under the terms of of the GNU Lesser
+# General Public License Version 3 (the ``LGPL''), or (at your option)
+# any later version.
+#
+# Software distributed under the License is distributed on an ``AS
+# IS'' basis, WITHOUT WARRANTY OF ANY KIND, either express or
+# implied. See the LGPL for the specific language governing rights and
+# limitations.
+#
+# You should have received a copy of the LGPL along with this
+# program. If not, go to http://www.gnu.org/licenses/lgpl.html or
+# write to the Free Software Foundation, Inc., 51 Franklin Street,
+# Fifth Floor, Boston, MA 02110-1301, USA.
+#
+# The development of this software was supported by:
+#   CoR-Lab, Research Institute for Cognition and Robotics
+#     Bielefeld University
+
 CMAKE_MINIMUM_REQUIRED(VERSION 2.8)
 
-# Project definition (version is grovelled from an asd system definition)
+# Extract version components from an approximately "git describe"-like
+# formatted version string.
+FUNCTION(GIT_VERSION_COMPONENTS INPUT OUT_REVISION)
+    SET(REGEX "^[-.a-z0-9]*([0-9]+)\\.([0-9]+)[-.]([0-9]+)-?(g[a-f0-9]+(:?-dirty)?|)$")
+    STRING(REGEX REPLACE ${REGEX} "\\3" ${OUT_REVISION} "${INPUT}")
+    SET(${OUT_REVISION} ${${OUT_REVISION}} PARENT_SCOPE)
+ENDFUNCTION()
+
+# Git-based version: run git describe, parse the output and store the
+# "revision" and "commit" components into version.sexp.
+FIND_PROGRAM(GIT_EXECUTABLE "git")
+IF(GIT_EXECUTABLE)
+    FUNCTION(GIT_BASED_VERSION MAJOR MINOR OUTPUT)
+        MATH(EXPR MINOR_MINUS_ONE "${MINOR} - 1")
+        SET(RELEASE_TAG "release-${MAJOR}.${MINOR_MINUS_ONE}")
+        EXECUTE_PROCESS(COMMAND ${GIT_EXECUTABLE} describe
+                                                  --long --dirty=-dirty
+                                                  --match "${RELEASE_TAG}"
+                        RESULT_VARIABLE RESULT
+                        OUTPUT_VARIABLE GIT_DESCRIBE_OUTPUT
+                        OUTPUT_STRIP_TRAILING_WHITESPACE
+                        ERROR_QUIET)
+        IF(RESULT EQUAL 0)
+            SET(${OUTPUT} ${GIT_DESCRIBE_OUTPUT} PARENT_SCOPE)
+        ELSE()
+            MESSAGE(STATUS "git describe failed (not a git repository?) in ${CMAKE_SOURCE_DIR}")
+        ENDIF()
+    ENDFUNCTION()
+ELSE()
+    MESSAGE(STATUS "git executable not found")
+ENDIF()
+
+# Project definition (version is grovelled from asd system definition,
+# possibly in combination with git describe).
 PROJECT(cl-rsbag-tools)
 SET(SYSTEM_NAME "cl-rsbag-tools-info")
-MACRO(EXTRACT_COMPONENT NAME OUTPUT)
+
+# Determine major and minor version components from asd file. Run git
+# describe to determine remaining patch component.
+FUNCTION(EXTRACT_COMPONENT NAME OUTPUT)
     FILE(STRINGS "${CMAKE_SOURCE_DIR}/${SYSTEM_NAME}.asd" TEMP
-         REGEX   "defconstant +\\+version-${NAME}\\+")
+         REGEX   "def[a-z]+ +\\+version-${NAME}\\+")
     STRING(REGEX REPLACE ".*\\+version-${NAME}\\+ +([0-9]+).*" "\\1"
-           CL_RSBAG_TOOLS_VERSION_${OUTPUT} ${TEMP})
-ENDMACRO()
-EXTRACT_COMPONENT(major    MAJOR)
-EXTRACT_COMPONENT(minor    MINOR)
-EXTRACT_COMPONENT(revision PATCH)
+           ${OUTPUT} ${TEMP})
+    SET(${OUTPUT} ${${OUTPUT}} PARENT_SCOPE)
+ENDFUNCTION()
+EXTRACT_COMPONENT(major CL_RSBAG_TOOLS_VERSION_MAJOR)
+EXTRACT_COMPONENT(minor CL_RSBAG_TOOLS_VERSION_MINOR)
+GIT_BASED_VERSION(${CL_RSBAG_TOOLS_VERSION_MAJOR}
+                  ${CL_RSBAG_TOOLS_VERSION_MINOR}
+                  GIT_DESCRIBE_OUTPUT)
+GIT_VERSION_COMPONENTS(${GIT_DESCRIBE_OUTPUT} CL_RSBAG_TOOLS_VERSION_PATCH)
+
+MESSAGE(STATUS "Project is ${CMAKE_PROJECT_NAME} (${CL_RSBAG_TOOLS_VERSION_MAJOR}.${CL_RSBAG_TOOLS_VERSION_MINOR}.${CL_RSBAG_TOOLS_VERSION_PATCH})")
 
 # Find and check SBCL installation.
 SET(SBCL_HOME $ENV{SBCL_HOME})
