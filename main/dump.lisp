@@ -24,6 +24,9 @@
 (asdf:clear-source-registry)
 (asdf:clear-output-translations)
 
+;; Reseed RSB id generator
+(rsb:enable-id-random-state-reseed)
+
 ;; Try to reload Spread library
 (network.spread:enable-reload-spread-library :if-fails #'warn)
 
