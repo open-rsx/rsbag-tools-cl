@@ -209,7 +209,7 @@ foreach(POLICY continue abort)
     # bag-record
     add_test(NAME    "bag-record/on-error=${POLICY}"
              COMMAND "${CMAKE_CURRENT_BINARY_DIR}/bag-record"
-                     --eval "(let ((timer (sb-ext:make-timer (lambda () (sb-ext:exit))))) (sb-ext:schedule-timer timer 3))"
+                     --load "${CMAKE_SOURCE_DIR}/test/send-test-events.lisp"
                      --debug --on-error "${POLICY}" --force
                      -o "bag-record-on-error=${POLICY}.tide" inprocess:)
 endforeach()
@@ -224,10 +224,20 @@ foreach(FLUSH_STRATEGY_OPTION "property-limit :property :length/entries :limit 1
     add_test(NAME    "bag-record/${TAG}"
              COMMAND "${CMAKE_CURRENT_BINARY_DIR}/bag-record"
                      --debug
-                     --eval "(let ((timer (sb-ext:make-timer (lambda () (sb-ext:exit))))) (sb-ext:schedule-timer timer 3))"
+                     --load "${CMAKE_SOURCE_DIR}/test/send-test-events.lisp"
                      --flush-strategy ${FLUSH_STRATEGY_OPTION}
                      --force
-                     -o output-${TAG}.tide inprocess:)
+                     -o "output-${TAG}.tide" inprocess:)
+endforeach()
+
+foreach(TIMESTAMP "CREATE" "SEND" "RECEIVE" "DELIVER")
+    add_test(NAME    "bag-record/timestamp=${TIMESTAMP}"
+             COMMAND "${CMAKE_CURRENT_BINARY_DIR}/bag-record"
+                     --debug
+                     --load "${CMAKE_SOURCE_DIR}/test/send-test-events.lisp"
+                     --index-timestamp ${TIMESTAMP}
+                     --force
+                     -o "output-timetamp=${TIMESTAMP}.tide" inprocess:)
 endforeach()
 
 # bag-{info,cat,play} tests

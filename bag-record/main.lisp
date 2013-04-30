@@ -1,6 +1,6 @@
 ;;; main.lisp --- Main function of the bag-record program.
 ;;
-;; Copyright (C) 2011, 2012 Jan Moringen
+;; Copyright (C) 2011, 2012, 2013 Jan Moringen
 ;;
 ;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 ;;
@@ -60,6 +60,11 @@ CONNECTION while THUNK executes."
 		       :default-value nil
 		       :description
 		       "Should the output file be overwritten in case it already exists?")
+	      (stropt  :long-name     "index-timestamp"
+		       :default-value "SEND"
+		       :argument-name "NAME"
+		       :description
+		       "Name of the timestamp which should be used to index events in the created log file.")
 	      (stropt  :long-name     "channel-allocation"
 		       :short-name    "a"
 		       :default-value "scope-and-type"
@@ -127,6 +132,8 @@ recorded.~@:>"))
 	       (output/pathname (or (getopt :long-name "output-file")
 				    (error "~@<No output file specified.~@:>")))
 	       (force           (getopt :long-name "force"))
+	       (timestamp       (make-keyword
+				 (getopt :long-name "index-timestamp")))
 	       (channel-alloc   (parse-instantiation-spec
 				 (getopt :long-name "channel-allocation")))
 	       (filters         (iter (for spec next (getopt :long-name "filter"))
@@ -137,6 +144,7 @@ recorded.~@:>"))
 				 (getopt :long-name "flush-strategy")))
 	       (connection      (events->bag
 				 uris output/pathname
+				 :timestamp        timestamp
 				 :channel-strategy channel-alloc
 				 :filters          filters
 				 :flush-strategy   flush-strategy
