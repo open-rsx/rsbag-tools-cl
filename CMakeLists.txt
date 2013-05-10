@@ -185,12 +185,14 @@ foreach(TOOL ${TOOLS})
              COMMAND "${CMAKE_CURRENT_BINARY_DIR}/${TOOL}" --version)
 endforeach()
 
-file(GLOB TIDE_FILES "${DATA_DIR}/?.?/*.tide")
-file(GLOB VERSIONS   RELATIVE "${DATA_DIR}" "${DATA_DIR}/?.?")
-file(GLOB ELAN_FILES "${DATA_DIR}/elan/*.eaf")
+file(GLOB VALID_TIDE_FILES       "${DATA_DIR}/?.?/valid-*.tide")
+file(GLOB RECOVERABLE_TIDE_FILES "${DATA_DIR}/?.?/recoverable-*.tide")
+set(TIDE_FILES ${VALID_TIDE_FILES} ${RECOVERABLE_TIDE_FILES})
+file(GLOB VERSIONS               RELATIVE "${DATA_DIR}" "${DATA_DIR}/?.?")
+file(GLOB ELAN_FILES             "${DATA_DIR}/elan/*.eaf")
 
 # All on-error policies for bag-{info,cat,play,record}
-set(FILE "${DATA_DIR}/${RSBAG_TOOLS_VERSION_MAJOR}.${RSBAG_TOOLS_VERSION_MINOR}/empty.tide")
+set(FILE "${DATA_DIR}/${RSBAG_TOOLS_VERSION_MAJOR}.${RSBAG_TOOLS_VERSION_MINOR}/valid-empty.tide")
 foreach(POLICY continue abort)
     add_test(NAME    "bag-info/on-error=${POLICY}"
              COMMAND "${CMAKE_CURRENT_BINARY_DIR}/bag-info"
@@ -243,7 +245,8 @@ endforeach()
 # bag-{info,cat,play} tests
 foreach(FILE ${TIDE_FILES} ${ELAN_FILES})
     file(RELATIVE_PATH NAME "${DATA_DIR}" "${FILE}")
-    if(FILE MATCHES "(empty-channel\\.tide|unsupported-type\\.tide)")
+    list(FIND VALID_TIDE_FILES ${FILE} TEMP)
+    if(TEMP EQUAL -1)
         set(CONTINUE --on-error continue)
     else()
         set(CONTINUE)
@@ -292,7 +295,7 @@ foreach(STYLE discard meta-data payload detailed
     add_test(NAME    "bag-cat/style/${STYLE}"
              COMMAND "${CMAKE_CURRENT_BINARY_DIR}/bag-cat"
                      --debug --style "${STYLE}"
-                     "${DATA_DIR}/${RSBAG_TOOLS_VERSION_MAJOR}.${RSBAG_TOOLS_VERSION_MINOR}/single-event.tide")
+                     "${DATA_DIR}/${RSBAG_TOOLS_VERSION_MAJOR}.${RSBAG_TOOLS_VERSION_MINOR}/valid-single-event.tide")
 endforeach()
 
 # Installation
