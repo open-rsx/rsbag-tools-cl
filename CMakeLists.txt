@@ -70,6 +70,9 @@ else()
                  NO_DEFAULT_PATH)
 endif()
 message(STATUS "SBCL executable: ${SBCL_EXECUTABLE}")
+set(FASL_CACHE_DIR "${CMAKE_CURRENT_BINARY_DIR}/fasl-cache"
+    CACHE FILEPATH
+    "Directory in which the fasl cache should be created.")
 
 # Configure Lisp environment.
 set(LISP_RUNTIME_OPTIONS "" CACHE STRING
@@ -87,7 +90,7 @@ if(LISP_INIT_CODE)
 endif()
 
 set(CL_SOURCE_REGISTRY       "(:source-registry (:tree \\\"${CMAKE_CURRENT_SOURCE_DIR}\\\") :inherit-configuration)")
-set(ASDF_OUTPUT_TRANSLATIONS "(:output-translations (t (\\\"${CMAKE_CURRENT_BINARY_DIR}/fasl-cache\\\" :implementation)) :ignore-inherited-configuration)")
+set(ASDF_OUTPUT_TRANSLATIONS "(:output-translations (t (\\\"${FASL_CACHE_DIR}\\\" :implementation)) :ignore-inherited-configuration)")
 
 # Execute Lisp processes, potentially with output redirection.
 function(configure_lisp NAME CODE)
