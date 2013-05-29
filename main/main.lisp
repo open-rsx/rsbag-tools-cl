@@ -1,6 +1,6 @@
 ;;; main.lisp --- Dispatch function of the main bag program.
 ;;
-;; Copyright (C) 2011, 2012 Jan Moringen
+;; Copyright (C) 2011, 2012, 2013 Jan Moringen
 ;;
 ;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 ;;
@@ -76,11 +76,11 @@ usually done by creating symbolic links~_~_~{~2T~A -> bag~_~}~@:>~%"
 link to TARGET named NAME. Note that existing filesystem objects named
 NAME can prevent the creation of the symbolic link."
   (unless (probe-file name)
+    #-(and sbcl (not win32)) (error "~@<Don't know how to create ~
+symbolic links on this implementation-platform combination.~@:>")
     (format t "~@<Creating symbolic link ~A -> ~A~@:>~%"
 	    name target)
-    #+sbcl (sb-posix:symlink target name)
-    #-sbcl (error "~@<Don't know how to create symlinks in this ~
-implementation-platform combination.~@:>")))
+    #+(and sbcl (not win32)) (sb-posix:symlink target name)))
 
 (defun %maybe-create-links (target)
   "Create symbolic links to TARGET for each entry in
