@@ -154,7 +154,6 @@ configure_lisp_redirect("${MAIN_NAME}"
                         "--load \"${CMAKE_CURRENT_SOURCE_DIR}/main/dump.lisp\"")
 add_custom_command(OUTPUT  "${CMAKE_CURRENT_BINARY_DIR}/${MAIN_NAME}"
                    COMMAND "${CMAKE_COMMAND}" -P "${CMAKE_CURRENT_BINARY_DIR}/sbcl.${MAIN_NAME}.cmake"
-                   DEPENDS "${SCRIPT}"
                    COMMENT "Creating Lisp image ${MAIN_NAME} (this can take a long time)")
 add_custom_target(binary ALL DEPENDS "${CMAKE_CURRENT_BINARY_DIR}/${MAIN_NAME}")
 
