@@ -5,7 +5,7 @@
 (load-system :cl-ppcre)       ;; for regex filter
 
 (load-system :cl-protobuf)
-(load-system :network.spread) ;; for spread transport
+#-win32 (load-system :network.spread) ;; for spread transport
 (load-system :usocket)        ;; for socket transport
 
 (load-system :swank)          ;; for the lulz
@@ -28,7 +28,7 @@
 (rsb:enable-id-random-state-reseed)
 
 ;; Try to reload Spread library
-(network.spread:enable-reload-spread-library :if-fails #'warn)
+#-win32 (network.spread:enable-reload-spread-library :if-fails #'warn)
 
 ;; Restart rsbag threadpool
 (rsbag:enable-restart-threadpool)
