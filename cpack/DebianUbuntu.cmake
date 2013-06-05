@@ -28,12 +28,12 @@ foreach(TOOL ${TOOLS})
                 "update-alternatives --install                       \\
                    /usr/bin/${BINARY_PREFIX}${TOOL}                  \\
                    ${BINARY_PREFIX}${TOOL}                           \\
-                   /usr/bin/${BINARY_PREFIX}${TOOL}${VERSION_SUFFIX} \\
+                   /usr/bin/${BINARY_PREFIX}${TOOL}${BINARY_SUFFIX} \\
                    ${PACKAGE_ALT_PRIORITY}\n\n")
     file(APPEND "${PRERM_SCRIPT}"
                 "update-alternatives --remove                            \\
                    ${BINARY_PREFIX}${TOOL}                               \\
-                   /usr/bin/${BINARY_PREFIX}${TOOL}${VERSION_SUFFIX}\n\n")
+                   /usr/bin/${BINARY_PREFIX}${TOOL}${BINARY_SUFFIX}\n\n")
 endforeach()
 execute_process(COMMAND chmod 755 "${POSTINST_SCRIPT}" "${PRERM_SCRIPT}")
 set(CPACK_DEBIAN_PACKAGE_CONTROL_EXTRA "${POSTINST_SCRIPT};${PRERM_SCRIPT}")
