@@ -143,7 +143,6 @@ CONNECTION while THUNK executes."
                        :description
                        (make-filter-help-string :show show))
               (stropt  :long-name     "flush-strategy"
-                       :default-value "property-limit :property :length/bytes :limit 33554432"
                        :argument-name "SPEC"
                        :description
                        (make-flush-strategy-help-string :show show))
@@ -240,20 +239,21 @@ terminate : void -> void
                                       (while spec)
                                       (collect (apply #'rsb.filter:filter
                                                       (parse-instantiation-spec spec)))))
-               (flush-strategy  (parse-instantiation-spec
-                                 (getopt :long-name "flush-strategy")))
+               (flush-strategy  (when-let ((value (getopt :long-name "flush-strategy")))
+                                  (parse-instantiation-spec value)))
                (progress-style  (case (getopt :long-name "progress-style")
                                   (:entries  #'progress-style/entries)
                                   (:channels #'progress-style/channels)))
                ((&flet make-connection (filename)
-                  (events->bag uris filename
-                               :error-policy     error-policy
-                               :timestamp        timestamp
-                               :channel-strategy channel-alloc
-                               :filters          filters
-                               :flush-strategy   flush-strategy
-                               :start?           (not control-uri)
-                               :if-exists        (if force :supersede :error))))
+                  (apply #'events->bag uris filename
+                         :error-policy     error-policy
+                         :timestamp        timestamp
+                         :channel-strategy channel-alloc
+                         :filters          filters
+                         :start?           (not control-uri)
+                         :if-exists        (if force :supersede :error)
+                         (when flush-strategy
+                           (list :flush-strategy flush-strategy)))))
                ((&flet recording-loop (connection wait-thunk)
                   (with-open-connection (connection connection)
                     (with-interactive-interrupt-exit ()
