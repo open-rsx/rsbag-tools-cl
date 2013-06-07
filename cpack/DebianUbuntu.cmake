@@ -14,7 +14,7 @@ set(CPACK_DEBIAN_PACKAGE_PRIORITY    "optional")
 set(CPACK_DEBIAN_PACKAGE_SECTION     "net")
 #SET(CPACK_DEBIAN_ARCHITECTURE        "${CMAKE_SYSTEM_PROCESSOR}") # Debian uses different names here
 set(CPACK_DEBIAN_PACKAGE_DEPENDS     "libc6")
-set(CPACK_DEBIAN_PACKAGE_RECOMMENDS  "spread (>= 4.0)")
+set(CPACK_DEBIAN_PACKAGE_SUGGESTS    "spread (>= 4.0)")
 
 # Generate postinst and prerm hooks
 set(PACKAGE_ALT_PRIORITY "100")
