@@ -23,6 +23,15 @@ set(POSTINST_SCRIPT      "${CMAKE_CURRENT_BINARY_DIR}/postinst")
 set(PRERM_SCRIPT         "${CMAKE_CURRENT_BINARY_DIR}/prerm")
 file(WRITE "${POSTINST_SCRIPT}" "#!/bin/sh\n\nset -e\n")
 file(WRITE "${PRERM_SCRIPT}"    "#!/bin/sh\n\nset -e\n")
+
+# Uncompress binary.
+file(APPEND "${POSTINST_SCRIPT}"
+            "(                                 \\
+               cd /usr/bin/                    \\
+               && ./${MAIN_BINARY_NAME} redump \\
+             )\n\n")
+
+# Update alternatives.
 foreach(TOOL ${TOOLS})
     file(APPEND "${POSTINST_SCRIPT}"
                 "update-alternatives --install                       \\
