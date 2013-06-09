@@ -150,6 +150,9 @@ message(STATUS "Project is ${CMAKE_PROJECT_NAME} (${VERSION_FROM_LISP})")
 
 # Create binary.
 set(MAIN_NAME "bag")
+file(GLOB     TOOLS
+     RELATIVE "${CMAKE_CURRENT_SOURCE_DIR}"
+     "bag-*")
 configure_lisp_redirect("${MAIN_NAME}"
                         "--load \"${CMAKE_CURRENT_SOURCE_DIR}/main/dump.lisp\"")
 add_custom_command(OUTPUT  "${CMAKE_CURRENT_BINARY_DIR}/${MAIN_NAME}"
@@ -159,17 +162,12 @@ add_custom_target(binary ALL DEPENDS "${CMAKE_CURRENT_BINARY_DIR}/${MAIN_NAME}")
 
 # Create symlinks.
 if(NOT CMAKE_SYSTEM_NAME STREQUAL "Windows")
-    file(GLOB     TOOLS
-         RELATIVE "${CMAKE_CURRENT_SOURCE_DIR}"
-         "bag-*")
-    foreach(TOOL ${TOOLS})
-        message(STATUS "Configuring tool ${TOOL}")
-        add_custom_command(OUTPUT  "${CMAKE_CURRENT_BINARY_DIR}/${TOOL}"
-                           COMMAND "${CMAKE_COMMAND}" -E create_symlink "${MAIN_NAME}" "${CMAKE_CURRENT_BINARY_DIR}/${TOOL}"
-                           DEPENDS "${CMAKE_CURRENT_BINARY_DIR}/${MAIN_NAME}"
-                           COMMENT "Creating symlink ${TOOL} -> ./${MAIN_NAME}")
-    endforeach()
-    add_custom_target(links ALL DEPENDS ${TOOLS})
+    message(STATUS "Configuring tool ${TOOLS}")
+    add_custom_command(OUTPUT  "${CMAKE_CURRENT_BINARY_DIR}/bag-info"
+                       COMMAND "${CMAKE_CURRENT_BINARY_DIR}/${MAIN_NAME}" create-links
+                       DEPENDS "${CMAKE_CURRENT_BINARY_DIR}/${MAIN_NAME}"
+                       COMMENT "Creating symlinks")
+    add_custom_target(links ALL DEPENDS bag-info)
 endif()
 
 # Tests
@@ -308,26 +306,6 @@ set(MAIN_BINARY_NAME ${BINARY_PREFIX}${MAIN_NAME}${BINARY_SUFFIX})
 install(PROGRAMS    "${CMAKE_CURRENT_BINARY_DIR}/${MAIN_NAME}"
         DESTINATION "bin"
         RENAME      "${MAIN_BINARY_NAME}")
-# Fake binary for symlink creation
-if(NOT CMAKE_SYSTEM_NAME STREQUAL "Windows")
-    add_custom_command(OUTPUT  "${CMAKE_CURRENT_BINARY_DIR}/${MAIN_BINARY_NAME}"
-                       COMMAND "${CMAKE_COMMAND}" -E touch "${CMAKE_CURRENT_BINARY_DIR}/${MAIN_BINARY_NAME}"
-                       COMMENT "Creating fake link target ${MAIN_BINARY_NAME}")
-    set(TOOLS_VERSIONED "")
-    foreach(TOOL ${TOOLS})
-        set(TOOL_NAME "${BINARY_PREFIX}${TOOL}${BINARY_SUFFIX}")
-        set(TOOLS_VERSIONED "${CMAKE_CURRENT_BINARY_DIR}/${TOOL_NAME};${TOOLS_VERSIONED}")
-        install(CODE "MESSAGE(\"Creating symlink ${TOOL_NAME} -> ${MAIN_BINARY_NAME}\")")
-        add_custom_command(OUTPUT  "${CMAKE_CURRENT_BINARY_DIR}/${TOOL_NAME}"
-                           COMMAND "${CMAKE_COMMAND}" -E create_symlink "${MAIN_BINARY_NAME}" "${CMAKE_CURRENT_BINARY_DIR}/${TOOL_NAME}"
-                           DEPENDS "${CMAKE_CURRENT_BINARY_DIR}/${MAIN_NAME}"
-                                   "${CMAKE_CURRENT_BINARY_DIR}/${MAIN_BINARY_NAME}"
-                           COMMENT "Creating symlink ${TOOL_NAME} -> ${MAIN_BINARY_NAME}")
-        install(FILES       "${CMAKE_CURRENT_BINARY_DIR}/${TOOL_NAME}"
-                DESTINATION "bin")
-    endforeach()
-    add_custom_target(versioned_links ALL DEPENDS ${TOOLS_VERSIONED})
-endif()
 # Install scripts
 install(DIRECTORY   "scripts"
         DESTINATION "share/rsbag${VERSION_SUFFIX}/")

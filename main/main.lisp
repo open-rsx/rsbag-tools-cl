@@ -49,7 +49,7 @@
       ;; commandline option, create symbolic links for entry points as
       ;; necessary and exit.
       ((string= "create-links" (second args))
-       (%maybe-create-links name))
+       (%maybe-create-links name (third args) (fourth args)))
 
       ;; If the program has been called with the "redump" commandline
       ;; option, dump into a new binary with the specified library
@@ -77,7 +77,7 @@
       ;; necessary.
       (t
        (format *error-output* "~@<Invoke this program as~_~_~
-~5@T~A create-links~
+~5@T~A create-links [PREFIX [SUFFIX]]~
 ~_  or ~:*~A redump [FILENAME (compress|static)*]~
 ~{~_  or ~A~}~_~_(not ~2:*~S). The latter invocations are usually ~
 done by creating symbolic links~_~_~
@@ -117,19 +117,21 @@ SPREAD_LIBRARY environment variable).~@:>"))
 ;;; Utility functions
 ;;
 
-(defun %maybe-create-link (target name)
+(defun %maybe-create-link (target name &optional prefix suffix)
   "If NAME does not designate a filesystem object, create a symbolic
 link to TARGET named NAME. Note that existing filesystem objects named
 NAME can prevent the creation of the symbolic link."
-  (unless (probe-file name)
-    #-(and sbcl (not win32)) (error "~@<Don't know how to create ~
+  (let ((name (format nil "~@[~A~]~A~@[~A~]" prefix name suffix)))
+    (unless (probe-file name)
+      #-(and sbcl (not win32)) (error "~@<Don't know how to create ~
 symbolic links on this implementation-platform combination.~@:>")
-    (format t "~@<Creating symbolic link ~A -> ~A~@:>~%"
-	    name target)
-    #+(and sbcl (not win32)) (sb-posix:symlink target name)))
+      (format t "~@<Creating symbolic link ~A -> ~A~@:>~%"
+	      name target)
+      #+(and sbcl (not win32)) (sb-posix:symlink target name))))
 
-(defun %maybe-create-links (target)
+(defun %maybe-create-links (target &optional prefix suffix)
   "Create symbolic links to TARGET for each entry in
 `*filename->entry-point*', if necessary."
   (let ((names (mapcar #'car *filename->entry-point*)))
-    (map nil #'%maybe-create-link (circular-list target) names)))
+    (mapc (rcurry #'%maybe-create-link prefix suffix)
+	  (circular-list target) names)))
