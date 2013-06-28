@@ -15,9 +15,6 @@
 
 (load-system :cl-rsbag-tools-main)
 
-(load-system :cl-rsbag-tidelog)
-(load-system :cl-rsbag-elan)
-
 ;;; Image saving/resuming logistics
 
 ;; Reset ASDF state
