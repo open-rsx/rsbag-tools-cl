@@ -176,6 +176,7 @@ if(NOT RSBAG_TOOLS_VERSION_PATCH)
                                                 RSBAG_TOOLS_VERSION_PATCH
                                                 RSBAG_TOOLS_VERSION_COMMIT)
 endif()
+set(VERSION_SUFFIX "${RSBAG_TOOLS_VERSION_MAJOR}.${RSBAG_TOOLS_VERSION_MINOR}")
 
 message(STATUS "Project is ${CMAKE_PROJECT_NAME} (${VERSION_FROM_LISP})")
 
@@ -223,7 +224,7 @@ file(GLOB VERSIONS               RELATIVE "${DATA_DIR}" "${DATA_DIR}/?.?")
 file(GLOB ELAN_FILES             "${DATA_DIR}/elan/*.eaf")
 
 # All on-error policies for bag-{info,cat,play,record}
-set(FILE "${DATA_DIR}/${RSBAG_TOOLS_VERSION_MAJOR}.${RSBAG_TOOLS_VERSION_MINOR}/valid-empty.tide")
+set(FILE "${DATA_DIR}/${VERSION_SUFFIX}/valid-empty.tide")
 foreach(POLICY continue abort)
     add_test(NAME    "bag-info/on-error=${POLICY}"
              COMMAND "${CMAKE_CURRENT_BINARY_DIR}/bag-info"
@@ -326,12 +327,11 @@ foreach(STYLE discard meta-data payload detailed
     add_test(NAME    "bag-cat/style/${STYLE}"
              COMMAND "${CMAKE_CURRENT_BINARY_DIR}/bag-cat"
                      --debug --style "${STYLE}"
-                     "${DATA_DIR}/${RSBAG_TOOLS_VERSION_MAJOR}.${RSBAG_TOOLS_VERSION_MINOR}/valid-single-event.tide")
+                     "${DATA_DIR}/${VERSION_SUFFIX}/valid-single-event.tide")
 endforeach()
 
 # Installation
 set(BINARY_PREFIX    "")
-set(VERSION_SUFFIX   "${RSBAG_TOOLS_VERSION_MAJOR}.${RSBAG_TOOLS_VERSION_MINOR}")
 set(BINARY_SUFFIX    "cl${VERSION_SUFFIX}")
 set(MAIN_BINARY_NAME ${BINARY_PREFIX}${MAIN_NAME}${BINARY_SUFFIX})
 install(PROGRAMS    "${CMAKE_CURRENT_BINARY_DIR}/${MAIN_NAME}"
