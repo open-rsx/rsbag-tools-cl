@@ -32,4 +32,5 @@
 (rsbag:enable-restart-threadpool)
 
 (com.dvlsoft.clon:dump "bag" rsbag.tools.main:main
-		       :compression :best)
+		       #+sb-core-compression :compression
+		       #+sb-core-compression 9)

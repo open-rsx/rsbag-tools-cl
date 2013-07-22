@@ -69,8 +69,13 @@
 	 (eval
 	  `(com.dvlsoft.clon:dump
 	    ,name main
-	    :compression ,(when (member "compress" local-args :test #'string=)
-			    :best)))))
+	    ,@(when (member "compress" local-args :test #'string=)
+		#+sb-core-compression '(:compression 9)
+		#-sb-core-compression
+		(progn
+		  (warn "~@<Compression is not supported in this ~
+		         implementation~@:>")
+		  '()))))))
 
       ;; Otherwise display information regarding entry points and
       ;; symbolic links and offer to create these automatically if
