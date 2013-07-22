@@ -30,4 +30,5 @@ LD_LIBRARY_PATH? ~_Spread transport will now be disabled.~@:>"
   (rsbag.tools.main:main))
 
 (com.dvlsoft.clon:dump "bag" reload-spread-and-main
-		       :compression :best)
+		       #+sb-core-compression :compression
+		       #+sb-core-compression 9)
