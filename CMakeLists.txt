@@ -229,9 +229,11 @@ file(GLOB RECOVERABLE_TIDE_FILES "${DATA_DIR}/?.?/recoverable-*.tide")
 set(TIDE_FILES ${VALID_TIDE_FILES} ${RECOVERABLE_TIDE_FILES})
 file(GLOB VERSIONS               RELATIVE "${DATA_DIR}" "${DATA_DIR}/?.?")
 file(GLOB ELAN_FILES             "${DATA_DIR}/elan/*.eaf")
+list(SORT VERSIONS)
+list(GET VERSIONS -1 CURRENT_SERIALIZATION_VERSION)
 
 # All on-error policies for bag-{info,cat,play,record}
-set(FILE "${DATA_DIR}/${VERSION_SUFFIX}/valid-empty.tide")
+set(FILE "${DATA_DIR}/${CURRENT_SERIALIZATION_VERSION}/valid-empty.tide")
 foreach(POLICY continue abort)
     add_test(NAME    "bag-info/on-error=${POLICY}"
              COMMAND "${CMAKE_CURRENT_BINARY_DIR}/bag-info"
@@ -334,7 +336,7 @@ foreach(STYLE discard meta-data payload detailed
     add_test(NAME    "bag-cat/style/${STYLE}"
              COMMAND "${CMAKE_CURRENT_BINARY_DIR}/bag-cat"
                      --debug --style "${STYLE}"
-                     "${DATA_DIR}/${VERSION_SUFFIX}/valid-single-event.tide")
+                     "${DATA_DIR}/${CURRENT_SERIALIZATION_VERSION}/valid-single-event.tide")
 endforeach()
 
 # Installation
