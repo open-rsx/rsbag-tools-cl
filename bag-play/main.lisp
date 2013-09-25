@@ -1,6 +1,6 @@
 ;;; main.lisp --- Main function of the bag-play program.
 ;;
-;; Copyright (C) 2011, 2012 Jan Moringen
+;; Copyright (C) 2011, 2012, 2013 Jan Moringen
 ;;
 ;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 ;;
@@ -88,9 +88,9 @@ the value of `*info-output*'."
 				(getopt :long-name "replay-strategy")))
 	     (progress         (getopt :long-name "show-progress")))
 
-	(log1 :info "Using ~:[~*all channels~;channels matching ~@<~@;~{~S~^, ~}~@:>~]"
-	      (not (eq channels t)) channel-specs)
-	(log1 :info "Using base-URI ~A" base-uri)
+	(log:info "~@<Using ~:[~*all channels~;channels matching ~@<~@;~{~S~^, ~}~@:>~]~@:>"
+		  (not (eq channels t)) channel-specs)
+	(log:info "~@<Using base-URI ~A~@:>" base-uri)
 
 	(with-interactive-interrupt-exit ()
 	  (with-error-policy (error-policy)
@@ -108,7 +108,7 @@ the value of `*info-output*'."
 					(list :end-index end-index))))))
 	      (setf (rsb.ep:processor-error-policy connection)
 		    error-policy)
-	      (log1 :info "Connection ~A" connection)
+	      (log:info "~@<Connection ~A~@:>" connection)
 	      (unwind-protect
 		   (replay connection (connection-strategy connection)
 			   :progress (when *info-output*

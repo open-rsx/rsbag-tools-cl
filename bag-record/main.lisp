@@ -22,20 +22,20 @@
 (defun invoke-with-control-service (uri connection thunk)
   "Expose an RPC server at URI that allows remote clients to control
 CONNECTION while THUNK executes."
-  (log1 :info "Exposing control interface at URI ~A" uri)
+  (log:info "~@<Exposing control interface at URI ~A~@:>" uri)
   (let ((thread (bt:current-thread)))
     (with-local-server (server uri)
       (with-methods (server)
 	  (("start" ()
-	     (log1 :info "Starting recording")
+	     (log:info "~@<Starting recording~@:>")
 	     (start connection)
 	     (values))
 	   ("stop" ()
-	     (log1 :info "Stopping recording")
+	     (log:info "~@<Stopping recording~@:>")
 	     (stop connection)
 	     (values))
 	   ("terminate" ()
-	     (log1 :info "Terminating")
+	     (log:info "~@<Terminating~@:>")
 	     (interrupt thread)
 	     (values)))
 	(funcall thunk)))))
@@ -160,7 +160,7 @@ recorded.~@:>"))
 				      (bag-channels (connection-bag connection)))))
 		    (close connection)))))
 
-	  (log1 :info "Using URIs ~@<~@;~{~A~^, ~}~@:>" uris)
+	  (log:info "~@<Using URIs ~@<~@;~{~A~^, ~}~@:>~@:>" uris)
 	  (with-error-policy (error-policy)
 	    (if control-uri
 		(invoke-with-control-service

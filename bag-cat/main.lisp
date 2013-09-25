@@ -1,6 +1,6 @@
 ;;; main.lisp --- Main function of the bag-cat program.
 ;;
-;; Copyright (C) 2011, 2012 Jan Moringen
+;; Copyright (C) 2011, 2012, 2013 Jan Moringen
 ;;
 ;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 ;;
@@ -169,7 +169,7 @@ in \"my-template-file.template\" to each event. See output of ~
 				  (when end-index
 				    (list :end-index end-index))))))
 	      (setf (rsb.ep:processor-error-policy connection) error-policy)
-	      (log1 :info "Replaying using connection ~A" connection)
+	      (log:info "~@<Replaying using connection ~A~@:>" connection)
 	      (unwind-protect
 		   (replay connection (connection-strategy connection))
 		(close connection)))))))))

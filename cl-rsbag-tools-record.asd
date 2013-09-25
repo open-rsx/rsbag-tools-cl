@@ -92,6 +92,7 @@ See `version/list' for details on keyword parameters."
 rsbag log files."
   :depends-on  (:alexandria
 		:let-plus
+		(:version :log4cl            "1.1.1")
 
 		(:version :cl-rsbag          #.(version/string :revision? nil))
 

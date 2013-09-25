@@ -91,6 +91,8 @@ See `version/list' for details on keyword parameters."
   :description "A tool that recats events stored in rsbag log files."
   :depends-on  (:alexandria
 		:let-plus
+		(:version :log4cl                        "1.1.1")
+
 		:cl-ppcre ;; for regex-based channel selection
 
 		(:version :cl-rsbag                      #.(version/string :revision? nil))
