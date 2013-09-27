@@ -305,11 +305,12 @@ foreach(FILE ${TIDE_FILES} ${ELAN_FILES})
                      --debug ${CONTINUE} --force -o "${OUTPUT}"
                      "${FILE}")
 
+    # bag-{cat,play}: range options
     foreach(RANGE_OPTION ""
                          "--start-index=0" "--start-time=0" "--start-time=-1e-9"
                          "--end-index=0"   "--end-time=0"   "--end-time=-1e-9")
-        string(REGEX REPLACE "--([-a-z]+)[ =]+(.*)" "\\1/\\2"
-               TAG "${RANGE_OPTION}")
+        string(REGEX REPLACE "--([-a-z]+)[ =]+(.*)" "\\1=\\2"
+               TAG "range-option:${RANGE_OPTION}")
 
         # bag-cat
         add_test(NAME    "bag-cat${NAME}/${TAG}"
@@ -319,12 +320,39 @@ foreach(FILE ${TIDE_FILES} ${ELAN_FILES})
                          "${FILE}")
 
         # bag-play
-        if(FILE MATCHES "(.*\\.eaf$|empty\\.tide|empty-channel\\.tide|single-event\\.tide)")
+        add_test(NAME    "bag-play${NAME}/${TAG}"
+                 COMMAND "${CMAKE_CURRENT_BINARY_DIR}/bag-play"
+                         --debug ${CONTINUE}
+                         ${RANGE_OPTION}
+                         --replay-strategy as-fast-as-possible
+                         "${FILE}" inprocess:)
+    endforeach()
+
+    # bag-{cat,play}: replay strategies
+    foreach(STRATEGY_OPTION ""
+                            "--replay-strategy=recorded-timing :speed 100"
+                            "--replay-strategy=recorded-timing :max-delay .0001"
+                            "--replay-strategy=as-fast-as-possible"
+                            "--replay-strategy=fixed-rate :rate 1000"
+                            "--replay-strategy=fixed-rate :delay .0001")
+        string(REGEX REPLACE "--([-a-z]+)[ =]+(.*)" "\\2"
+               TEMP "replay-strategy:${STRATEGY_OPTION}")
+        string(REGEX REPLACE "[ ]" "_" TAG "${TEMP}")
+
+        # bag-cat
+        add_test(NAME    "bag-cat${NAME}/${TAG}"
+                 COMMAND "${CMAKE_CURRENT_BINARY_DIR}/bag-cat"
+                         --debug ${CONTINUE}
+                         ${STRATEGY_OPTION}
+                         "${FILE}")
+
+        # bag-play
+        if(NOT (FILE MATCHES "(simple\\.eaf$|recoverable-missing-index\\.tide$)")
+           OR STRATEGY_OPTION)
             add_test(NAME    "bag-play${NAME}/${TAG}"
                      COMMAND "${CMAKE_CURRENT_BINARY_DIR}/bag-play"
                              --debug ${CONTINUE}
-                             ${RANGE_OPTION}
-                             --replay-strategy as-fast-as-possible
+                             ${STRATEGY_OPTION}
                              "${FILE}" inprocess:)
         endif()
     endforeach()
