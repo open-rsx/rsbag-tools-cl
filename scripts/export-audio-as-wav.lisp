@@ -1,6 +1,6 @@
-;;; export-wav.lisp --- Export rst.audition.SoundChunk as WAV stream.
+;;; export-audio-as-wav.lisp --- Export rst.audition.SoundChunk as WAV stream.
 ;;
-;; Copyright (C) 2012 Jan Moringen
+;; Copyright (C) 2012, 2013 Jan Moringen
 ;;
 ;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 ;;
@@ -17,12 +17,15 @@
 ;; You should have received a copy of the GNU General Public License
 ;; along with this program. If not, see <http://www.gnu.org/licenses>.
 
+;; Note: this script exists mainly for educational purposes. In most
+;; cases, the :audio-stream/wav formatting style can be used instead.
+
 #.(unless (when-let* ((package (find-package "RST.AUDITION"))
-		      (symbol  (find-symbol "SOUND-CHUNK" package))
-		      (class   (find-class symbol nil)))
-	    class)
-    (error "~@<Could not find class rst.audition:sound-chunk. Did you ~
-load the SoundChunk.proto file using the --load-idl option?~@:>"))
+		      (symbol  (find-symbol "SOUND-CHUNK-CHANNELS" package)))
+	    (ignore-errors (fdefinition `(setf ,symbol))))
+    (error "~@<Class RST.AUDITION:SOUND-CHUNK is not loaded ~
+properly. Did you load the SoundChunk.proto file using the --load-idl ~
+option?~@:>"))
 
 (let+ (((&accessors-r/o (channels      rst.audition:sound-chunk-channels)
 			(sample-rate   rst.audition:sound-chunk-rate)
@@ -39,12 +42,10 @@ load the SoundChunk.proto file using the --load-idl option?~@:>"))
   ;; fact that the header has been written by binding the variable
   ;; header-written? to t.
   (unless (boundp 'header-written?)
-    (format *error-output*
-	    "Writing wave header for ~A (~D byte~:P/sample) x ~D channel~:P @ ~:D Hz~%"
+    (format *error-output* "Writing wave header for ~A (~D ~
+			    byte~:P/sample) x ~D channel~:P @ ~:D Hz~%"
 	    sample-format width channels sample-rate)
-    (format *error-output*
-	    "Begin timestamp: ~A~%"
-	    (floor create-unix-nsec 1000))
+    (format *error-output* "Begin timestamp   ~A~%" create)
 
     ;; The non-constant fields have the following meanings:
     ;; 0 Size
@@ -86,5 +87,8 @@ load the SoundChunk.proto file using the --load-idl option?~@:>"))
 	(set-field 40 4 (- fake-size 44))) ;; Sub chunk size
       (write-sequence wave-header-template stream))
     (set 'header-written? t))
+
+  (format *error-output* "~CProcessing buffer ~A" #\Return create)
+  (force-output *error-output*)
 
   (write-sequence samples stream))
