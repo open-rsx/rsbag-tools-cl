@@ -99,7 +99,7 @@ CONNECTION while THUNK executes."
    :more-versions   (list :rsbag         (cl-rsbag-system:version/list :commit? t)
                           :rsbag-tidelog (cl-rsbag-system:version/list :commit? t))
    :update-synopsis #'update-synopsis
-   :return          #'(lambda () (return-from main)))
+   :return          (lambda () (return-from main)))
 
   (unless (remainder)
     (error "~@<Specify at least one URI from which events should be ~

@@ -84,9 +84,9 @@ in \"my-template-file.template\" to each event. See output of ~
 (defun make-channel-filter (specs)
   (when specs
     (apply #'disjoin
-           (mapcar #'(lambda (spec)
-                       #'(lambda (channel)
-                           (cl-ppcre:scan spec (channel-name channel))))
+           (mapcar (lambda (spec)
+                     (lambda (channel)
+                       (cl-ppcre:scan spec (channel-name channel))))
                    specs))))
 
 (defun main ()
@@ -99,7 +99,7 @@ in \"my-template-file.template\" to each event. See output of ~
      :more-versions   (list :rsbag         (cl-rsbag-system:version/list :commit? t)
                             :rsbag-tidelog (cl-rsbag-system:version/list :commit? t))
      :update-synopsis #'update-synopsis
-     :return          #'(lambda () (return-from main))))
+     :return          (lambda () (return-from main))))
 
   (unless (length= 1 (remainder))
     (error "~@<Specify input file.~@:>"))
@@ -135,8 +135,8 @@ in \"my-template-file.template\" to each event. See output of ~
              (target          (ecase (getopt :long-name "target-stream")
                                 ((:stdout :standard-output) *standard-output*)
                                 ((:stderr :error-output)    *error-output*)))
-             (sink            #'(lambda (datum)
-                                  (format-event datum style target))))
+             (sink            (lambda (datum)
+                                (format-event datum style target))))
         (with-interactive-interrupt-exit ()
           (with-error-policy (error-policy)
             (let ((connection

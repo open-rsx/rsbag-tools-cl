@@ -26,9 +26,9 @@
 (defun make-channel-filter (specs)
   (when specs
     (apply #'disjoin
-           (mapcar #'(lambda (spec)
-                       #'(lambda (channel)
-                           (cl-ppcre:scan spec (channel-name channel))))
+           (mapcar (lambda (spec)
+                     (lambda (channel)
+                       (cl-ppcre:scan spec (channel-name channel))))
                 specs))))
 
 (defun print-progress (progress
@@ -54,7 +54,7 @@ the value of `*info-output*'."
      :more-versions   (list :rsbag         (cl-rsbag-system:version/list :commit? t)
                             :rsbag-tidelog (cl-rsbag-system:version/list :commit? t))
      :update-synopsis #'update-synopsis
-     :return          #'(lambda () (return-from main))))
+     :return          (lambda () (return-from main))))
 
   (unless (<= 1 (length (remainder)) 2)
     (error "~@<Specify input file and, optionally, base URI.~@:>"))

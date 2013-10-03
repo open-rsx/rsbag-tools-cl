@@ -25,8 +25,8 @@
                           (when (pathname-type pathname)
                             (list "." (pathname-type pathname)))))
          (entry    (cdr (assoc name *filename->entry-point*
-                               :test #'(lambda (name entry)
-                                         (search entry name))))))
+                               :test (lambda (name entry)
+                                       (search entry name))))))
     (cond
       ;; If we found an entry point, use it.
       (entry

@@ -73,9 +73,9 @@ are supported:~{~&+ ~4A (extension: \".~(~:*~A~)\")~}."
 (defun make-channel-filter (specs)
   (when specs
     (apply #'disjoin
-           (mapcar #'(lambda (spec)
-                       #'(lambda (channel)
-                           (cl-ppcre:scan spec (channel-name channel))))
+           (mapcar (lambda (spec)
+                     (lambda (channel)
+                       (cl-ppcre:scan spec (channel-name channel))))
                    specs))))
 
 (defun collect-input-files (args)
@@ -134,7 +134,7 @@ match any files.~@:>"
    :more-versions   (list :rsbag         (cl-rsbag-system:version/list :commit? t)
                           :rsbag-tidelog (cl-rsbag-system:version/list :commit? t))
    :update-synopsis #'update-synopsis
-   :return          #'(lambda () (return-from main)))
+   :return          (lambda () (return-from main)))
 
   (with-logged-warnings
     (progn #+later with-print-limits
@@ -179,8 +179,8 @@ match any files.~@:>"
                           (null    nil)
                           (keyword
                            (list :transform/timestamp
-                                 #'(lambda (timestamp datum)
-                                     (rsb:timestamp datum transform/timestamp)))))))
+                                 (lambda (timestamp datum)
+                                   (rsb:timestamp datum transform/timestamp)))))))
             (iter (for bag in (cons output inputs))
                   (when bag
                     (handler-case

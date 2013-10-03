@@ -21,9 +21,9 @@
                       &key
                       progress
                       (transform           #'identity)
-                      (transform/timestamp #'(lambda (timestamp datum)
-                                               (declare (ignore datum))
-                                               timestamp))
+                      (transform/timestamp (lambda (timestamp datum)
+                                             (declare (ignore datum))
+                                             timestamp))
                       &allow-other-keys)
   (let+ ((length (length input))
          ((&flet update-progress (i)
@@ -68,4 +68,4 @@
 (defmethod transcode ((input sequence) (output bag)
                       &rest args &key
                       &allow-other-keys)
-  (map nil #'(lambda (bag) (apply #'transcode bag output args)) input))
+  (map nil (lambda (bag) (apply #'transcode bag output args)) input))

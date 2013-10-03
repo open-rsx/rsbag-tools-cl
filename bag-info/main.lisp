@@ -54,7 +54,7 @@ Examples:
    :more-versions   (list :rsbag         (cl-rsbag-system:version/list :commit? t)
                           :rsbag-tidelog (cl-rsbag-system:version/list :commit? t))
    :update-synopsis #'update-synopsis
-   :return          #'(lambda () (return-from main)))
+   :return          (lambda () (return-from main)))
 
   (unless (length= 1 (remainder))
     (error "Specify exactly one log file."))
