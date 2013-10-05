@@ -78,9 +78,9 @@ check their consistency and return them as four values:
     ;; Check mutually exclusive options.
     (when (and start-time start-index)
       (error "~@<The commandline options \"start-time\" and ~
-\"start-index\" are mutually exclusive.~@:>"))
+              \"start-index\" are mutually exclusive.~@:>"))
     (when (and end-time end-index)
       (error "~@<The commandline options \"end-time\" and ~
-\"end-index\" are mutually exclusive.~@:>"))
+              \"end-index\" are mutually exclusive.~@:>"))
 
     (values start-time start-index end-time end-index)))

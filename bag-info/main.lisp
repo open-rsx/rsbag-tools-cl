@@ -9,16 +9,16 @@
 (defun make-help-string (&key
                          (program-name "bag-info"))
   "Return a help that explains the commandline option interface."
-  (format nil "Display information about BAG-FILE.
-
-The file format of BAG-FILE is guessed based on the ~
-filename. Currently, the following file formats are supported:~{~&+ ~
-~4A (extension: \".~(~:*~A~)\")~}
-
-Examples:
-
-  ~A /tmp/everything.tide
-"
+  (format nil "Display information about BAG-FILE.~@
+               ~@
+               The file format of BAG-FILE is guessed based on the ~
+               filename. Currently, the following file formats are ~
+               supported:~{~&+ ~4A (extension: \".~(~:*~A~)\")~}~@
+               ~@
+               Examples:~@
+               ~@
+               ~2@T~A /tmp/everything.tide~@
+               "
           (mapcar #'car (rsbag.backend:backend-classes))
           program-name))
 
@@ -69,8 +69,9 @@ Examples:
         (with-error-policy (error-policy)
           (with-bag (bag input :direction :input)
             (format t "File ~S~&~2T~<~@;~@{~@(~8A~): ~
-~:[N/A~;~:*~,,',:D~]~^~&~}~:>~&~2T~@<~@;~:{Channel ~
-~S~&~4T~@<~@;~{~@(~8A~): ~:[N/A~;~:*~,,',:D~]~^~&~}~:>~&~}~:>~&"
+                       ~:[N/A~;~:*~,,',:D~]~^~&~}~:>~&~2T~@<~@;~:{Channel ~
+                       ~S~&~4T~@<~@;~{~@(~8A~): ~
+                       ~:[N/A~;~:*~,,',:D~]~^~&~}~:>~&~}~:>~&"
                     input
                     (let+ (((&accessors-r/o (start rsbag:start)
                                             (end   rsbag:end)) bag)

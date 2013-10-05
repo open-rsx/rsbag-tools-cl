@@ -9,31 +9,33 @@
 (defun make-help-string ()
   "Return a help that explains the commandline option interface."
   (format nil "Copy entries from input files matching GLOB-EXPRESSION ~
-or from an explicitly given list of INPUT-FILEs into the specified ~
-output file. In addition to the canonical globbing syntax, expressions ~
-of the form
+               or from an explicitly given list of INPUT-FILEs into ~
+               the specified output file. In addition to the canonical ~
+               globbing syntax, expressions of the form~@
+               ~@
+               ~2@TSOMESTUFF/**/MORESTUFF~@
+               ~@
+               can be used to search directories recursively.~@
+               ~@
 
-  SOMESTUFF/**/MORESTUFF
-
-can be used to search directories recursively.
-
-The file formats of input files and the output file are determined ~
-based on the file type (extension). Currently, the following file ~
-formats are supported:~{~&+ ~4A (extension: \".~(~:*~A~)\")~}.
-"
+               The file formats of input files and the output file are ~
+               determined based on the file ~
+               type (extension). Currently, the following file formats ~
+               are supported:~{~&+ ~4A (extension: \".~(~:*~A~)\")~}.~@
+               "
           (mapcar #'car (rsbag.backend:backend-classes))))
 
 (defun make-example-string (&key
                             (program-name "bag-merge" #+later (progname)))
   "Make and return a string containing usage examples of the program."
-  (format nil "~A -o bla.tide '/vol/my-separate-logs/*.tide'
-
-  Merge all log files matching the glob expression ~
-\"/vol/my-separate-logs/*.tide\" into a single log file named ~
-\"bla.tide\". Note the quotes which prevent the shell from ~
-interpreting the glob expression.
-
-"
+  (format nil "~2@T~A -o bla.tide '/vol/my-separate-logs/*.tide'~@
+               ~@
+               Merge all log files matching the glob expression ~
+               \"/vol/my-separate-logs/*.tide\" into a single log file ~
+               named \"bla.tide\". Note the quotes which prevent the ~
+               shell from interpreting the glob expression.~@
+               ~@
+               "
           program-name))
 
 (defun update-synopsis (&key
@@ -50,9 +52,13 @@ interpreting the glob expression.
                        :type          :file
                        :description
                        (format nil "Name of the file into which ~
-captured events should be written. The file format is determined based ~
-on the file type (extension). Currently, the following file formats ~
-are supported:~{~&+ ~4A (extension: \".~(~:*~A~)\")~}."
+                                    captured events should be ~
+                                    written. The file format is ~
+                                    determined based on the file ~
+                                    type (extension). Currently, the ~
+                                    following file formats are ~
+                                    supported:~{~&+ ~4A (extension: ~
+                                    \".~(~:*~A~)\")~}."
                                (mapcar #'car (rsbag.backend:backend-classes))))
               (switch  :long-name     "force"
                        :default-value nil
@@ -91,19 +97,19 @@ ARGS can be
       ;; Neither glob expression nor filenames
       ((null args)
        (error "~@<No glob expression or one or more input log files ~
-specified.~@:>"))
+               specified.~@:>"))
 
       ;; A single glob expression. Does it match anything?
       ((and (length= 1 parsed) (wild-pathname-p (first parsed)))
        (or (directory (first parsed))
            (error "~@<The specified input glob expression ~S did not ~
-match any files.~@:>"
+                   match any files.~@:>"
                   (first args))))
 
-      ;; Multiple argument: should refer to existing files.
+      ;; Multiple arguments: should refer to existing files.
       ((when-let ((invalid (remove-if #'existing-file parsed)))
          (error "~@<The following specified input file~P~:* ~
-~[~;does~:;do~] not exist: ~{~S~^, ~}.~@:>"
+                 ~[~;does~:;do~] not exist: ~{~S~^, ~}.~@:>"
                 (length invalid) invalid)))
 
       ;; We don't understand anything else.

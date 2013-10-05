@@ -41,7 +41,14 @@ CONNECTION while THUNK executes."
                        :short-name    "o"
                        :type          :file
                        :description
-                       (format nil "Name of the file into which captured events should be written. The file format is determined based on the file type (extension). Currently, the following file formats are supported:~{~&+ ~4A (extension: \".~(~:*~A~)\")~}."
+                       (format nil "Name of the file into which ~
+                                    captured events should be ~
+                                    written. The file format is ~
+                                    determined based on the file ~
+                                    type (extension). Currently, the ~
+                                    following file formats are ~
+                                    supported:~{~&+ ~4A (extension: ~
+                                    \".~(~:*~A~)\")~}."
                                (mapcar #'car (rsbag.backend:backend-classes))))
               (switch  :long-name     "force"
                        :default-value nil
@@ -103,7 +110,7 @@ CONNECTION while THUNK executes."
 
   (unless (remainder)
     (error "~@<Specify at least one URI from which events should be ~
-recorded.~@:>"))
+            recorded.~@:>"))
 
   (with-logged-warnings
     ;; Load IDLs as specified on the commandline.

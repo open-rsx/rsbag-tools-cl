@@ -12,8 +12,8 @@
                       (symbol  (find-symbol "SOUND-CHUNK-CHANNELS" package)))
             (ignore-errors (fdefinition `(setf ,symbol))))
     (error "~@<Class RST.AUDITION:SOUND-CHUNK is not loaded ~
-properly. Did you load the SoundChunk.proto file using the --load-idl ~
-option?~@:>"))
+            properly. Did you load the SoundChunk.proto file using the ~
+            --load-idl option?~@:>"))
 
 (let+ (((&accessors-r/o (channels      rst.audition:sound-chunk-channels)
                         (sample-rate   rst.audition:sound-chunk-rate)

@@ -12,24 +12,26 @@
 and lists the available replay strategies."
   (with-output-to-string (stream)
     (format stream "Replay events form the specified input file ~
-according to SPEC which has to be of the form
-
-  KIND KEY1 VALUE1 KEY2 VALUE2 ...
-
-where keys and values depend on KIND and are optional in most ~
-cases. Examples (note that the single quotes have to be included only ~
-when used within a shell):
-
-  --replay-strategy recorded-timing
-  -r as-fast-as-possible
-  --replay-strategy 'fixed-rate :rate 10'
-  -r 'remote-controlled :uri \"spread://localhost:4803/myplayback/control\"'
-
-")
+                    according to SPEC which has to be of the form~@
+                    ~@
+                    ~2@TKIND KEY1 VALUE1 KEY2 VALUE2 ...~@
+                    ~@
+                    where keys and values depend on KIND and are ~
+                    optional in most cases. Examples (note that the ~
+                    single quotes have to be included only when used ~
+                    within a shell):~@
+                    ~@
+                    ~2@T--replay-strategy recorded-timing~@
+                    ~2@T-r as-fast-as-possible~@
+                    ~2@T--replay-strategy 'fixed-rate :rate 10'~@
+                    ~2@T-r 'remote-controlled :uri ~
+                      \"spread://localhost:4803/myplayback/control\"'~@
+                    ~@
+                    ")
     (with-abbreviation (stream :strategies show)
-      (format stream "Currently, the following strategies are supported:
-
-" )
+      (format stream "Currently, the following strategies are supported:~@
+                      ~@
+                      ")
       (print-classes-help-string
        (rsbag.rsb:replay-strategy-classes) stream
        :initarg-blacklist '(:start-index :end-index

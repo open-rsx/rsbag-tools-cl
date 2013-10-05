@@ -8,7 +8,8 @@
                       (symbol  (find-symbol "IMAGE-WIDTH" package)))
             (ignore-errors (fdefinition `(setf ,symbol))))
     (error "~@<Class RST.VISION:IMAGE is not loaded properly. Did you ~
-load the Image.proto file using the --load-idl option?~@:>"))
+            load the Image.proto file using the --load-idl ~
+            option?~@:>"))
 
 (let* (;; Directory into which output images should be written. Note
        ;; trailing `/'.

@@ -12,43 +12,48 @@
   "Return a help that explains the commandline option interface."
   (format nil
           "Outputs data from channels in the bag file ~
-INPUT-FILE-OR-- (or standard input, if \"-\" is specified) on standard ~
-output.
-
-The file format of INPUT-FILE is guessed based on the ~
-filename. Currently, the following file formats are supported:~{~&+ ~
-~4A (extension: \".~(~:*~A~)\")~}"
+           INPUT-FILE-OR-- (or standard input, if \"-\" is specified) ~
+           on standard output.~@
+           ~@
+           The file format of INPUT-FILE is guessed based on the ~
+           filename. Currently, the following file formats are ~
+           supported:~{~&+ ~4A (extension: \".~(~:*~A~)\")~}"
           (mapcar #'car (rsbag.backend:backend-classes))))
 
 (defun make-examples-string ()
   "Make and return a string containing usage examples of the program."
   (format nil
-          "~2T~A /tmp/everything.tide
+          "~2T~A /tmp/everything.tide~@
+           ~@
+           Output the data from all channels in the log file ~
+           \"/tmp/everything.tide\" ordered by timestamps.~@
+           ~@
+           ~2T~:*~A -c isr /tmp/nao.tide~@
+           ~@
+           Output the data from all channels of the log file ~
+           \"/tmp/nao.tide\" the names of which contain the string ~
+           \"isr\".~@
+           ~@
+           ~2T~:*~A --channel 'STRING$' --channel 'BYTES$' log.tide~@
+           ~@
+           Output the data from all channels of the log file ~
+           \"log.tide\" whose names end in either \"STRING\" or ~
+           \"BYTES\".~@
+           ~@
+           ~2T~:*~A --style 'payload :separator (#\\Newline (:rule ~
+           #\\-))' log.tide ~@
+           ~@
+           Print event payloads separating payloads of different ~
+           events by newlines and horizontal rules.~@
+           ~@
+           ~2T~:*~A --style 'programmable/template :template ~
+           #P\"my-template-file.template\"' log.tide~@
+           ~@
 
-Output the data from all channels in the log file ~
-\"/tmp/everything.tide\" ordered by timestamps.
-
-~2T~:*~A -c isr /tmp/nao.tide
-
-Output the data from all channels of the log file \"/tmp/nao.tide\" ~
-the names of which contain the string \"isr\".
-
-~2T~:*~A --channel 'STRING$' --channel 'BYTES$' log.tide
-
-Output the data from all channels of the log file \"log.tide\" whose ~
-names end in either \"STRING\" or \"BYTES\".
-
-~2T~:*~A --style 'payload :separator (#\\Newline (:rule #\\-))' log.tide
-
-Print event payloads separating payloads of different events by ~
-newlines and horizontal rules.
-
-~2T~:*~A --style 'programmable/template :template ~
-#P\"my-template-file.template\"' log.tide
-
-Format events in the log file \"log.tide\" by applying the template ~
-in \"my-template-file.template\" to each event. See output of ~
---help-for styles for more information."
+           Format events in the log file \"log.tide\" by applying the ~
+           template in \"my-template-file.template\" to each ~
+           event. See output of --help-for styles for more ~
+           information."
           "bag-cat"))
 
 (defun update-synopsis (&key
