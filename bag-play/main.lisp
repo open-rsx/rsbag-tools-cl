@@ -4,7 +4,7 @@
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
-(cl:in-package :rsbag.tools.play)
+(cl:in-package #:rsbag.tools.play)
 
 (defun update-synopsis (&key
 			(show :default))

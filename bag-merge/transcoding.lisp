@@ -4,7 +4,7 @@
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
-(cl:in-package :rsbag.tools.merge)
+(cl:in-package #:rsbag.tools.merge)
 
 (defmethod make-channel-name ((input-channel t))
   (channel-name input-channel))

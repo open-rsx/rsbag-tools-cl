@@ -4,33 +4,33 @@
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
-(cl:defpackage :rsbag.tools.record
-  (:shadowing-import-from :rsbag
-   :direction
+(cl:defpackage #:rsbag.tools.record
+  (:shadowing-import-from #:rsbag
+   #:direction
 
-   :meta-data
-   :meta-data-count
-   :meta-data-keys
-   :meta-data-values
-   :meta-data-plist
-   :meta-data-alist)
+   #:meta-data
+   #:meta-data-count
+   #:meta-data-keys
+   #:meta-data-values
+   #:meta-data-plist
+   #:meta-data-alist)
 
   (:use
-   :cl
-   :alexandria
-   :iterate
-   :let-plus
-   :com.dvlsoft.clon
+   #:cl
+   #:alexandria
+   #:iterate
+   #:let-plus
+   #:com.dvlsoft.clon
 
-   :rsb
-   :rsb.patterns
-   :rsb.common
+   #:rsb
+   #:rsb.patterns
+   #:rsb.common
 
-   :rsbag
-   :rsbag.rsb)
+   #:rsbag
+   #:rsbag.rsb)
 
   (:export
-   :main)
+   #:main)
 
   (:documentation
    "Package definition for the bag-record program."))

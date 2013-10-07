@@ -4,7 +4,7 @@
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
-(cl:in-package :rsbag.tools.merge)
+(cl:in-package #:rsbag.tools.merge)
 
 (defun make-help-string ()
   "Return a help that explains the commandline option interface."

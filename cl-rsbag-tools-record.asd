@@ -4,16 +4,16 @@
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
-(cl:defpackage :cl-rsbag-tools-record-system
+(cl:defpackage #:cl-rsbag-tools-record-system
   (:use
-   :cl
-   :asdf)
+   #:cl
+   #:asdf)
 
   (:export
-   :version/list
-   :version/string))
+   #:version/list
+   #:version/string))
 
-(cl:in-package :cl-rsbag-tools-record-system)
+(cl:in-package #:cl-rsbag-tools-record-system)
 
 
 ;;; Version stuff

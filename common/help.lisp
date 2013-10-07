@@ -4,7 +4,7 @@
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
-(cl:in-package :rsbag.common)
+(cl:in-package #:rsbag.common)
 
 (defun make-replay-strategy-help-string (&key
 					 (show :default))

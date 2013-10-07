@@ -4,23 +4,23 @@
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
-(cl:defpackage :rsbag.tools.main
+(cl:defpackage #:rsbag.tools.main
   (:use
-   :cl
-   :alexandria
-   :iterate
-   :com.dvlsoft.clon
+   #:cl
+   #:alexandria
+   #:iterate
+   #:com.dvlsoft.clon
 
-   :rsbag
+   #:rsbag
 
-   :rsb.common)
-
-  (:export
-   :main)
+   #:rsb.common)
 
   (:export
-   :make-static
-   :make-dynamic)
+   #:main)
+
+  (:export
+   #:make-static
+   #:make-dynamic)
 
   (:documentation
    "Package definition for the main bag program."))

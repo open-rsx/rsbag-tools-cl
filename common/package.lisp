@@ -4,26 +4,26 @@
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
-(cl:defpackage :rsbag.common
+(cl:defpackage #:rsbag.common
   (:use
-   :cl
-   :alexandria
-   :let-plus
+   #:cl
+   #:alexandria
+   #:let-plus
 
-   :com.dvlsoft.clon
+   #:com.dvlsoft.clon
 
-   :rsbag.rsb.replay
+   #:rsbag.rsb.replay
 
-   :rsb.common)
+   #:rsb.common)
 
   ;; Commandline options
   (:export
-   :make-replay-options
-   :process-bounds-options)
+   #:make-replay-options
+   #:process-bounds-options)
 
   ;; Help text generation
   (:export
-   :make-replay-strategy-help-string)
+   #:make-replay-strategy-help-string)
 
   (:documentation
    "This package contains some common utility functions for RSBag:

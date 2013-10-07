@@ -4,7 +4,7 @@
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
-(cl:in-package :rsbag.tools.record)
+(cl:in-package #:rsbag.tools.record)
 
 (defun invoke-with-control-service (uri connection thunk)
   "Expose an RPC server at URI that allows remote clients to control

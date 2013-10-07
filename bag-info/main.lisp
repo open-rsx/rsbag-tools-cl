@@ -4,7 +4,7 @@
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
-(cl:in-package :rsbag.tools.info)
+(cl:in-package #:rsbag.tools.info)
 
 (defun make-help-string (&key
 			 (program-name "bag-info"))

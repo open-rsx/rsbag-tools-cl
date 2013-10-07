@@ -4,35 +4,35 @@
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
-(cl:defpackage :rsbag.tools.cat
-  (:shadowing-import-from :rsbag
-   :direction
+(cl:defpackage #:rsbag.tools.cat
+  (:shadowing-import-from #:rsbag
+   #:direction
 
-   :meta-data
-   :meta-data-count
-   :meta-data-keys
-   :meta-data-values
-   :meta-data-plist
-   :meta-data-alist)
+   #:meta-data
+   #:meta-data-count
+   #:meta-data-keys
+   #:meta-data-values
+   #:meta-data-plist
+   #:meta-data-alist)
 
   (:use
-   :cl
-   :alexandria
-   :let-plus
-   :iterate
-   :com.dvlsoft.clon
+   #:cl
+   #:alexandria
+   #:let-plus
+   #:iterate
+   #:com.dvlsoft.clon
 
-   :rsb ;;; TODO(jmoringe): currently for logging
-   :rsb.common
-   :rsb.formatting
+   #:rsb
+   #:rsb.common
+   #:rsb.formatting
 
-   :rsbag
-   :rsbag.view
-   :rsbag.rsb
-   :rsbag.common)
+   #:rsbag
+   #:rsbag.view
+   #:rsbag.rsb
+   #:rsbag.common)
 
   (:export
-   :main)
+   #:main)
 
   (:documentation
    "Package definition for the bag-cat program."))

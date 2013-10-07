@@ -4,7 +4,7 @@
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
-(cl:in-package :rsbag.tools.play)
+(cl:in-package #:rsbag.tools.play)
 
 (defun make-help-string (&key
 			 (show :default))

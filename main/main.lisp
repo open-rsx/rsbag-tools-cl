@@ -4,7 +4,7 @@
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
-(cl:in-package :rsbag.tools.main)
+(cl:in-package #:rsbag.tools.main)
 
 (defvar *filename->entry-point*
   '(("bag-record" . rsbag.tools.record:main)

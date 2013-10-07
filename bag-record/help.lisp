@@ -1,10 +1,10 @@
-;;;; help.lisp ---Help text generation for the bag-record program.
+;;;; help.lisp --- Help text generation for the bag-record program.
 ;;;;
 ;;;; Copyright (C) 2012, 2013 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
-(cl:in-package :rsbag.tools.record)
+(cl:in-package #:rsbag.tools.record)
 
 (defun make-help-string (&key
 			 (show :default))

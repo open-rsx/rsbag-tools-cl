@@ -4,21 +4,21 @@
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
-(cl:defpackage :rsbag.tools.info
+(cl:defpackage #:rsbag.tools.info
   (:use
-   :cl
-   :alexandria
-   :let-plus
-   :iterate
-   :com.dvlsoft.clon
+   #:cl
+   #:alexandria
+   #:let-plus
+   #:iterate
+   #:com.dvlsoft.clon
 
-   :rsbag
+   #:rsbag
 
-   :rsb.common
-   :rsb.formatting)
+   #:rsb.common
+   #:rsb.formatting)
 
   (:export
-   :main)
+   #:main)
 
   (:documentation
    "Package definition for the bag-info program."))
