@@ -32,10 +32,10 @@ associated to ENTRY, suitable for associating ENTRY to it."))
 output channel."))
 
 (defgeneric transcode (input output
-		       &key
-		       channels
-		       skip-empty-channels?
-		       progress)
+                       &key
+                       channels
+                       skip-empty-channels?
+                       progress)
   (:documentation
    "Copy and potentially transform the contents of INPUT to
 OUTPUT. INPUT and OUTPUT can be bags or channels or sequences of such.
@@ -53,9 +53,7 @@ If PROGRESS is non-nil it has to be a function accepting six
 arguments: a current index, an overall length, an input bag, an input
 channel, an output bag and an output channel. "))
 
-
 ;;; Default behavior
-;;
 
 (defmethod transform-timestamp ((timestamp t) (entry t))
   "Default behavior is to not modify TIMESTAMP."

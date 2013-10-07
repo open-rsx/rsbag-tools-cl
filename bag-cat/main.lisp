@@ -6,26 +6,24 @@
 
 (cl:in-package #:rsbag.tools.cat)
 
-
 ;;; Help and main functions
-;;
 
 (defun make-help-string ()
   "Return a help that explains the commandline option interface."
   (format nil
-	  "Outputs data from channels in the bag file ~
+          "Outputs data from channels in the bag file ~
 INPUT-FILE-OR-- (or standard input, if \"-\" is specified) on standard ~
 output.
 
 The file format of INPUT-FILE is guessed based on the ~
 filename. Currently, the following file formats are supported:~{~&+ ~
 ~4A (extension: \".~(~:*~A~)\")~}"
-	  (mapcar #'car (rsbag.backend:backend-classes))))
+          (mapcar #'car (rsbag.backend:backend-classes))))
 
 (defun make-examples-string ()
   "Make and return a string containing usage examples of the program."
   (format nil
-	  "~2T~A /tmp/everything.tide
+          "~2T~A /tmp/everything.tide
 
 Output the data from all channels in the log file ~
 \"/tmp/everything.tide\" ordered by timestamps.
@@ -51,10 +49,10 @@ newlines and horizontal rules.
 Format events in the log file \"log.tide\" by applying the template ~
 in \"my-template-file.template\" to each event. See output of ~
 --help-for styles for more information."
-	  "bag-cat"))
+          "bag-cat"))
 
 (defun update-synopsis (&key
-			(show :default))
+                        (show :default))
   "Create and return a commandline option tree."
   (make-synopsis
    ;; Basic usage and specific options.
@@ -63,33 +61,33 @@ in \"my-template-file.template\" to each event. See output of ~
    :item    (make-common-options :show show)
    :item    (make-error-handling-options :show show)
    :item    (make-replay-options :show show
-				 :replay-strategy-default "as-fast-as-possible")
+                                 :replay-strategy-default "as-fast-as-possible")
    :item    (defgroup (:header "Output Options")
-	      (stropt  :long-name     "style"
-		       :default-value "payload"
-		       :argument-name "SPEC"
-		       :description
-		       (make-style-help-string :show show))
-	      (enum    :long-name     "target-stream"
-		       :enum          '(:stdout :standard-output
-					:stderr :error-output)
-		       :default-value :standard-output
-		       :argument-name "STREAM-NAME"
-		       :description
-		       "Stream to which produced output should be sent."))
+              (stropt  :long-name     "style"
+                       :default-value "payload"
+                       :argument-name "SPEC"
+                       :description
+                       (make-style-help-string :show show))
+              (enum    :long-name     "target-stream"
+                       :enum          '(:stdout :standard-output
+                                        :stderr :error-output)
+                       :default-value :standard-output
+                       :argument-name "STREAM-NAME"
+                       :description
+                       "Stream to which produced output should be sent."))
    ;; Append IDL options.
    :item    (make-idl-options)
    ;; Append examples.
    :item    (defgroup (:header "Examples")
-	      (make-text :contents (make-examples-string)))))
+              (make-text :contents (make-examples-string)))))
 
 (defun make-channel-filter (specs)
   (when specs
     (apply #'disjoin
-	   (mapcar #'(lambda (spec)
-		       #'(lambda (channel)
-			   (cl-ppcre:scan spec (channel-name channel))))
-		   specs))))
+           (mapcar #'(lambda (spec)
+                       #'(lambda (channel)
+                           (cl-ppcre:scan spec (channel-name channel))))
+                   specs))))
 
 (defun main ()
   "Entry point function of the bag-cat program."
@@ -99,7 +97,7 @@ in \"my-template-file.template\" to each event. See output of ~
     (process-commandline-options
      :version         (cl-rsbag-tools-cat-system:version/list :commit? t)
      :more-versions   (list :rsbag         (cl-rsbag-system:version/list :commit? t)
-			    :rsbag-tidelog (cl-rsbag-system:version/list :commit? t))
+                            :rsbag-tidelog (cl-rsbag-system:version/list :commit? t))
      :update-synopsis #'update-synopsis
      :return          #'(lambda () (return-from main))))
 
@@ -119,44 +117,44 @@ in \"my-template-file.template\" to each event. See output of ~
       ;; Pass all of these to `bag->events' for and start the
       ;; resulting connection.
       (let+ ((error-policy  (maybe-relay-to-thread
-			     (process-error-handling-options)))
-	     (input         (first (remainder)))
-	     (channel-specs (iter (for channel next (getopt :long-name "channel"))
-				  (while channel)
-				  (collect channel)))
-	     (channels      (or (make-channel-filter channel-specs) t))
-	     ((&values start-time start-index end-time end-index)
-	      (process-bounds-options))
-	     (replay-strategy (parse-instantiation-spec
-			       (getopt :long-name "replay-strategy")))
-	     (style           (let+ (((class &rest args)
-				      (parse-instantiation-spec
-				       (getopt :long-name "style"))))
-				(apply #'make-instance (find-style-class class)
-				       args)))
-	     (target          (ecase (getopt :long-name "target-stream")
-				((:stdout :standard-output) *standard-output*)
-				((:stderr :error-output)    *error-output*)))
-	     (sink            #'(lambda (datum)
-				  (format-event datum style target))))
-	(with-interactive-interrupt-exit ()
-	  (with-error-policy (error-policy)
-	    (let ((connection
-		   (apply #'bag->events input sink
-			  :channels        channels
-			  :transform       `(&from-source
-					     :converter ,(default-converter 'nibbles:octet-vector))
-			  :replay-strategy replay-strategy
-			  (append (when start-time
-				    (list :start-time start-time))
-				  (when start-index
-				    (list :start-index start-index))
-				  (when end-time
-				    (list :end-time end-time))
-				  (when end-index
-				    (list :end-index end-index))))))
-	      (setf (rsb.ep:processor-error-policy connection) error-policy)
-	      (log:info "~@<Replaying using connection ~A~@:>" connection)
-	      (unwind-protect
-		   (replay connection (connection-strategy connection))
-		(close connection)))))))))
+                             (process-error-handling-options)))
+             (input         (first (remainder)))
+             (channel-specs (iter (for channel next (getopt :long-name "channel"))
+                                  (while channel)
+                                  (collect channel)))
+             (channels      (or (make-channel-filter channel-specs) t))
+             ((&values start-time start-index end-time end-index)
+              (process-bounds-options))
+             (replay-strategy (parse-instantiation-spec
+                               (getopt :long-name "replay-strategy")))
+             (style           (let+ (((class &rest args)
+                                      (parse-instantiation-spec
+                                       (getopt :long-name "style"))))
+                                (apply #'make-instance (find-style-class class)
+                                       args)))
+             (target          (ecase (getopt :long-name "target-stream")
+                                ((:stdout :standard-output) *standard-output*)
+                                ((:stderr :error-output)    *error-output*)))
+             (sink            #'(lambda (datum)
+                                  (format-event datum style target))))
+        (with-interactive-interrupt-exit ()
+          (with-error-policy (error-policy)
+            (let ((connection
+                   (apply #'bag->events input sink
+                          :channels        channels
+                          :transform       `(&from-source
+                                             :converter ,(default-converter 'nibbles:octet-vector))
+                          :replay-strategy replay-strategy
+                          (append (when start-time
+                                    (list :start-time start-time))
+                                  (when start-index
+                                    (list :start-index start-index))
+                                  (when end-time
+                                    (list :end-time end-time))
+                                  (when end-index
+                                    (list :end-index end-index))))))
+              (setf (rsb.ep:processor-error-policy connection) error-policy)
+              (log:info "~@<Replaying using connection ~A~@:>" connection)
+              (unwind-protect
+                   (replay connection (connection-strategy connection))
+                (close connection)))))))))

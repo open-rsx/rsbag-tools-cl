@@ -7,7 +7,7 @@
 (cl:in-package #:rsbag.tools.play)
 
 (defun make-help-string (&key
-			 (show :default))
+                         (show :default))
   "Return a help that explains the commandline option interface."
   (with-output-to-string (stream)
     (format stream "Replay events from INPUT-FILE on RSB channels ~
@@ -24,11 +24,11 @@ derived from BASE-URI.
 The file format of INPUT-FILE is guessed based on the ~
 filename. Currently, the following file formats are supported:~{~&+ ~
 ~4A (extension: \".~(~:*~A~)\")~}"
-	    (mapcar #'car (rsbag.backend:backend-classes))
-	    "bag-play")))
+            (mapcar #'car (rsbag.backend:backend-classes))
+            "bag-play")))
 
 (defun make-examples-string (&key
-			     (program-name "bag-play"))
+                             (program-name "bag-play"))
   "Make and return a string containing usage examples of the program."
   (format nil "~A /tmp/everything.tide spread://azurit:4803/
 
@@ -47,4 +47,4 @@ sub-channels) as fast as possible, discarding the recorded timing ~
 information. Publish replayed on channels with the prefix ~
 \"/mynamespace\", i.e. \"/mynamespace/nao/vision/top\" for events ~
 recorded for \"/nao/vision/top\". "
-	  program-name))
+          program-name))

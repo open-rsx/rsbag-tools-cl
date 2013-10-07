@@ -7,7 +7,7 @@
 (cl:in-package #:rsbag.tools.record)
 
 (defun make-help-string (&key
-			 (show :default))
+                         (show :default))
   "Return a help that explains the commandline option interface."
   (with-output-to-string (stream)
     (format stream "Capture events being exchanged on the scopes ~
@@ -24,7 +24,7 @@ store the events exchanged in the corresponding RSB channels.
       (print-uri-help stream :uri-var "each URI"))))
 
 (defun make-channel-strategy-help-string (&key
-					  (show :default))
+                                          (show :default))
   "Return a help string that explains how to specify channel
 allocation strategies and lists the available strategies."
   (with-output-to-string (stream)
@@ -48,7 +48,7 @@ when used within a shell):
       (print-classes-help-string (channel-strategy-classes) stream))))
 
 (defun make-filter-help-string (&key
-				(show :default))
+                                (show :default))
   "Return a help string that explains how to specify filters and lists
 the available filters. "
   (with-output-to-string (stream)
@@ -76,7 +76,7 @@ when used within a shell):
       (print-filter-help stream))))
 
 (defun make-flush-strategy-help-string (&key
-					(show :default))
+                                        (show :default))
   "Return a help string that explains how to specify flush strategies
 and lists the available strategies."
   (with-output-to-string (stream)
@@ -103,7 +103,7 @@ when used within a shell):
       (print-classes-help-string (rsbag.backend:flush-strategy-classes) stream))))
 
 (defun make-examples-string (&key
-			     (program-name "bag-record"))
+                             (program-name "bag-record"))
   "Make and return a string containing usage examples of the program."
   (format nil "~A -o /tmp/everything.tide spread://azurit:4803/
 
@@ -130,4 +130,4 @@ with the daemon name option.
 \"/nao/vision/top\" and \"/nao/audio/all\" into the log file ~
 \"/tmp/multichannel.tide\".
 "
-	  program-name))
+          program-name))

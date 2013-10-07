@@ -13,22 +13,22 @@ CONNECTION while THUNK executes."
   (let ((thread (bt:current-thread)))
     (with-local-server (server uri)
       (with-methods (server)
-	  (("start" ()
-	     (log:info "~@<Starting recording~@:>")
-	     (start connection)
-	     (values))
-	   ("stop" ()
-	     (log:info "~@<Stopping recording~@:>")
-	     (stop connection)
-	     (values))
-	   ("terminate" ()
-	     (log:info "~@<Terminating~@:>")
-	     (interrupt thread)
-	     (values)))
-	(funcall thunk)))))
+          (("start" ()
+             (log:info "~@<Starting recording~@:>")
+             (start connection)
+             (values))
+           ("stop" ()
+             (log:info "~@<Stopping recording~@:>")
+             (stop connection)
+             (values))
+           ("terminate" ()
+             (log:info "~@<Terminating~@:>")
+             (interrupt thread)
+             (values)))
+        (funcall thunk)))))
 
 (defun update-synopsis (&key
-			(show :default))
+                        (show :default))
   "Create and return a commandline option tree."
   (make-synopsis
    ;; Basic usage and specific options.
@@ -37,42 +37,42 @@ CONNECTION while THUNK executes."
    :item    (make-common-options :show show)
    :item    (make-error-handling-options :show show)
    :item    (defgroup (:header "Recording Options")
-	      (path    :long-name     "output-file"
-		       :short-name    "o"
-		       :type          :file
-		       :description
-		       (format nil "Name of the file into which captured events should be written. The file format is determined based on the file type (extension). Currently, the following file formats are supported:~{~&+ ~4A (extension: \".~(~:*~A~)\")~}."
-			       (mapcar #'car (rsbag.backend:backend-classes))))
-	      (switch  :long-name     "force"
-		       :default-value nil
-		       :description
-		       "Should the output file be overwritten in case it already exists?")
-	      (stropt  :long-name     "index-timestamp"
-		       :default-value "SEND"
-		       :argument-name "NAME"
-		       :description
-		       "Name of the timestamp which should be used to index events in the created log file.")
-	      (stropt  :long-name     "channel-allocation"
-		       :short-name    "a"
-		       :default-value "scope-and-type"
-		       :argument-name "SPEC"
-		       :description
-		       (make-channel-strategy-help-string :show show))
-	      (stropt  :long-name     "filter"
-		       :short-name    "f"
-		       :argument-name "SPEC"
-		       :description
-		       (make-filter-help-string :show show))
-	      (stropt  :long-name     "flush-strategy"
-		       :default-value "property-limit :property :length/bytes :limit 33554432"
-		       :argument-name "SPEC"
-		       :description
-		       (make-flush-strategy-help-string :show show))
-	      (stropt  :long-name     "control-uri"
-		       :short-name    "c"
-		       :argument-name "URI"
-		       :description
-		       "A URI specifying the root scope and transport configuration of an RPC server exposing methods which allow controlling the recording process. Currently, the following methods are provided:
+              (path    :long-name     "output-file"
+                       :short-name    "o"
+                       :type          :file
+                       :description
+                       (format nil "Name of the file into which captured events should be written. The file format is determined based on the file type (extension). Currently, the following file formats are supported:~{~&+ ~4A (extension: \".~(~:*~A~)\")~}."
+                               (mapcar #'car (rsbag.backend:backend-classes))))
+              (switch  :long-name     "force"
+                       :default-value nil
+                       :description
+                       "Should the output file be overwritten in case it already exists?")
+              (stropt  :long-name     "index-timestamp"
+                       :default-value "SEND"
+                       :argument-name "NAME"
+                       :description
+                       "Name of the timestamp which should be used to index events in the created log file.")
+              (stropt  :long-name     "channel-allocation"
+                       :short-name    "a"
+                       :default-value "scope-and-type"
+                       :argument-name "SPEC"
+                       :description
+                       (make-channel-strategy-help-string :show show))
+              (stropt  :long-name     "filter"
+                       :short-name    "f"
+                       :argument-name "SPEC"
+                       :description
+                       (make-filter-help-string :show show))
+              (stropt  :long-name     "flush-strategy"
+                       :default-value "property-limit :property :length/bytes :limit 33554432"
+                       :argument-name "SPEC"
+                       :description
+                       (make-flush-strategy-help-string :show show))
+              (stropt  :long-name     "control-uri"
+                       :short-name    "c"
+                       :argument-name "URI"
+                       :description
+                       "A URI specifying the root scope and transport configuration of an RPC server exposing methods which allow controlling the recording process. Currently, the following methods are provided:
 
 + start : void -> void
   Restart recording after it has been stopped.
@@ -82,13 +82,13 @@ CONNECTION while THUNK executes."
   Terminate the recording process and the program."))
    ;; Append RSB options.
    :item    (make-options
-	     :show? (or (eq show t)
-			(and (listp show) (member :rsb show))))
+             :show? (or (eq show t)
+                        (and (listp show) (member :rsb show))))
    ;; Append IDL options.
    :item    (make-idl-options)
    ;; Append examples.
    :item    (defgroup (:header "Examples")
-	      (make-text :contents (make-examples-string)))))
+              (make-text :contents (make-examples-string)))))
 
 (defun main ()
   "Entry point function of the bag-record program."
@@ -97,7 +97,7 @@ CONNECTION while THUNK executes."
   (process-commandline-options
    :version         (cl-rsbag-tools-record-system:version/list :commit? t)
    :more-versions   (list :rsbag         (cl-rsbag-system:version/list :commit? t)
-			  :rsbag-tidelog (cl-rsbag-system:version/list :commit? t))
+                          :rsbag-tidelog (cl-rsbag-system:version/list :commit? t))
    :update-synopsis #'update-synopsis
    :return          #'(lambda () (return-from main)))
 
@@ -110,46 +110,46 @@ recorded.~@:>"))
     (process-idl-options)
 
     (rsb.formatting:with-print-limits (*standard-output*)
-	;; Create a reader and start the receiving and printing loop.
-	(let+ ((error-policy    (maybe-relay-to-thread
-				 (process-error-handling-options)))
-	       (control-uri     (when-let ((string (getopt :long-name "control-uri")))
-				(puri:parse-uri string)))
-	       (uris            (mapcar #'puri:parse-uri (remainder)))
-	       (output/pathname (or (getopt :long-name "output-file")
-				    (error "~@<No output file specified.~@:>")))
-	       (force           (getopt :long-name "force"))
-	       (timestamp       (make-keyword
-				 (getopt :long-name "index-timestamp")))
-	       (channel-alloc   (parse-instantiation-spec
-				 (getopt :long-name "channel-allocation")))
-	       (filters         (iter (for spec next (getopt :long-name "filter"))
-				      (while spec)
-				      (collect (apply #'rsb.filter:filter
-						      (parse-instantiation-spec spec)))))
-	       (flush-strategy  (parse-instantiation-spec
-				 (getopt :long-name "flush-strategy")))
-	       (connection      (events->bag
-				 uris output/pathname
-				 :timestamp        timestamp
-				 :channel-strategy channel-alloc
-				 :filters          filters
-				 :flush-strategy   flush-strategy
-				 :start?           (not control-uri)
-				 :if-exists        (if force :supersede :error)))
-	       ((&flet recording-loop ()
-		  (setf (rsb.ep:processor-error-policy connection) error-policy)
-		  (unwind-protect
-		      (with-interactive-interrupt-exit ()
-		        (iter (sleep 10)
-			      (format t "~A ~@<~@;~{~A~^, ~}~@:>~%"
-				      (local-time:now)
-				      (bag-channels (connection-bag connection)))))
-		    (close connection)))))
+        ;; Create a reader and start the receiving and printing loop.
+        (let+ ((error-policy    (maybe-relay-to-thread
+                                 (process-error-handling-options)))
+               (control-uri     (when-let ((string (getopt :long-name "control-uri")))
+                                (puri:parse-uri string)))
+               (uris            (mapcar #'puri:parse-uri (remainder)))
+               (output/pathname (or (getopt :long-name "output-file")
+                                    (error "~@<No output file specified.~@:>")))
+               (force           (getopt :long-name "force"))
+               (timestamp       (make-keyword
+                                 (getopt :long-name "index-timestamp")))
+               (channel-alloc   (parse-instantiation-spec
+                                 (getopt :long-name "channel-allocation")))
+               (filters         (iter (for spec next (getopt :long-name "filter"))
+                                      (while spec)
+                                      (collect (apply #'rsb.filter:filter
+                                                      (parse-instantiation-spec spec)))))
+               (flush-strategy  (parse-instantiation-spec
+                                 (getopt :long-name "flush-strategy")))
+               (connection      (events->bag
+                                 uris output/pathname
+                                 :timestamp        timestamp
+                                 :channel-strategy channel-alloc
+                                 :filters          filters
+                                 :flush-strategy   flush-strategy
+                                 :start?           (not control-uri)
+                                 :if-exists        (if force :supersede :error)))
+               ((&flet recording-loop ()
+                  (setf (rsb.ep:processor-error-policy connection) error-policy)
+                  (unwind-protect
+                      (with-interactive-interrupt-exit ()
+                        (iter (sleep 10)
+                              (format t "~A ~@<~@;~{~A~^, ~}~@:>~%"
+                                      (local-time:now)
+                                      (bag-channels (connection-bag connection)))))
+                    (close connection)))))
 
-	  (log:info "~@<Using URIs ~@<~@;~{~A~^, ~}~@:>~@:>" uris)
-	  (with-error-policy (error-policy)
-	    (if control-uri
-		(invoke-with-control-service
-		 control-uri connection #'recording-loop)
-		(recording-loop)))))))
+          (log:info "~@<Using URIs ~@<~@;~{~A~^, ~}~@:>~@:>" uris)
+          (with-error-policy (error-policy)
+            (if control-uri
+                (invoke-with-control-service
+                 control-uri connection #'recording-loop)
+                (recording-loop)))))))

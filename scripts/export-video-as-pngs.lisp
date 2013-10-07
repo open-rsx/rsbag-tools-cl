@@ -5,8 +5,8 @@
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
 #.(unless (when-let* ((package (find-package "RST.VISION"))
-		      (symbol  (find-symbol "IMAGE-WIDTH" package)))
-	    (ignore-errors (fdefinition `(setf ,symbol))))
+                      (symbol  (find-symbol "IMAGE-WIDTH" package)))
+            (ignore-errors (fdefinition `(setf ,symbol))))
     (error "~@<Class RST.VISION:IMAGE is not loaded properly. Did you ~
 load the Image.proto file using the --load-idl option?~@:>"))
 
@@ -24,17 +24,17 @@ load the Image.proto file using the --load-idl option?~@:>"))
        ;; and silently use to the nearest possible sizes when a
        ;; requested size is not supported.
        (style            (make-instance (find-style-class :image/png)
-					:width  t
-					:height t))
+                                        :width  t
+                                        :height t))
        ;; Create an output filename within the specified output
        ;; directory based on the timestamp of the current event.
        (filename         (merge-pathnames
-			  (format nil "~A.~A"
-				  (floor create-unix/nsec 1000) "png")
-			  output-directory)))
+                          (format nil "~A.~A"
+                                  (floor create-unix/nsec 1000) "png")
+                          output-directory)))
 
   (format t "~CProcessing frame ~A -> ~A"
-	  #\Return create-unix/nsec filename)
+          #\Return create-unix/nsec filename)
   (force-output *standard-output*)
 
   ;; Make sure the output directory actually exists, creating it if
@@ -44,7 +44,7 @@ load the Image.proto file using the --load-idl option?~@:>"))
   ;; Write the payload of the current event into the output file,
   ;; formatting the data as a PNG image.
   (with-output-to-file (stream filename
-			       :if-exists         :overwrite
-			       :if-does-not-exist :create
-			       :element-type      '(unsigned-byte 8))
+                               :if-exists         :overwrite
+                               :if-does-not-exist :create
+                               :element-type      '(unsigned-byte 8))
     (format-payload data style stream)))

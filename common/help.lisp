@@ -7,7 +7,7 @@
 (cl:in-package #:rsbag.common)
 
 (defun make-replay-strategy-help-string (&key
-					 (show :default))
+                                         (show :default))
   "Return a help string that explains how to specify replay strategies
 and lists the available replay strategies."
   (with-output-to-string (stream)
@@ -33,6 +33,6 @@ when used within a shell):
       (print-classes-help-string
        (rsbag.rsb:replay-strategy-classes) stream
        :initarg-blacklist '(:start-index :end-index
-			    :start-time  :end-time
-			    :error-policy
-			    :stream :previous-command)))))
+                            :start-time  :end-time
+                            :error-policy
+                            :stream :previous-command)))))
