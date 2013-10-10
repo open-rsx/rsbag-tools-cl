@@ -17,7 +17,9 @@ set(CPACK_DEBIAN_PACKAGE_DEPENDS     "libc6")
 set(CPACK_DEBIAN_PACKAGE_SUGGESTS    "spread (>= 4.0)")
 
 # Generate postinst and prerm hooks
-set(PACKAGE_ALT_PRIORITY "102")
+math(EXPR PACKAGE_ALT_PRIORITY "100
+                                + (100 * ${RSBAG_TOOLS_VERSION_MAJOR})
+                                + (  1 * ${RSBAG_TOOLS_VERSION_MINOR})")
 
 set(POSTINST_SCRIPT      "${CMAKE_CURRENT_BINARY_DIR}/postinst")
 set(PRERM_SCRIPT         "${CMAKE_CURRENT_BINARY_DIR}/prerm")
