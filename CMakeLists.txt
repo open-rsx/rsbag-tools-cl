@@ -355,6 +355,10 @@ foreach(STYLE discard meta-data payload detailed
 endforeach()
 
 # Installation
+install(CODE "message(STATUS \"Compressing Lisp image ${MAIN_NAME} (this can take a long time)\")
+              execute_process(COMMAND \"${CMAKE_CURRENT_BINARY_DIR}/${MAIN_NAME}\"
+                                      redump \"${CMAKE_CURRENT_BINARY_DIR}/${MAIN_NAME}\" compress)")
+
 set(BINARY_PREFIX    "")
 set(BINARY_SUFFIX    "cl${VERSION_SUFFIX}")
 set(MAIN_BINARY_NAME ${BINARY_PREFIX}${MAIN_NAME}${BINARY_SUFFIX})

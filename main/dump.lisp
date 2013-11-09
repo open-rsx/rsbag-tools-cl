@@ -30,6 +30,4 @@
 ;; Restart rsbag threadpool
 (rsbag:enable-restart-threadpool)
 
-(com.dvlsoft.clon:dump "bag" rsbag.tools.main:main
-                       #+sb-core-compression :compression
-                       #+sb-core-compression 9)
+(com.dvlsoft.clon:dump "bag" rsbag.tools.main:main)
