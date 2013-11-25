@@ -15,18 +15,17 @@
        ;; trailing `/'.
        (output-directory "./")
        ;; Width and height can be specified as follows:
-       ;; + t              -> retain the width/height of the input
-       ;;                     image
-       ;; + '(:% PERCENT)  -> scale to PERCENT percent of the
-       ;;                     width/height of the input image
-       ;; + '(:px PIXELS)  -> scale to PIXELS width/height
+       ;;
+       ;; + t             -> retain the width/height of the input
+       ;;                    image
+       ;; + (:% PERCENT)  -> scale to PERCENT percent of the
+       ;;                    width/height of the input image
+       ;; + (:px PIXELS)  -> scale to PIXELS width/height
        ;;
        ;; The latter two forms may not support arbitrary output sizes
        ;; and silently use to the nearest possible sizes when a
        ;; requested size is not supported.
-       (style            (make-instance (find-style-class :image/png)
-                                        :width  t
-                                        :height t))
+       (style            (make-style '(:image/png :width t :height t)))
        ;; Create an output filename within the specified output
        ;; directory based on the timestamp of the current event.
        (filename         (merge-pathnames

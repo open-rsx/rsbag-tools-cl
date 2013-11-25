@@ -132,11 +132,8 @@
               (process-bounds-options))
              (replay-strategy (parse-instantiation-spec
                                (getopt :long-name "replay-strategy")))
-             (style           (let+ (((class &rest args)
-                                      (parse-instantiation-spec
-                                       (getopt :long-name "style"))))
-                                (apply #'make-instance (find-style-class class)
-                                       args)))
+             (style           (make-style (parse-instantiation-spec
+                                           (getopt :long-name "style"))))
              (target          (ecase (getopt :long-name "target-stream")
                                 ((:stdout :standard-output) *standard-output*)
                                 ((:stderr :error-output)    *error-output*)))
