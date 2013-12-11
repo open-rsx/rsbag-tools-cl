@@ -144,22 +144,21 @@
                                 (format-event datum style target))))
         (with-interactive-interrupt-exit ()
           (with-error-policy (error-policy)
-            (let ((connection
-                   (apply #'bag->events input sink
-                          :channels        channels
-                          :transform       `(&from-source
-                                             :converter ,(default-converter 'nibbles:octet-vector))
-                          :replay-strategy replay-strategy
-                          (append (when start-time
-                                    (list :start-time start-time))
-                                  (when start-index
-                                    (list :start-index start-index))
-                                  (when end-time
-                                    (list :end-time end-time))
-                                  (when end-index
-                                    (list :end-index end-index))))))
-              (setf (rsb.ep:processor-error-policy connection) error-policy)
+            (with-open-connection
+                (connection
+                 (apply #'bag->events input sink
+                        :error-policy    error-policy
+                        :channels        channels
+                        :transform       `(&from-source
+                                           :converter ,(default-converter 'nibbles:octet-vector))
+                        :replay-strategy replay-strategy
+                        (append (when start-time
+                                  (list :start-time start-time))
+                                (when start-index
+                                  (list :start-index start-index))
+                                (when end-time
+                                  (list :end-time end-time))
+                                (when end-index
+                                  (list :end-index end-index)))))
               (log:info "~@<Replaying using connection ~A~@:>" connection)
-              (unwind-protect
-                   (replay connection (connection-strategy connection))
-                (close connection)))))))))
+              (replay connection (connection-strategy connection)))))))))

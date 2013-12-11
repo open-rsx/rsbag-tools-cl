@@ -81,27 +81,25 @@ the value of `*info-output*'."
 
         (with-interactive-interrupt-exit ()
           (with-error-policy (error-policy)
-            (let ((connection (apply #'bag->events input base-uri
-                                     :channels        channels
-                                     :replay-strategy replay-strategy
-                                     (append
-                                      (when start-time
-                                        (list :start-time start-time))
-                                      (when start-index
-                                        (list :start-index start-index))
-                                      (when end-time
-                                        (list :end-time end-time))
-                                      (when end-index
-                                        (list :end-index end-index))))))
-              (setf (rsb.ep:processor-error-policy connection)
-                    error-policy)
+            (with-open-connection
+                (connection (apply #'bag->events input base-uri
+                                   :error-policy    error-policy
+                                   :channels        channels
+                                   :replay-strategy replay-strategy
+                                   (append
+                                    (when start-time
+                                      (list :start-time start-time))
+                                    (when start-index
+                                      (list :start-index start-index))
+                                    (when end-time
+                                      (list :end-time end-time))
+                                    (when end-index
+                                      (list :end-index end-index)))))
               (log:info "~@<Connection ~A~@:>" connection)
-              (unwind-protect
-                   (replay connection (connection-strategy connection)
-                           :progress (when *info-output*
-                                       (case progress
-                                         (:line #'print-progress))))
-                (close connection)))))
+              (replay connection (connection-strategy connection)
+                      :progress (when *info-output*
+                                  (case progress
+                                    (:line #'print-progress)))))))
 
         (unless (eq progress :none)
           (terpri *standard-output*)))))

@@ -136,23 +136,22 @@ CONNECTION while THUNK executes."
                                                       (parse-instantiation-spec spec)))))
                (flush-strategy  (parse-instantiation-spec
                                  (getopt :long-name "flush-strategy")))
-               (connection      (events->bag
-                                 uris output/pathname
-                                 :timestamp        timestamp
-                                 :channel-strategy channel-alloc
-                                 :filters          filters
-                                 :flush-strategy   flush-strategy
-                                 :start?           (not control-uri)
-                                 :if-exists        (if force :supersede :error)))
                ((&flet recording-loop ()
-                  (setf (rsb.ep:processor-error-policy connection) error-policy)
-                  (unwind-protect
-                      (with-interactive-interrupt-exit ()
-                        (iter (sleep 10)
-                              (format t "~A ~@<~@;~{~A~^, ~}~@:>~%"
-                                      (local-time:now)
-                                      (bag-channels (connection-bag connection)))))
-                    (close connection)))))
+                  (with-open-connection
+                      (connection (events->bag
+                                   uris output/pathname
+                                   :error-policy     error-policy
+                                   :timestamp        timestamp
+                                   :channel-strategy channel-alloc
+                                   :filters          filters
+                                   :flush-strategy   flush-strategy
+                                   :start?           (not control-uri)
+                                   :if-exists        (if force :supersede :error)))
+                    (with-interactive-interrupt-exit ()
+                      (iter (sleep 10)
+                            (format t "~A ~@<~@;~{~A~^, ~}~@:>~%"
+                                    (local-time:now)
+                                    (bag-channels (connection-bag connection)))))))))
 
           (log:info "~@<Using URIs ~@<~@;~{~A~^, ~}~@:>~@:>" uris)
           (with-error-policy (error-policy)
