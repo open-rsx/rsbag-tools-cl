@@ -28,27 +28,45 @@ commandline options:
              :typespec      'range-boundary/timestamp
              :argument-name "TIMESTAMP-OR-SECONDS"
              :description
-             "Start replaying events at the point in time indicated by TIMESTAMP-OR-SECONDS. When the value should be parsed as a timestamp, the syntax @[YYYY-MM-DDT]HH:MM:SS has to be used. A single real number is interpreted as time in seconds relative to the beginning of the replay. Mutually exclusive with --start-index.")
+             "Start replaying entries at the point in time indicated by TIMESTAMP-OR-SECONDS.
+
+When the value should be parsed as a timestamp, the syntax @[YYYY-MM-DDT]HH:MM:SS has to be used.
+
+A single positive real number is interpreted as time in seconds relative to the beginning of the replay. Similarly, a single negative real number is interpreted as time in seconds relative to the end of the replay, e.g. -2.5 indicates \"2.5 seconds before the end of the replay\".
+
+Mutually exclusive with --start-index.")
     (lispobj :long-name     "start-index"
              :short-name    "S"
-             :typespec      'non-negative-integer
+             :typespec      'integer
              :argument-name "INDEX"
              :description
-             "Index of the event at which the replay should
-start. Mutually exclusive with --start-time.")
+             "Index of the entry at which the replay should start.
+
+A non-negative integer N is interpreted as the (N+1)-th entry relative to the beginning of the replay, i.e. 0 designates the first entry. A negative integer N is interpreted as |N| entries back from the end of the replay.
+
+Mutually exclusive with --start-time.")
     (lispobj :long-name     "end-time"
              :short-name    "e"
              :typespec      'range-boundary/timestamp
              :argument-name "TIMESTAMP-OR-SECONDS"
              :description
-             "Stop replaying events at the point in time indicated by TIMESTAMP-OR-SECONDS. When the value should be parsed as a timestamp, the syntax @[YYYY-MM-DDT]HH:MM:SS has to be used. A single real number is interpreted as time in seconds relative to the beginning of the replay. Mutually exclusive with --end-index.")
+             "Stop replaying entries at the point in time indicated by TIMESTAMP-OR-SECONDS.
+
+When the value should be parsed as a timestamp, the syntax @[YYYY-MM-DDT]HH:MM:SS has to be used.
+
+A single real number is interpreted as time in seconds relative to the beginning of the replay. Similarly, a single negative real number is interpreted as time in seconds relative to the end of the replay, e.g. -2.5 indicates \"2.5 seconds before the end of the replay\".
+
+Mutually exclusive with --end-index.")
     (lispobj :long-name     "end-index"
              :short-name    "E"
-             :typespec      'non-negative-integer
+             :typespec      'integer
              :argument-name "INDEX"
              :description
-             "Index of the event at which the replay should
-end. Mutually exclusive with --end-time.")
+             "Index of the entry at which the replay should end.
+
+A non-negative integer N is interpreted as the (N+1)-th entry relative to the beginning of the replay, i.e. 0 designates the first entry. A negative integer N is interpreted as |N| entries back from the end of the replay.
+
+Mutually exclusive with --end-time.")
     (stropt  :long-name     "replay-strategy"
              :short-name    "r"
              :default-value replay-strategy-default
@@ -68,9 +86,9 @@ end. Mutually exclusive with --end-time.")
 check their consistency and return them as four values:
 
 1. start-time:  `local-time:timestamp' or nil
-2. start-index: `non-negative-integer' or nil
+2. start-index: `integer' or nil
 3. end-time:    `local-time:timestamp' or nil
-4. end-index:   `non-negative-integer' or nil"
+4. end-index:   `integer' or nil"
   (let+ (((start-time start-index end-time end-index)
           (mapcar (curry #'getopt :long-name)
                   '("start-time" "start-index"
