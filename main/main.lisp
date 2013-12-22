@@ -75,7 +75,6 @@
                (rest args))
               (static?   (member "static" local-args :test #'string=))
               (compress? (member "compress" local-args :test #'string=)))
-         (setf uiop:*image-entry-point* "rsbag.tools.main:main") ; TODO temp
          (rsb.tools.commands:command-execute
           (rsb.tools.commands:make-command
            :redump

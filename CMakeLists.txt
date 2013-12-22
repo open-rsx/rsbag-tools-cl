@@ -135,20 +135,20 @@ if(WITH_ELAN_BACKEND)
     add_silent_load(rsbag-elan)
 endif()
 
-file(TO_CMAKE_PATH "${CMAKE_CURRENT_SOURCE_DIR}" SOURCE_DIR)
-set(CL_SOURCE_REGISTRY       "(:source-registry
-                                (:tree \\\"${SOURCE_DIR}\\\")
-                                ${LISP_SOURCE_REGISTRY_ENTRIES}
-                                :inherit-configuration)")
-file(TO_CMAKE_PATH "${LISP_FASL_CACHE_DIR}" LISP_FASL_CACHE_DIR)
-set(ASDF_OUTPUT_TRANSLATIONS "(:output-translations
-                                (t (\\\"${LISP_FASL_CACHE_DIR}\\\" :implementation))
-                                :ignore-inherited-configuration)")
-
 # Execute Lisp processes, potentially with output redirection.
 function(configure_lisp NAME CODE)
     set(NAME "${NAME}")
     set(DO   "${CODE} --quit")
+    file(TO_CMAKE_PATH "${CMAKE_CURRENT_SOURCE_DIR}" SOURCE_DIR)
+    set(CL_SOURCE_REGISTRY       "(:source-registry
+                                    (:tree \\\"${SOURCE_DIR}\\\")
+                                    ${LISP_SOURCE_REGISTRY_ENTRIES}
+                                    :inherit-configuration)")
+    file(TO_CMAKE_PATH "${LISP_FASL_CACHE_DIR}" LISP_FASL_CACHE_DIR)
+    set(ASDF_OUTPUT_TRANSLATIONS "(:output-translations
+                                    ${ASDF_EXTRA_OUTPUT_TRANSLATIONS}
+                                    (t (\\\"${LISP_FASL_CACHE_DIR}\\\" :implementation))
+                                    :ignore-inherited-configuration)")
     configure_file("${CMAKE_CURRENT_SOURCE_DIR}/sbcl.cmake.in"
                    "${CMAKE_CURRENT_BINARY_DIR}/sbcl.${NAME}.cmake"
                    @ONLY)
@@ -204,23 +204,29 @@ set(VERSION_SUFFIX "${RSBAG_TOOLS_VERSION_MAJOR}.${RSBAG_TOOLS_VERSION_MINOR}")
 message(STATUS "Project is ${CMAKE_PROJECT_NAME} (${VERSION_FROM_LISP})")
 
 # Create binary.
-set(MAIN_NAME "rsbag")
-set(MAIN_EXECUTABLE "${CMAKE_CURRENT_BINARY_DIR}/${MAIN_NAME}${CMAKE_EXECUTABLE_SUFFIX}")
-file(GLOB     TOOLS
-     RELATIVE "${CMAKE_CURRENT_SOURCE_DIR}"
-     "bag-*")
+set(MAIN_NAME        "rsbag")
+set(MAIN_SYSTEM_NAME "cl-rsbag-tools-main")
+set(MAIN_EXECUTABLE  "${CMAKE_CURRENT_BINARY_DIR}/${MAIN_NAME}${CMAKE_EXECUTABLE_SUFFIX}")
+set(ASDF_EXTRA_OUTPUT_TRANSLATIONS "((\\\"${CMAKE_CURRENT_SOURCE_DIR}\\\" #P\\\"${MAIN_SYSTEM_NAME}\\\")
+                                    #P\\\"${MAIN_EXECUTABLE}\\\")")
 configure_lisp_redirect("${MAIN_NAME}"
-                        "--load \"${CMAKE_CURRENT_SOURCE_DIR}/main/dump.lisp\"")
+                        "--eval \"(load-system :iterate)\"
+                         --eval \"(setf iterate::*always-declare-variables* t)\"
+                         --eval \"(asdf:oos (quote asdf:program-op) :${MAIN_SYSTEM_NAME})\"")
+set(ASDF_EXTRA_OUTPUT_TRANSLATIONS)
 add_custom_command(OUTPUT  "${MAIN_EXECUTABLE}"
                    COMMAND "${CMAKE_COMMAND}" -P "${CMAKE_CURRENT_BINARY_DIR}/sbcl.${MAIN_NAME}.cmake"
                    COMMENT "Creating Lisp image ${MAIN_NAME} (this can take a long time)")
 add_custom_target(binary ALL DEPENDS "${MAIN_EXECUTABLE}")
 
 # Create symlinks.
+file(GLOB     TOOLS
+     RELATIVE "${CMAKE_CURRENT_SOURCE_DIR}"
+     "bag-*")
 if(NOT CMAKE_SYSTEM_NAME STREQUAL "Windows")
     message(STATUS "Configuring tool ${TOOLS}")
     add_custom_command(OUTPUT  "${CMAKE_CURRENT_BINARY_DIR}/bag-info"
-                       COMMAND "${CMAKE_CURRENT_BINARY_DIR}/${MAIN_NAME}" create-links "bag-"
+                       COMMAND "${MAIN_EXECUTABLE}" create-links "bag-"
                        DEPENDS "${MAIN_EXECUTABLE}"
                        COMMENT "Creating symlinks")
     add_custom_target(links ALL DEPENDS bag-info)

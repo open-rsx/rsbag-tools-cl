@@ -1,6 +1,6 @@
 ;;;; rsbag-tools-main.asd --- System definition for the bag-main program.
 ;;;;
-;;;; Copyright (C) 2011, 2012, 2013, 2014 Jan Moringen
+;;;; Copyright (C) 2011, 2012, 2013, 2014, 2015 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -85,4 +85,5 @@ tools."
   :components  ((:module     "main"
                  :components ((:file       "package")
                               (:file       "main"
-                               :depends-on ("package"))))))
+                               :depends-on ("package")))))
+  :entry-point "rsbag.tools.main:main")
