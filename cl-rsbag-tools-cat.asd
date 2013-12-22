@@ -71,7 +71,7 @@ See `version/list' for details on keyword parameters."
   :maintainer  "Jan Moringen <jmoringe@techfak.uni-bielefeld.de>"
   :version     #.(version/string)
   :license     "GPL3; see COPYING file for details."
-  :description "A tool that recats events stored in rsbag log files."
+  :description "A tool that is to RSBag log files what UNIX cat is to text files."
   :depends-on  (:alexandria
                 :let-plus
                 (:version :log4cl                        "1.1.1")
