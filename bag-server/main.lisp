@@ -47,32 +47,34 @@
    ARGS can be
    + A designator of a wild pathname matching one or more files
    + A list of pathname designators of existing files"
+  ;; Neither glob expression nor filenames.
+  (when (emptyp args)
+    (error "~@<No glob expression or one or more input log files ~
+            specified.~@:>"))
+
   (let+ ((parsed (map 'list #'parse-namestring args))
          ((&flet existing-file? (pathname)
             (when-let ((probed (probe-file pathname)))
-              (and (pathname-name probed) (pathname-type probed))))))
-    (cond
-      ;; Neither glob expression nor filenames.
-      ((null args)
-       (error "~@<No glob expression or one or more input log files ~
-               specified.~@:>"))
-
-      ;; A single glob expression. Does it match anything?
-      ((and (length= 1 parsed) (wild-pathname-p (first parsed)))
-       (or (directory (first parsed))
-           (error "~@<The specified input glob expression ~S did not ~
-                   match any files.~@:>"
-                  (first args))))
-
-      ;; Multiple arguments: should refer to existing files.
-      ((when-let ((invalid (remove-if #'existing-file? parsed)))
-         (error "~@<The following specified input file~P~:* ~
-                 ~[~;does~:;do~] not exist: ~{~S~^, ~}.~@:>"
-                (length invalid) invalid)))
-
-      ;; We don't understand anything else.
-      (t
-       parsed))))
+              (and (pathname-name probed) (pathname-type probed)))))
+         ((&flet maybe-resolve (pathname)
+            (cond
+              ((wild-pathname-p pathname)
+               (or (directory pathname)
+                   (cerror "Continue without these inputs"
+                           "~@<The specified input glob expression ~S did not ~
+                            match any files.~@:>"
+                           pathname)))
+              ((not (existing-file? pathname))
+               (cerror "Continue without this input"
+                       "~@<The following specified input file ~
+                        does not exist: ~S.~@:>"
+                       pathname))
+              (t
+               (list pathname))))))
+    (or (mappend #'maybe-resolve parsed)
+        (error "~@<No (existing) input files found for ~{~S~^, ~
+                ~}.~@:>"
+               parsed))))
 
 (defvar *trials* nil
   "TODO(jmoringe): document")
