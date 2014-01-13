@@ -1,6 +1,6 @@
 ;;;; main.lisp --- Main function of the bag-server program.
 ;;;;
-;;;; Copyright (C) 2011, 2012, 2013 Jan Moringen
+;;;; Copyright (C) 2011, 2012, 2013, 2014 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -186,7 +186,17 @@
                   (funcall #'progress file url))))
         (terpri *info-output*)
 
-        (foo)
+        (push (hunchentoot:create-prefix-dispatcher
+               "/info"
+               (lambda ()
+                (who:with-html-output-to-string (stream)
+                  (:html
+                   (:body
+                    (dolist (name *trials*)
+                      (who:esc " • ")
+                      (who:htm
+                       (:a :href (format nil "~A/info" name) (who:esc name)))))))))
+              hunchentoot:*dispatch-table*)
 
         (log:info "~@<Starting server ~A~@:>" base-url)
         (hunchentoot:start acceptor)
