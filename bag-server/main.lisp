@@ -12,6 +12,7 @@
    :postfix "INPUT-FILE-OR-GLOB-PATTERN-1 [INPUT-FILE-OR-GLOB-PATTERN-2 ...]"
    :item    (make-text :contents (make-help-string :show show))
    :item    (make-common-options :show show)
+   :item    (make-error-handling-options :show show)
    :item    (defgroup (:header "Server Options")
                 (stropt  :short-name     "a"
                        :long-name      "address"
@@ -144,63 +145,67 @@
   (when (getopt :long-name "debug")
     (setf hunchentoot:*show-lisp-errors-p* t))
 
-  (with-logged-warnings
-    ;; Load IDLs as specified on the commandline.
-    (process-idl-options)
+  (rsb.formatting:with-print-limits (*standard-output*)
+    (with-logged-warnings
+      ;; Load IDLs as specified on the commandline.
+      (process-idl-options)
 
-    (let* ((address     (getopt :long-name "address"))
-           (port        (getopt :long-name "port"))
-           (acceptor    (apply #'make-instance 'hunchentoot:easy-acceptor
-                               :address address
-                               :port    port
-                               (append
-                                #+later (when-let ((pathname
-                                            (getopt :long-name "message-log-file")))
-                                  (list :message-log-destination pathname))
-                                (when-let ((pathname
-                                            (getopt :long-name "access-log-file")))
-                                  (list :access-log-destination pathname)))))
-           (base-url    (make-instance 'puri:uri
-                                       :scheme :http
-                                       :host    address
-                                       :port    port))
-           (input-files (collect-input-files (remainder)))
-           (names       (make-normalized-names input-files)))
+      (let* ((error-policy (maybe-relay-to-thread
+                            (process-error-handling-options)))
+             (address      (getopt :long-name "address"))
+             (port         (getopt :long-name "port"))
+             (acceptor     (apply #'make-instance 'hunchentoot:easy-acceptor
+                                  :address address
+                                  :port    port
+                                  (append
+                                   #+later (when-let ((pathname
+                                                       (getopt :long-name "message-log-file")))
+                                             (list :message-log-destination pathname))
+                                   (when-let ((pathname
+                                               (getopt :long-name "access-log-file")))
+                                     (list :access-log-destination pathname)))))
+             (base-url     (make-instance 'puri:uri
+                                          :scheme :http
+                                          :host    address
+                                          :port    port))
+             (input-files  (collect-input-files (remainder)))
+             (names        (make-normalized-names input-files)))
 
-      (with-interactive-interrupt-exit ()
-        (log:info "~@<Preparing to serve files at ~A~@:>" base-url)
-        (let+ ((max-length (reduce #'max input-files
-                                   :key (compose #'length #'namestring)))
-               (i 0)
-               ((&flet progress (file url)
-                  (format *info-output* "~C~4:D ~VA -> ~A"
-                          #\Return (incf i) max-length file url)
-                  (force-output *info-output*))))
-          (iter (for file in input-files)
-                (for name in names)
-                (let ((url (handler-case
-                               (mount-bag base-url file name)
-                             (error (condition)
-                               (log:error "~@<Failed to serve file ~A: ~A~@:>"
-                                          file condition)))))
-                  (funcall #'progress file url))))
-        (terpri *info-output*)
+        (with-error-policy (error-policy)
+          (with-interactive-interrupt-exit ()
+            (log:info "~@<Preparing to serve files at ~A~@:>" base-url)
+            (let+ ((max-length (reduce #'max input-files
+                                       :key (compose #'length #'namestring)))
+                   (i 0)
+                   ((&flet progress (file url)
+                      (format *info-output* "~C~4:D ~VA -> ~A"
+                              #\Return (incf i) max-length file url)
+                      (force-output *info-output*))))
+              (iter (for file in input-files)
+                    (for name in names)
+                    (restart-case
+                        (let ((url (mount-bag base-url file name)))
+                          (funcall #'progress file url))
+                      (continue ()
+                        :report (lambda (stream)
+                                  (format stream "~@<Continue with the next input.~@:>"))))))
+            (terpri *info-output*)
 
-        (push (hunchentoot:create-prefix-dispatcher
-               "/info"
-               (lambda ()
-                (who:with-html-output-to-string (stream)
-                  (:html
-                   (:body
-                    (dolist (name *trials*)
-                      (who:esc " • ")
-                      (who:htm
-                       (:a :href (format nil "~A/info" name) (who:esc name)))))))))
-              hunchentoot:*dispatch-table*)
+            (push (hunchentoot:create-prefix-dispatcher
+                   "/info"
+                   (lambda ()
+                     (who:with-html-output-to-string (stream)
+                       (:html
+                        (:body
+                         (:ul
+                          (dolist (name *trials*)
+                            (who:htm
+                             (:li (:a :href (format nil "~A/info" name) (who:esc name)))))))))))
+                  hunchentoot:*dispatch-table*)
 
-        (log:info "~@<Starting server ~A~@:>" base-url)
-        (hunchentoot:start acceptor)
+            (log:info "~@<Starting server ~A~@:>" base-url)
+            (hunchentoot:start acceptor)
 
-        (unwind-protect
-             (iter (sleep 1))
-          (hunchentoot:stop acceptor))))))
+            (unwind-protect
+                 (iter (sleep 1))
+              (hunchentoot:stop acceptor))))))))
