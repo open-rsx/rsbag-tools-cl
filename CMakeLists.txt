@@ -1,6 +1,6 @@
 # CMakeLists.txt --- CMake build description file.
 #
-# Copyright (C) 2011, 2012, 2013 Jan Moringen
+# Copyright (C) 2011, 2012, 2013, 2014 Jan Moringen
 #
 # Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -294,8 +294,8 @@ foreach(FILE ${TIDE_FILES} ${ELAN_FILES})
 
     # bag-{cat,play}: range options
     foreach(RANGE_OPTION ""
-                         "--start-index=0" "--start-time=0" "--start-time=-1e-9"
-                         "--end-index=0"   "--end-time=0"   "--end-time=-1e-9")
+                         "--start-index=0" "--start-time=0"
+                         "--end-index=0"   "--end-time=0")
         string(REGEX REPLACE "--([-a-z]+)[ =]+(.*)" "\\1=\\2"
                TAG "range-option:${RANGE_OPTION}")
 
@@ -314,6 +314,29 @@ foreach(FILE ${TIDE_FILES} ${ELAN_FILES})
                          --replay-strategy as-fast-as-possible
                          "${FILE}" inprocess:)
     endforeach()
+
+    if(FILE MATCHES two-events)
+        foreach(RANGE_OPTION "--start-index=-1" "--start-time=-1"
+                             "--end-index=-1"   "--end-time=-1")
+            string(REGEX REPLACE "--([-a-z]+)[ =]+(.*)" "\\1=\\2"
+                   TAG "range-option:${RANGE_OPTION}")
+
+            # bag-cat
+            add_test(NAME    "bag-cat${NAME}/${TAG}"
+                     COMMAND "${CMAKE_CURRENT_BINARY_DIR}/bag-cat"
+                             --debug ${CONTINUE}
+                             ${RANGE_OPTION}
+                             "${FILE}")
+
+            # bag-play
+            add_test(NAME    "bag-play${NAME}/${TAG}"
+                     COMMAND "${CMAKE_CURRENT_BINARY_DIR}/bag-play"
+                             --debug ${CONTINUE}
+                             ${RANGE_OPTION}
+                             --replay-strategy as-fast-as-possible
+                             "${FILE}" inprocess:)
+        endforeach()
+    endif()
 
     # bag-{cat,play}: replay strategies
     foreach(STRATEGY_OPTION ""
