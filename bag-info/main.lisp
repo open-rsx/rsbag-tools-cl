@@ -1,6 +1,6 @@
 ;;;; main.lisp --- Main function of the bag-info program.
 ;;;;
-;;;; Copyright (C) 2011, 2012, 2013 Jan Moringen
+;;;; Copyright (C) 2011, 2012, 2013, 2014 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -73,25 +73,23 @@
                        ~S~&~4T~@<~@;~{~@(~8A~): ~
                        ~:[N/A~;~:*~,,',:D~]~^~&~}~:>~&~}~:>~&"
                     input
-                    (let+ (((&accessors-r/o (start rsbag:start)
-                                            (end   rsbag:end)) bag)
-                           (duration (when (and start end)
+                    (let+ (((&accessors-r/o start-timestamp end-timestamp) bag)
+                           (duration (when (and start-timestamp end-timestamp)
                                        (local-time:timestamp-difference
-                                        end start))))
+                                        end-timestamp start-timestamp))))
                       `(:events ,(reduce #'+ (bag-channels bag) :key #'length)
                         ,@(when sizes?
                             `(:size ,(reduce #'+ (bag-channels bag)
                                              :key #'channel-size)))
-                        :start    ,(rsbag:start bag)
-                        :end      ,(rsbag:end   bag)
+                        :start    ,start-timestamp
+                        :end      ,end-timestamp
                         :duration ,duration))
                     (iter (for channel each (bag-channels bag))
-                          (let+ (((&accessors-r/o (length length)
-                                                  (start  rsbag:start)
-                                                  (end    rsbag:end)) channel)
-                                 (duration (when (and start end)
+                          (let+ (((&accessors-r/o
+                                   length start-timestamp end-timestamp) channel)
+                                 (duration (when (and start-timestamp end-timestamp)
                                              (local-time:timestamp-difference
-                                              end start))))
+                                              end-timestamp start-timestamp))))
                             (collect (list (channel-name channel)
                                            `(:type     ,(meta-data channel :type)
                                              :format   ,(when-let ((format (meta-data channel :format)))
@@ -106,8 +104,8 @@
                                              :events   ,length
                                              ,@(when sizes?
                                                  `(:size ,(channel-size channel)))
-                                             :start    ,start
-                                             :end      ,end
+                                             :start    ,start-timestamp
+                                             :end      ,end-timestamp
                                              :duration ,duration
                                              :rate     ,(when (and duration (plusp duration))
                                                           (/ length duration))))))))))))))
