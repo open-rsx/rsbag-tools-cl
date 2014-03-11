@@ -160,7 +160,7 @@ git_version_components(${VERSION_FROM_LISP} RSBAG_TOOLS_VERSION_MAJOR
 # version components.
 if(NOT RSBAG_TOOLS_VERSION_PATCH)
     git_based_version(${RSBAG_TOOLS_VERSION_MAJOR} ${RSBAG_TOOLS_VERSION_MINOR})
-    set(REDIRECTIONS "ERROR_FILE \"${CMAKE_CURRENT_BINARY_DIR}/version.1.err\"")
+    set(REDIRECTIONS "ERROR_FILE \"${CMAKE_CURRENT_BINARY_DIR}/version.2.err\"")
     execute_lisp("version"
                  "--eval \"(asdf:find-system :${SYSTEM_NAME})\"
                   --eval \"(princ (${SYSTEM_NAME}-system:version/string :commit? t))\""
