@@ -147,7 +147,7 @@ endfunction()
 
 # Project definition (version is grovelled from asd system definition,
 # possibly in combination with version.sexp file written below).
-project(cl-rsbag-tools)
+project(cl-rsbag-tools NONE)
 set(SYSTEM_NAME "cl-rsbag-tools-info")
 
 # Determine at least major and minor version components.
