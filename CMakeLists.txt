@@ -158,7 +158,7 @@ git_version_components(${VERSION_FROM_LISP} RSBAG_TOOLS_VERSION_MAJOR
 
 # If necessary, try to run git describe and determine remaining
 # version components.
-if(NOT RSBAG_TOOLS_VERSION_PATCH)
+if(GIT_EXECUTABLE AND (NOT RSBAG_TOOLS_VERSION_PATCH))
     git_based_version(${RSBAG_TOOLS_VERSION_MAJOR} ${RSBAG_TOOLS_VERSION_MINOR})
     set(REDIRECTIONS "ERROR_FILE \"${CMAKE_CURRENT_BINARY_DIR}/version.2.err\"")
     execute_lisp("version"
