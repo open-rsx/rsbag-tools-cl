@@ -1,31 +1,96 @@
 ;;;; main.lisp --- Main function of the bag-record program.
 ;;;;
-;;;; Copyright (C) 2011, 2012, 2013 Jan Moringen
+;;;; Copyright (C) 2011, 2012, 2013, 2014 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
 (cl:in-package #:rsbag.tools.record)
 
-(defun invoke-with-control-service (uri connection thunk)
+(defun invoke-with-control-service (uri connection make-connection loop)
   "Expose an RPC server at URI that allows remote clients to control
 CONNECTION while THUNK executes."
   (log:info "~@<Exposing control interface at URI ~A~@:>" uri)
-  (let ((thread (bt:current-thread)))
+  (let+ ((connection connection)
+         (running?   nil)
+         (close?     nil)
+         (exit?      nil)
+         (lock       (bt:make-lock))
+         (condition  (bt:make-condition-variable :name "Connection"))
+         ((&flet wait-for-connection (&optional thunk)
+           (bt:with-lock-held (lock)
+             (loop :until (or exit? connection) :do (bt:condition-wait condition lock)))
+           (when (and connection thunk) (funcall thunk))))
+         ((&flet wait-for-close (&optional thunk)
+           (bt:with-lock-held (lock)
+             (loop :until (or close? exit?) :do (bt:condition-wait condition lock))
+             (when thunk (funcall thunk)))))
+         ((&flet check-connection (context)
+            (unless connection
+              (error "~@<Cannot ~A without open bag.~@:>" context))))
+         ((&flet close-connection ()
+            (log:info "~@<Closing ~A~@:>" connection)
+            (setf close? t)
+            (bt:condition-notify condition))))
     (with-local-server (server uri)
       (with-methods (server)
-          (("start" ()
-             (log:info "~@<Starting recording~@:>")
+        (;; Connection level
+         ("start" ()
+           (bt:with-lock-held (lock)
+             (check-connection "start recording")
+             (when running?
+               (error "~@<~A is already recording.~@:>" connection))
+             (log:info "~@<Starting recording with ~A~@:>" connection)
              (start connection)
-             (values))
-           ("stop" ()
-             (log:info "~@<Stopping recording~@:>")
+             (setf running? t))
+           (values))
+         ("stop" ()
+           (bt:with-lock-held (lock)
+             (check-connection "stop recording")
+             (unless running?
+               (error "~@<~A is not recording.~@:>" connection))
+             (log:info "~@<Stopping recording with ~A~@:>" connection)
              (stop connection)
-             (values))
-           ("terminate" ()
-             (log:info "~@<Terminating~@:>")
-             (interrupt thread)
-             (values)))
-        (funcall thunk)))))
+             (setf running? nil))
+           (values))
+
+         ;; Bag level
+         ("open" (filename string)
+           (bt:with-lock-held (lock)
+             (when connection
+               (error "~@<Recording ~A in progress, cannot open a ~
+                       different bag.~@:>"
+                      connection))
+             (log:info "~@<Opening ~S~@:>" filename)
+             (setf connection (funcall make-connection filename)
+                   running?   nil
+                   close?     nil)
+             (bt:condition-notify condition))
+           (values))
+         ("close" ()
+           (bt:with-lock-held (lock)
+             (check-connection "close bag")
+             (close-connection))
+           (bt:with-lock-held (lock)
+             (loop :while connection :do (bt:condition-wait condition lock)))
+           (values))
+
+         ;; Process level
+         ("terminate" ()
+           (log:info "~@<Terminating~@:>")
+           (bt:with-lock-held (lock)
+             (setf exit? t)
+             (bt:condition-notify condition))
+           (values)))
+
+        (loop :until exit? :do
+           (wait-for-connection
+            (lambda () (funcall loop connection #'wait-for-close)))
+           (bt:with-lock-held (lock)
+             (if close?
+                 (progn
+                   (setf connection nil)
+                   (bt:condition-notify condition))
+                 (setf exit? t))))))))
 
 (defun update-synopsis (&key
                         (show :default))
@@ -81,11 +146,24 @@ CONNECTION while THUNK executes."
                        :description
                        "A URI specifying the root scope and transport configuration of an RPC server exposing methods which allow controlling the recording process. Currently, the following methods are provided:
 
-+ start : void -> void
-  Restart recording after it has been stopped.
-+ stop : void -> void
-  Stop recording allowing it to be restarted later.
-+ terminate : void -> void
+start : void -> void
+
+  Restart recording after it has been stopped. Only applicable if a bag has been opened.
+
+stop : void -> void
+
+  Stop recording allowing it to be restarted later. Only applicable if a bag has been opened.
+
+open : string -> void
+
+  Open the specified file to record into it. Does not start recording. Only applicable if not bag is currently open.
+
+close : void -> void
+
+  Close the current bag. Only applicable if a bag is open.
+
+terminate : void -> void
+
   Terminate the recording process and the program."))
    ;; Append RSB options.
    :item    (make-options
@@ -124,7 +202,8 @@ CONNECTION while THUNK executes."
                                 (puri:parse-uri string)))
                (uris            (mapcar #'puri:parse-uri (remainder)))
                (output/pathname (or (getopt :long-name "output-file")
-                                    (error "~@<No output file specified.~@:>")))
+                                    (unless control-uri
+                                      (error "~@<No output file specified.~@:>"))))
                (force           (getopt :long-name "force"))
                (timestamp       (make-keyword
                                  (getopt :long-name "index-timestamp")))
@@ -136,26 +215,31 @@ CONNECTION while THUNK executes."
                                                       (parse-instantiation-spec spec)))))
                (flush-strategy  (parse-instantiation-spec
                                  (getopt :long-name "flush-strategy")))
-               ((&flet recording-loop ()
-                  (with-open-connection
-                      (connection (events->bag
-                                   uris output/pathname
-                                   :error-policy     error-policy
-                                   :timestamp        timestamp
-                                   :channel-strategy channel-alloc
-                                   :filters          filters
-                                   :flush-strategy   flush-strategy
-                                   :start?           (not control-uri)
-                                   :if-exists        (if force :supersede :error)))
+               ((&flet make-connection (filename)
+                  (events->bag uris filename
+                               :error-policy     error-policy
+                               :timestamp        timestamp
+                               :channel-strategy channel-alloc
+                               :filters          filters
+                               :flush-strategy   flush-strategy
+                               :start?           (not control-uri)
+                               :if-exists        (if force :supersede :error))))
+               ((&flet recording-loop (connection wait-thunk)
+                  (with-open-connection (connection connection)
                     (with-interactive-interrupt-exit ()
-                      (iter (sleep 10)
-                            (format t "~A ~@<~@;~{~A~^, ~}~@:>~%"
-                                    (local-time:now)
-                                    (bag-channels (connection-bag connection)))))))))
+                      (funcall wait-thunk))))))
 
           (log:info "~@<Using URIs ~@<~@;~{~A~^, ~}~@:>~@:>" uris)
           (with-error-policy (error-policy)
             (if control-uri
                 (invoke-with-control-service
-                 control-uri connection #'recording-loop)
-                (recording-loop)))))))
+                 control-uri (when output/pathname
+                               (make-connection output/pathname))
+                 #'make-connection #'recording-loop)
+                (let ((connection (make-connection output/pathname)))
+                  (recording-loop connection
+                                  (lambda ()
+                                    (iter (sleep 10)
+                                          (format t "~A ~@<~@;~{~A~^, ~}~@:>~%"
+                                                  (local-time:now)
+                                                  (bag-channels (connection-bag connection)))))))))))))
