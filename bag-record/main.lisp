@@ -82,6 +82,13 @@ CONNECTION while THUNK executes."
              (bt:condition-notify condition))
            (values)))
 
+        ;; Send ready event for clients to wait on.
+        (let+ (((&accessors (path puri:uri-path)) uri))
+          (unless (ends-with #\/ path)
+            (setf path (concatenate 'string path "/")))
+          (with-informer (informer (puri:merge-uris "state/ready" uri) t)
+            (send informer rsb.converter:+no-value+)))
+
         (loop :until exit? :do
            (wait-for-connection
             (lambda () (funcall loop connection #'wait-for-close)))
