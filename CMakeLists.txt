@@ -362,6 +362,13 @@ foreach(FILE ${TIDE_FILES} ${ELAN_FILES})
                      --debug ${CONTINUE} --force -o "${OUTPUT}"
                      "${FILE}")
 
+    # play with prefix scope
+    add_test(NAME    "bag-play${NAME}/${TAG}/prefix"
+             COMMAND "${MAIN_EXECUTABLE}" play
+                     --debug ${CONTINUE}
+                     --replay-strategy as-fast-as-possible
+                     "${FILE}" inprocess:/prefix/)
+
     # cat, play, introspect: range options
     foreach(RANGE_OPTION ""
                          "--start-index=0" "--start-time=0"
