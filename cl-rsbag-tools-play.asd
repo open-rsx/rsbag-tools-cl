@@ -1,6 +1,6 @@
 ;;;; rsbag-tools-play.asd --- System definition for the bag-play program.
 ;;;;
-;;;; Copyright (C) 2011, 2012, 2013 Jan Moringen
+;;;; Copyright (C) 2011, 2012, 2013, 2014 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -74,15 +74,16 @@ See `version/list' for details on keyword parameters."
   :description "A tool that replays events stored in rsbag log files."
   :depends-on  (:alexandria
                 :let-plus
-                (:version :log4cl            "1.1.1")
+                (:version :log4cl             "1.1.1")
 
                 :cl-ppcre
 
-                (:version :cl-rsbag          #.(version/string :revision? nil))
-                (:version :cl-rsbag-common   #.(version/string))
+                (:version :cl-rsbag           #.(version/string :revision? nil))
+                (:version :cl-rsbag-common    #.(version/string))
 
-                (:version :cl-rsb            #.(version/string :revision? nil))
-                (:version :cl-rsb-common     #.(version/string :revision? nil)))
+                (:version :cl-rsb             #.(version/string :revision? nil))
+                (:version :cl-rsb-common      #.(version/string :revision? nil))
+                (:version :cl-rsb-formatting  #.(version/string :revision? nil)))
   :components  ((:module     "bag-play"
                  :components ((:file       "package")
                               (:file       "help"

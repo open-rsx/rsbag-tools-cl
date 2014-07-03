@@ -1,6 +1,6 @@
 ;;;; main.lisp --- Main function of the bag-play program.
 ;;;;
-;;;; Copyright (C) 2011, 2012, 2013 Jan Moringen
+;;;; Copyright (C) 2011, 2012, 2013, 2014 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -59,7 +59,8 @@ the value of `*info-output*'."
   (unless (<= 1 (length (remainder)) 2)
     (error "~@<Specify input file and, optionally, base URI.~@:>"))
 
-  (with-logged-warnings
+  (rsb.formatting:with-print-limits (*standard-output*)
+    (with-logged-warnings
 
       ;; Create a reader and start the receiving and printing loop.
       (let+ ((error-policy (maybe-relay-to-thread
@@ -75,7 +76,8 @@ the value of `*info-output*'."
                                 (getopt :long-name "replay-strategy")))
              (progress         (getopt :long-name "show-progress")))
 
-        (log:info "~@<Using ~:[~*all channels~;channels matching ~@<~@;~{~S~^, ~}~@:>~]~@:>"
+        (log:info "~@<Using ~:[~*all channels~;channels matching ~
+                   ~@<~@;~{~S~^, ~}~@:>~]~@:>"
                   (not (eq channels t)) channel-specs)
         (log:info "~@<Using base-URI ~A~@:>" base-uri)
 
@@ -102,4 +104,4 @@ the value of `*info-output*'."
                                     (:line #'print-progress)))))))
 
         (unless (eq progress :none)
-          (terpri *standard-output*)))))
+          (terpri *standard-output*))))))

@@ -1,6 +1,6 @@
 ;;;; main.lisp --- Main function of the bag-merge program.
 ;;;;
-;;;; Copyright (C) 2011, 2012, 2013 Jan Moringen
+;;;; Copyright (C) 2011, 2012, 2013, 2014 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -142,8 +142,8 @@ ARGS can be
    :update-synopsis #'update-synopsis
    :return          (lambda () (return-from main)))
 
-  (with-logged-warnings
-    (progn #+later with-print-limits
+  (rsb.formatting:with-print-limits (*standard-output*)
+    (with-logged-warnings
       (let+ ((error-policy    (maybe-relay-to-thread
                                (process-error-handling-options)))
              (input-files     (collect-input-files (remainder)))
