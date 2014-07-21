@@ -290,6 +290,9 @@ foreach(FILE ${TIDE_FILES} ${ELAN_FILES})
     add_test(NAME    "bag-info${NAME}"
              COMMAND "${CMAKE_CURRENT_BINARY_DIR}/bag-info"
                      --debug ${CONTINUE} "${FILE}")
+    add_test(NAME    "bag-info${NAME}/compute-size"
+             COMMAND "${CMAKE_CURRENT_BINARY_DIR}/bag-info"
+                     --debug ${CONTINUE} --compute-sizes "${FILE}")
 
     # bag-merge
     string(REGEX REPLACE "/" "" OUTPUT "${NAME}")

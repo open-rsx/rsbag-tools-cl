@@ -42,10 +42,6 @@
                     :description
                     "Print format information for each channel."))))
 
-(defun channel-size (channel)
-  "Return the size of the content of CHANNEL in bytes."
-  (reduce #'+ channel :key #'length))
-
 (defun main ()
   "Entry point function of the bag-info program."
   (update-synopsis)
@@ -65,9 +61,13 @@
                             (process-error-handling-options)))
              ((input) (remainder))
              (sizes?  (getopt :long-name "compute-sizes"))
-             (format? (getopt :long-name "print-format")))
+             (format? (getopt :long-name "print-format"))
+             ((&flet channel-size (channel)
+                "Return the size of the content of CHANNEL in bytes."
+                (reduce #'+ channel :key #'length))))
         (with-error-policy (error-policy)
-          (with-bag (bag input :direction :input)
+          (with-bag (bag input :direction :input
+                               :transform '(nil))
             (format t "File ~S~&~2T~<~@;~@{~@(~8A~): ~
                        ~:[N/A~;~:*~,,',:D~]~^~&~}~:>~&~2T~@<~@;~:{Channel ~
                        ~S~&~4T~@<~@;~{~@(~8A~): ~
