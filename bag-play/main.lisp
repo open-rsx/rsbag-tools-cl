@@ -46,7 +46,7 @@ the value of `*info-output*'."
 (defun main ()
   "Entry point function of the bag-play program."
   (update-synopsis)
-  (setf *default-configuration* (options-from-default-sources))
+  (setf *configuration* (options-from-default-sources))
   (let ((*readtable* (copy-readtable *readtable*)))
     (local-time:enable-read-macros)
     (process-commandline-options

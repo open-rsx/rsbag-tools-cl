@@ -185,7 +185,7 @@ terminate : void -> void
 (defun main ()
   "Entry point function of the bag-record program."
   (update-synopsis)
-  (setf *default-configuration* (options-from-default-sources))
+  (setf *configuration* (options-from-default-sources))
   (process-commandline-options
    :version         (cl-rsbag-tools-record-system:version/list :commit? t)
    :more-versions   (list :rsbag         (cl-rsbag-system:version/list :commit? t)
