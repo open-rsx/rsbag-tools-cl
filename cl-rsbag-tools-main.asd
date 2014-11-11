@@ -1,6 +1,6 @@
 ;;;; rsbag-tools-main.asd --- System definition for the bag-main program.
 ;;;;
-;;;; Copyright (C) 2011, 2012, 2013 Jan Moringen
+;;;; Copyright (C) 2011, 2012, 2013, 2014 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -74,6 +74,8 @@ See `version/list' for details on keyword parameters."
   :description "Main program and dispatch functions for all cl-rsbag
 tools."
   :depends-on  (:alexandria
+
+                (:version :rsb-introspection     #.(version/string :revision? nil))
 
                 (:version :cl-rsbag-tools-record #.(version/string))
                 (:version :cl-rsbag-tools-info   #.(version/string))
