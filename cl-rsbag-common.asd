@@ -1,6 +1,6 @@
 ;;;; cl-rsbag-tools-common.asd --- Common functions for cl-rsbag-based utilities.
 ;;;;
-;;;; Copyright (C) 2012, 2013 Jan Moringen
+;;;; Copyright (C) 2012, 2013, 2014 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -70,7 +70,7 @@ See `version/list' for details on keyword parameters."
   :author      "Jan Moringen <jmoringe@techfak.uni-bielefeld.de>"
   :maintainer  "Jan Moringen <jmoringe@techfak.uni-bielefeld.de>"
   :version     #.(version/string)
-  :license     "GPL3; see COPYING file for details."
+  :license     "GPLv3" ; see COPYING file for details
   :description "This system provides some common functions for
 RSBag-related systems."
   :depends-on  (:alexandria

@@ -70,7 +70,7 @@ See `version/list' for details on keyword parameters."
   :author      "Jan Moringen <jmoringe@techfak.uni-bielefeld.de>"
   :maintainer  "Jan Moringen <jmoringe@techfak.uni-bielefeld.de>"
   :version     #.(version/string)
-  :license     "GPL3; see COPYING file for details."
+  :license     "GPLv3" ; see COPYING file for details
   :description "A tool that merges one or more rsbag log file into a
 new rsbag log file, potentially transforming channels and/or entries
 in the process."

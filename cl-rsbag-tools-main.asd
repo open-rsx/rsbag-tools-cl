@@ -70,7 +70,7 @@ See `version/list' for details on keyword parameters."
   :author      "Jan Moringen <jmoringe@techfak.uni-bielefeld.de>"
   :maintainer  "Jan Moringen <jmoringe@techfak.uni-bielefeld.de>"
   :version     #.(version/string)
-  :license     "GPL3; see COPYING file for details."
+  :license     "GPLv3" ; see COPYING file for details
   :description "Main program and dispatch functions for all cl-rsbag
 tools."
   :depends-on  (:alexandria
