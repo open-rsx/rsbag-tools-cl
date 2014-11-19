@@ -69,6 +69,9 @@
                        :argument-name "NAME-OR-REGEXP"
                        :description
                        "Select the channels matching NAME-OR-REGEXP for merging. This option can be specified multiple times.")
+              (stropt  :long-name "transform-datum"
+                       #+todo :argument-name
+                       #+todo :description #+todo "TODO")
               (stropt  :long-name "transform-timestamp"
                        :argument-name "TIMESTAMP-NAME"
                        :description
@@ -144,16 +147,18 @@ ARGS can be
 
   (rsb.formatting:with-print-limits (*standard-output*)
     (with-logged-warnings
-      (let+ ((error-policy    (maybe-relay-to-thread
-                               (process-error-handling-options)))
-             (input-files     (collect-input-files (remainder)))
-             (output/pathname (or (getopt :long-name "output-file")
-                                  (error "~@<No output file specified.~@:>")))
-             (force           (getopt :long-name "force"))
-             (channel-specs   (iter (for channel next (getopt :long-name "channel"))
-                                    (while channel)
-                                    (collect channel)))
-             (channels        (or (make-channel-filter channel-specs) t))
+      (let+ ((error-policy        (maybe-relay-to-thread
+                                   (process-error-handling-options)))
+             (input-files         (collect-input-files (remainder)))
+             (output/pathname     (or (getopt :long-name "output-file")
+                                      (error "~@<No output file specified.~@:>")))
+             (force               (getopt :long-name "force"))
+             (channel-specs       (iter (for channel next (getopt :long-name "channel"))
+                                        (while channel)
+                                        (collect channel)))
+             (channels            (or (make-channel-filter channel-specs) t))
+             (transform/datum     (when-let ((spec (getopt :long-name "transform-datum")))
+                                    (eval (read-from-string spec))))
              (transform/timestamp (when-let ((spec (getopt :long-name "transform-timestamp")))
                                     (read-from-string spec)))
              inputs
@@ -181,12 +186,15 @@ ARGS can be
                  (apply #'transcode inputs output
                         :channels channels
                         :progress #'print-progress
-                        (etypecase transform/timestamp
-                          (null    nil)
-                          (keyword
-                           (list :transform/timestamp
-                                 (lambda (timestamp datum)
-                                   (rsb:timestamp datum transform/timestamp)))))))
+                        (append
+                         (when transform/datum
+                           (list :transform transform/datum))
+                         (etypecase transform/timestamp
+                           (null    nil)
+                           (keyword
+                            (list :transform/timestamp
+                                  (lambda (timestamp datum)
+                                    (rsb:timestamp datum transform/timestamp))))))))
             (iter (for bag in (cons output inputs))
                   (when bag
                     (handler-case
