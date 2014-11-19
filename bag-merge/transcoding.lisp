@@ -1,6 +1,6 @@
 ;;;; transcoding.lisp --- Transcoding input bags into an output bag.
 ;;;;
-;;;; Copyright (C) 2011, 2012, 2013 Jan Moringen
+;;;; Copyright (C) 2011, 2012, 2013, 2014 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -37,8 +37,10 @@
                        (rsbag:channel-bag output) output))))))
     (iter (for (timestamp datum) each (channel-items input))
           (for i :from 0)
-          (setf (entry output (funcall transform/timestamp timestamp datum))
-                (funcall transform datum))
+          (let* ((datum/transformed     (funcall transform datum))
+                 (timestamp/transformed (funcall transform/timestamp
+                                                 timestamp datum/transformed)))
+            (setf (entry output timestamp/transformed) datum/transformed))
           (update-progress i))
     (update-progress t)))
 
