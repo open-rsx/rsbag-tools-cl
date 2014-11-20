@@ -1,6 +1,6 @@
 ;;;; options.lisp --- Common functions related to commandline options.
 ;;;;
-;;;; Copyright (C) 2012, 2013 Jan Moringen
+;;;; Copyright (C) 2012, 2013, 2014 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -67,6 +67,15 @@ Mutually exclusive with --end-index.")
 A non-negative integer N is interpreted as the (N+1)-th entry relative to the beginning of the replay, i.e. 0 designates the first entry. A negative integer N is interpreted as |N| entries back from the end of the replay.
 
 Mutually exclusive with --end-time.")
+    (lispobj :long-name     "loop"
+             :short-name    "n"
+             :typespec      '(or (eql t) positive-integer)
+             :default-value 1
+             :argument-name "NUMBER-OF-TIMES-OR-T"
+             :description
+             "Number of times the replay should be repeated.
+
+The character \"t\" indicates that the replay should be repeated indefinitely.")
     (stropt  :long-name     "replay-strategy"
              :short-name    "r"
              :default-value replay-strategy-default

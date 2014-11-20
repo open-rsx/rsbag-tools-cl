@@ -1,6 +1,6 @@
 ;;;; main.lisp --- Main function of the bag-cat program.
 ;;;;
-;;;; Copyright (C) 2011, 2012, 2013 Jan Moringen
+;;;; Copyright (C) 2011, 2012, 2013, 2014 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -130,6 +130,7 @@
              (channels      (or (make-channel-filter channel-specs) t))
              ((&values start-time start-index end-time end-index)
               (process-bounds-options))
+             (num-repetitions (getopt :long-name "loop"))
              (replay-strategy (parse-instantiation-spec
                                (getopt :long-name "replay-strategy")))
              (style           (make-style (parse-instantiation-spec
@@ -156,6 +157,8 @@
                                 (when end-time
                                   (list :end-time end-time))
                                 (when end-index
-                                  (list :end-index end-index)))))
+                                  (list :end-index end-index))
+                                (when num-repetitions
+                                  (list :num-repetitions num-repetitions)))))
               (log:info "~@<Replaying using connection ~A~@:>" connection)
               (replay connection (connection-strategy connection)))))))))

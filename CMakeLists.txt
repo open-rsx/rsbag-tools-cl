@@ -304,7 +304,8 @@ foreach(FILE ${TIDE_FILES} ${ELAN_FILES})
     # bag-{cat,play}: range options
     foreach(RANGE_OPTION ""
                          "--start-index=0" "--start-time=0"
-                         "--end-index=0"   "--end-time=0")
+                         "--end-index=0"   "--end-time=0"
+                         "--loop=1"        "--loop=2")
         string(REGEX REPLACE "--([-a-z]+)[ =]+(.*)" "\\1=\\2"
                TAG "range-option:${RANGE_OPTION}")
 

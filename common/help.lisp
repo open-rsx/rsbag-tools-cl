@@ -1,6 +1,6 @@
 ;;;; help.lisp --- Automatic generation of help strings.
 ;;;;
-;;;; Copyright (C) 2012, 2013 Jan Moringen
+;;;; Copyright (C) 2012, 2013, 2014 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -36,5 +36,6 @@ and lists the available replay strategies."
        (rsbag.rsb:replay-strategy-classes) stream
        :initarg-blacklist '(:start-index :end-index
                             :start-time  :end-time
+                            :num-repetitions
                             :error-policy
                             :stream :previous-command)))))

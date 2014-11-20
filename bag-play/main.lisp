@@ -72,6 +72,7 @@ the value of `*info-output*'."
              (channels         (or (make-channel-filter channel-specs) t))
              ((&values start-time start-index end-time end-index)
               (process-bounds-options))
+             (num-repetitions  (getopt :long-name "loop"))
              (replay-strategy  (parse-instantiation-spec
                                 (getopt :long-name "replay-strategy")))
              (progress         (getopt :long-name "show-progress")))
@@ -96,7 +97,9 @@ the value of `*info-output*'."
                                     (when end-time
                                       (list :end-time end-time))
                                     (when end-index
-                                      (list :end-index end-index)))))
+                                      (list :end-index end-index))
+                                    (when num-repetitions
+                                      (list :num-repetitions num-repetitions)))))
               (log:info "~@<Connection ~A~@:>" connection)
               (replay connection (connection-strategy connection)
                       :progress (when *info-output*
