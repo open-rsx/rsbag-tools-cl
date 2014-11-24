@@ -147,7 +147,8 @@ endfunction()
 
 # Project definition (version is grovelled from asd system definition,
 # possibly in combination with version.sexp file written below).
-project(cl-rsbag-tools NONE)
+# C compiler is needed for CLON's stream-width determination feature
+project(cl-rsbag-tools "C")
 set(SYSTEM_NAME "cl-rsbag-tools-info")
 
 # Determine at least major and minor version components.
