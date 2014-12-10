@@ -171,7 +171,16 @@ close : void -> void
 
 terminate : void -> void
 
-  Terminate the recording process and the program."))
+  Terminate the recording process and the program.")
+              (enum    :long-name     "progress-style"
+                       :short-name    "p"
+                       :enum          '(:none :entries :channels)
+                       :default-value :entries
+                       :argument-name "SPEC"
+                       :description
+                       (format nil "The style used to display ~
+                                    information about the recorded ~
+                                    data. \"none\" to disable.")))
    ;; Append RSB options.
    :item    (make-options
              :show? (or (eq show t)
@@ -181,6 +190,17 @@ terminate : void -> void
    ;; Append examples.
    :item    (defgroup (:header "Examples")
               (make-text :contents (make-examples-string)))))
+
+(defun progress-style/channels (connection)
+  (format t "~A ~@<~@;~{~A~^, ~}~@:>~%"
+          (local-time:now)
+          (bag-channels (connection-bag connection))))
+
+(defun progress-style/entries (connection)
+  (format t "~A ~:D entr~:@P~%"
+          (local-time:now)
+          (reduce #'+ (bag-channels (connection-bag connection))
+                  :key #'length)))
 
 (defun main ()
   "Entry point function of the bag-record program."
@@ -222,6 +242,9 @@ terminate : void -> void
                                                       (parse-instantiation-spec spec)))))
                (flush-strategy  (parse-instantiation-spec
                                  (getopt :long-name "flush-strategy")))
+               (progress-style  (case (getopt :long-name "progress-style")
+                                  (:entries  #'progress-style/entries)
+                                  (:channels #'progress-style/channels)))
                ((&flet make-connection (filename)
                   (events->bag uris filename
                                :error-policy     error-policy
@@ -247,6 +270,5 @@ terminate : void -> void
                   (recording-loop connection
                                   (lambda ()
                                     (iter (sleep 10)
-                                          (format t "~A ~@<~@;~{~A~^, ~}~@:>~%"
-                                                  (local-time:now)
-                                                  (bag-channels (connection-bag connection)))))))))))))
+                                          (when progress-style
+                                            (funcall progress-style connection))))))))))))
