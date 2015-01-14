@@ -1,6 +1,6 @@
 # CMakeLists.txt --- CMake build description file.
 #
-# Copyright (C) 2011, 2012, 2013, 2014 Jan Moringen
+# Copyright (C) 2011, 2012, 2013, 2014, 2015 Jan Moringen
 #
 # Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -90,6 +90,28 @@ if(NOT WITH_SSL_SUPPORT)
     set(LISP_INIT "--eval \"(progn (pushnew :drakma-no-ssl *features*) (pushnew :hunchentoot-no-ssl *features*))\" ${LISP_INIT}")
 endif()
 
+option(WITH_PROTOCOL_BUFFER_CONVERTER "Build with protocol buffer converter." ON)
+if(WITH_PROTOCOL_BUFFER_CONVERTER)
+    add_silent_load(rsb-converter-protocol-buffer)
+endif()
+
+option(WITH_REGEX_FILTER "Build with regex filter." ON)
+if(WITH_REGEX_FILTER)
+    add_silent_load(rsb-filter-regex)
+endif()
+option(WITH_XPATH_FILTER "Build with XPath filter." ON)
+if(WITH_XPATH_FILTER)
+    add_silent_load(rsb-filter-xpath)
+endif()
+
+option(WITH_SOCKET_TRANSPORT "Build with socket transport." ON)
+if(WITH_SOCKET_TRANSPORT)
+    add_silent_load(rsb-transport-socket)
+endif()
+option(WITH_SPREAD_TRANSPORT "Build with Spread transport." ON)
+if(WITH_SPREAD_TRANSPORT)
+    add_silent_load(rsb-transport-spread)
+endif()
 option(WITH_ROS_TRANSPORT "Enable support for ROS transport." ON)
 if(WITH_ROS_TRANSPORT)
     add_silent_load(rsb-ros)
@@ -98,6 +120,7 @@ option(WITH_YARP_TRANSPORT "Enable support for ROS transport." ON)
 if(WITH_YARP_TRANSPORT)
     add_silent_load(rsb-yarp)
 endif()
+
 option(WITH_PNG_SUPPORT "Enable support for PNG image payloads." ON)
 if(WITH_PNG_SUPPORT)
     add_silent_load(cl-rsb-formatting-png)
