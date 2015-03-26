@@ -1,6 +1,6 @@
 (defun send-test-event-and-exit ()
   (sleep 1)
-  (rsb:with-informer (i "inprocess:" t)
+  (rsb:with-participant (i :informer "inprocess:")
     (let ((buffer (nibbles:make-octet-vector 4)))
       (setf (nibbles:ub32ref/le buffer 0) 1)
       (rsb:send i buffer :rsb.transport.wire-schema "UINT32")))

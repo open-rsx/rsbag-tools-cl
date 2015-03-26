@@ -31,7 +31,7 @@ CONNECTION while THUNK executes."
             (log:info "~@<Closing ~A~@:>" connection)
             (setf close? t)
             (bt:condition-notify condition))))
-    (with-local-server (server uri)
+    (with-participant (server :local-server uri)
       (with-methods (server)
         (;; Connection level
          ("start" ()
@@ -86,7 +86,8 @@ CONNECTION while THUNK executes."
         (let+ (((&accessors (path puri:uri-path)) uri))
           (unless (ends-with #\/ path)
             (setf path (concatenate 'string path "/")))
-          (with-informer (informer (puri:merge-uris "state/ready" uri) t)
+          (with-participant
+              (informer :informer (puri:merge-uris "state/ready" uri))
             (send informer rsb.converter:+no-value+)))
 
         (loop :until exit? :do
