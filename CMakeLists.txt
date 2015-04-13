@@ -231,6 +231,16 @@ set(DATA_DIR "${cl-rsbag-tools_SOURCE_DIR}/test/data/")
 
 enable_testing()
 
+# Lift-based tests for formatting and stats systems.
+foreach(SYSTEM rsbag-tools-commands)
+    configure_lisp_redirect("test-${SYSTEM}"
+                            "--eval \"(proclaim (quote (optimize (debug 3) (safety 3) (speed 0))))\"
+                             --eval \"(asdf:test-system :${SYSTEM})\"")
+    add_test(NAME    "test-${SYSTEM}"
+             COMMAND "${CMAKE_COMMAND}" -P "${CMAKE_CURRENT_BINARY_DIR}/sbcl.test-${SYSTEM}.cmake")
+    set_tests_properties("test-${SYSTEM}" PROPERTIES RUN_SERIAL TRUE)
+endforeach()
+
 # --help, --help-all and --version for all binaries.
 foreach(TOOL ${TOOLS})
     add_test(NAME    "${TOOL}-help"

@@ -100,4 +100,35 @@
                               (:file       "record")
                               (:file       "play")
                               (:file       "cat")
+                              (:file       "transform"))))
+  :in-order-to ((test-op (test-op :rsbag-tools-commands-test))))
+
+(defsystem :rsbag-tools-commands-test
+  :author      "Jan Moringen <jmoringe@techfak.uni-bielefeld.de>"
+  :maintainer  "Jan Moringen <jmoringe@techfak.uni-bielefeld.de>"
+  :version     #.(version/string)
+  :license     "GPLv3" ; see COPYING file for details.
+  :description "Unit tests for rsbag-tools-commands system."
+  :depends-on  (:alexandria
+                :let-plus
+
+                (:version :lift                 "1.7.1")
+
+                (:version :rsbag-tools-commands #.(version/string)))
+  :encoding    :utf-8
+  :components  ((:module     "commands"
+                 :pathname   "test/commands"
+                 :serial     t
+                 :components ((:file       "package")
+
+                              (:file       "info")
+                              (:file       "record")
+                              (:file       "play")
+                              (:file       "cat")
                               (:file       "transform")))))
+
+(defmethod perform ((operation test-op)
+                    (component (eql (find-system :rsbag-tools-commands-test))))
+  (funcall (find-symbol "RUN-TESTS" :lift)
+           :config (funcall (find-symbol "LIFT-RELATIVE-PATHNAME" :lift)
+                            "lift-rsbag-tools-commands.config")))
