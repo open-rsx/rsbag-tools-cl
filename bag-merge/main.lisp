@@ -1,6 +1,6 @@
 ;;;; main.lisp --- Main function of the bag-merge program.
 ;;;;
-;;;; Copyright (C) 2011, 2012, 2013, 2014 Jan Moringen
+;;;; Copyright (C) 2011, 2012, 2013, 2014, 2015 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -25,8 +25,7 @@
                "
           (mapcar #'car (rsbag.backend:backend-classes))))
 
-(defun make-example-string (&key
-                            (program-name "bag-merge" #+later (progname)))
+(defun make-example-string (&key (program-name "bag merge"))
   "Make and return a string containing usage examples of the program."
   (format nil "~2@T~A -o bla.tide '/vol/my-separate-logs/*.tide'~@
                ~@
@@ -39,14 +38,15 @@
           program-name))
 
 (defun update-synopsis (&key
-                        (show :default))
+                        (show         :default)
+                        (program-name "bag merge"))
   "Create and return a commandline option tree."
   (make-synopsis
    :postfix "GLOB-EXPRESSION | INPUT-FILE+"
    :item    (make-text :contents (make-help-string))
    :item    (make-common-options :show show)
    :item    (make-error-handling-options :show show)
-   :item    (defgroup (:header "Display Options")
+   :item    (defgroup (:header "Transform Options")
               (path    :long-name     "output-file"
                        :short-name    "o"
                        :type          :file
@@ -69,15 +69,23 @@
                        :argument-name "NAME-OR-REGEXP"
                        :description
                        "Select the channels matching NAME-OR-REGEXP for merging. This option can be specified multiple times.")
-              (stropt  :long-name "transform-datum"
+              (stropt  :long-name     "transform-datum"
                        #+todo :argument-name
                        #+todo :description #+todo "TODO")
-              (stropt  :long-name "transform-timestamp"
+              (stropt  :long-name     "transform-timestamp"
                        :argument-name "TIMESTAMP-NAME"
                        :description
-                       "Index events by TIMESTAMP-NAME instead of the create timestamp."))
+                       "Index events by TIMESTAMP-NAME instead of the create timestamp.")
+              (enum    :long-name     "show-progress"
+                       :short-name    "p"
+                       :enum          '(:none :line)
+                       :default-value :line
+                       :argument-name "STYLE"
+                       :description
+                       "Indicate progress of the ongoing playback using style STYLE."))
    :item    (defgroup (:header "Examples")
-              (make-text :contents (make-example-string)))))
+              (make-text :contents (make-example-string
+                                    :program-name program-name)))))
 
 (defun make-channel-filter (specs)
   (when specs
@@ -119,86 +127,57 @@ ARGS can be
       (t
        parsed))))
 
-(defun print-progress (index
-                       &optional
-                       length
-                       input-bag  input-channel
-                       output-bag output-channel)
-  (case index
-    ((t)
-     (fresh-line *standard-output*))
-    (t
-     (format *standard-output* "~C[~28A|~48A] -> [~28A|~48A] ~6,2,2F % ~9:D/~9:D"
-             #\Return
-             input-bag  (channel-name input-channel)
-             output-bag (channel-name output-channel)
-             (/ (1+ index) (max 1 length)) index (1- length))
-     (force-output *standard-output*))))
-
-(defun main ()
+(defun main (program-pathname args)
   "Entry point function of the bag-merge program."
-  (update-synopsis)
-  (process-commandline-options
-   :version         (cl-rsbag-tools-merge-system:version/list :commit? t)
-   :more-versions   (list :rsbag         (cl-rsbag-system:version/list :commit? t)
-                          :rsbag-tidelog (cl-rsbag-system:version/list :commit? t))
-   :update-synopsis #'update-synopsis
-   :return          (lambda () (return-from main)))
+  (let ((program-name (concatenate
+                       'string (namestring program-pathname) " merge")))
+    (update-synopsis :program-name program-name)
+    (process-commandline-options
+     :commandline     (list* program-name args)
+     :version         (cl-rsbag-tools-merge-system:version/list :commit? t)
+     :more-versions   (list :rsbag         (cl-rsbag-system:version/list :commit? t)
+                            :rsbag-tidelog (cl-rsbag-system:version/list :commit? t))
+     :update-synopsis (curry #'update-synopsis :program-name program-name)
+     :return          (lambda () (return-from main))))
 
-  (rsb.formatting:with-print-limits (*standard-output*)
-    (with-logged-warnings
-      (let+ ((error-policy        (maybe-relay-to-thread
-                                   (process-error-handling-options)))
-             (input-files         (collect-input-files (remainder)))
-             (output/pathname     (or (getopt :long-name "output-file")
-                                      (error "~@<No output file specified.~@:>")))
-             (force               (getopt :long-name "force"))
-             (channel-specs       (iter (for channel next (getopt :long-name "channel"))
-                                        (while channel)
-                                        (collect channel)))
-             (channels            (or (make-channel-filter channel-specs) t))
-             (transform/datum     (when-let ((spec (getopt :long-name "transform-datum")))
-                                    (eval (read-from-string spec))))
-             (transform/timestamp (when-let ((spec (getopt :long-name "transform-timestamp")))
-                                    (read-from-string spec)))
-             inputs
-             output)
-
-        (with-error-policy (error-policy)
-          ;; Since `with-bag' only handles one bag, we have to handle
-          ;; the possibility of unwinding with multiple open bags
-          ;; manually.
-          (unwind-protect
-               (progn
-                 ;; Open files and store resulting bags successively
-                 ;; to ensure that open bags can be closed when
-                 ;; unwinding.
-                 (iter (for file in input-files)
-                       (format *standard-output* "Opening input file ~S~%" file)
-                       (push (open-bag file :direction :input) inputs))
-                 (format *standard-output* "Opening output file ~S~%"
-                         output/pathname)
-                 (setf output (open-bag
-                               output/pathname
-                               :if-exists (if force :supersede :error)))
-
-                 ;; Transcode individual input files into output file.
-                 (apply #'transcode inputs output
-                        :channels channels
-                        :progress #'print-progress
+  (let ((error-policy        (maybe-relay-to-thread
+                              (process-error-handling-options)))
+        (input-files         (collect-input-files (remainder)))
+        (output-files        (or (getopt :long-name "output-file")
+                                 (error "~@<No output file specified.~@:>")))
+        (force?              (getopt :long-name "force"))
+        (channels            (let ((specs (iter (for channel next (getopt :long-name "channel"))
+                                                (while channel)
+                                                (collect channel))))
+                               (or (make-channel-filter specs) t)))
+        (progress-style      (getopt :long-name "show-progress"))
+        (transform/datum     (when-let ((spec (getopt :long-name "transform-datum")))
+                               (eval (read-from-string spec))))
+        (transform/timestamp (when-let ((spec (getopt :long-name "transform-timestamp")))
+                               (read-from-string spec))))
+    (rsb.common:with-error-policy (error-policy)
+      (rsb.formatting:with-print-limits (*standard-output*)
+        (with-logged-warnings
+          (let ((command
+                 (apply #'rsb.tools.commands:make-command
+                        :transform
+                        :service        'rsbag.tools.commands::command
+                        :input-files    input-files
+                        :output-file    output-files
+                        :force?         force?
+                        :channels       channels
+                        :progress-style progress-style
                         (append
                          (when transform/datum
-                           (list :transform transform/datum))
+                           (list :transform/datum transform/datum))
                          (etypecase transform/timestamp
-                           (null    nil)
+                           (null
+                            '())
                            (keyword
                             (list :transform/timestamp
                                   (lambda (timestamp datum)
-                                    (rsb:timestamp datum transform/timestamp))))))))
-            (iter (for bag in (cons output inputs))
-                  (when bag
-                    (handler-case
-                        (close bag)
-                      (error (condition)
-                        (warn "~@<Error closing bag ~A: ~A~@:>"
-                              bag condition)))))))))))
+                                    (declare (ignore timestamp))
+                                    (rsb:timestamp datum transform/timestamp)))))))))
+
+            (rsb.tools.commands:command-execute
+             command :error-policy error-policy)))))))

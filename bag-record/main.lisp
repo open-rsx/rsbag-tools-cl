@@ -1,107 +1,14 @@
 ;;;; main.lisp --- Main function of the bag-record program.
 ;;;;
-;;;; Copyright (C) 2011, 2012, 2013, 2014 Jan Moringen
+;;;; Copyright (C) 2011, 2012, 2013, 2014, 2015 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
 (cl:in-package #:rsbag.tools.record)
 
-(defun invoke-with-control-service (uri connection make-connection loop)
-  "Expose an RPC server at URI that allows remote clients to control
-CONNECTION while THUNK executes."
-  (log:info "~@<Exposing control interface at URI ~A~@:>" uri)
-  (let+ ((connection connection)
-         (running?   nil)
-         (close?     nil)
-         (exit?      nil)
-         (lock       (bt:make-lock))
-         (condition  (bt:make-condition-variable :name "Connection"))
-         ((&flet wait-for-connection (&optional thunk)
-           (bt:with-lock-held (lock)
-             (loop :until (or exit? connection) :do (bt:condition-wait condition lock)))
-           (when (and connection thunk) (funcall thunk))))
-         ((&flet wait-for-close (&optional thunk)
-           (bt:with-lock-held (lock)
-             (loop :until (or close? exit?) :do (bt:condition-wait condition lock))
-             (when thunk (funcall thunk)))))
-         ((&flet check-connection (context)
-            (unless connection
-              (error "~@<Cannot ~A without open bag.~@:>" context))))
-         ((&flet close-connection ()
-            (log:info "~@<Closing ~A~@:>" connection)
-            (setf close? t)
-            (bt:condition-notify condition))))
-    (with-participant (server :local-server uri)
-      (with-methods (server)
-        (;; Connection level
-         ("start" ()
-           (bt:with-lock-held (lock)
-             (check-connection "start recording")
-             (when running?
-               (error "~@<~A is already recording.~@:>" connection))
-             (log:info "~@<Starting recording with ~A~@:>" connection)
-             (start connection)
-             (setf running? t))
-           (values))
-         ("stop" ()
-           (bt:with-lock-held (lock)
-             (check-connection "stop recording")
-             (unless running?
-               (error "~@<~A is not recording.~@:>" connection))
-             (log:info "~@<Stopping recording with ~A~@:>" connection)
-             (stop connection)
-             (setf running? nil))
-           (values))
-
-         ;; Bag level
-         ("open" (filename string)
-           (bt:with-lock-held (lock)
-             (when connection
-               (error "~@<Recording ~A in progress, cannot open a ~
-                       different bag.~@:>"
-                      connection))
-             (log:info "~@<Opening ~S~@:>" filename)
-             (setf connection (funcall make-connection filename)
-                   running?   nil
-                   close?     nil)
-             (bt:condition-notify condition))
-           (values))
-         ("close" ()
-           (bt:with-lock-held (lock)
-             (check-connection "close bag")
-             (close-connection))
-           (bt:with-lock-held (lock)
-             (loop :while connection :do (bt:condition-wait condition lock)))
-           (values))
-
-         ;; Process level
-         ("terminate" ()
-           (log:info "~@<Terminating~@:>")
-           (bt:with-lock-held (lock)
-             (setf exit? t)
-             (bt:condition-notify condition))
-           (values)))
-
-        ;; Send ready event for clients to wait on.
-        (let+ (((&accessors (path puri:uri-path)) uri))
-          (unless (ends-with #\/ path)
-            (setf path (concatenate 'string path "/")))
-          (with-participant
-              (informer :informer (puri:merge-uris "state/ready" uri))
-            (send informer rsb.converter:+no-value+)))
-
-        (loop :until exit? :do
-           (wait-for-connection
-            (lambda () (funcall loop connection #'wait-for-close)))
-           (bt:with-lock-held (lock)
-             (if close?
-                 (progn
-                   (setf connection nil)
-                   (bt:condition-notify condition))
-                 (setf exit? t))))))))
-
 (defun update-synopsis (&key
-                        (show :default))
+                        (show         :default)
+                        (program-name "rsbag record"))
   "Create and return a commandline option tree."
   (make-synopsis
    ;; Basic usage and specific options.
@@ -189,87 +96,61 @@ terminate : void -> void
    :item    (make-idl-options)
    ;; Append examples.
    :item    (defgroup (:header "Examples")
-              (make-text :contents (make-examples-string)))))
+              (make-text :contents (make-examples-string
+                                    :program-name program-name)))))
 
-(defun progress-style/channels (connection)
-  (format t "~A ~@<~@;~{~A~^, ~}~@:>~%"
-          (local-time:now)
-          (bag-channels (connection-bag connection))))
-
-(defun progress-style/entries (connection)
-  (format t "~A ~:D entr~:@P~%"
-          (local-time:now)
-          (reduce #'+ (bag-channels (connection-bag connection))
-                  :key #'length)))
-
-(defun main ()
+(defun main (program-pathname args)
   "Entry point function of the bag-record program."
-  (update-synopsis)
-  (setf *configuration* (options-from-default-sources))
-  (process-commandline-options
-   :version         (cl-rsbag-tools-record-system:version/list :commit? t)
-   :more-versions   (list :rsbag         (cl-rsbag-system:version/list :commit? t)
-                          :rsbag-tidelog (cl-rsbag-system:version/list :commit? t))
-   :update-synopsis #'update-synopsis
-   :return          (lambda () (return-from main)))
+  (let ((program-name (concatenate
+                       'string (namestring program-pathname) " record") ))
+    (update-synopsis :program-name program-name)
+    (setf *configuration* (options-from-default-sources))
+    (process-commandline-options
+     :commandline     (list* program-name args)
+     :version         (cl-rsbag-tools-record-system:version/list :commit? t)
+     :more-versions   (list :rsbag         (cl-rsbag-system:version/list :commit? t)
+                            :rsbag-tidelog (cl-rsbag-system:version/list :commit? t))
+     :update-synopsis (curry #'update-synopsis :program-name program-name)
+     :return          (lambda () (return-from main))))
 
   (unless (remainder)
     (error "~@<Specify at least one URI from which events should be ~
             recorded.~@:>"))
 
-  (with-logged-warnings
-    ;; Load IDLs as specified on the commandline.
-    (process-idl-options)
-
+  (let ((error-policy       (maybe-relay-to-thread
+                             (process-error-handling-options)))
+        (uris               (remainder))
+        (filters            (iter (for spec next (getopt :long-name "filter"))
+                                  (while spec)
+                                  (collect (apply #'rsb.filter:filter
+                                                  (parse-instantiation-spec spec)))))
+        (output-file        (getopt :long-name "output-file"))
+        (force?             (getopt :long-name "force"))
+        (index-timestamp    (make-keyword
+                             (getopt :long-name "index-timestamp")))
+        (channel-allocation (getopt :long-name "channel-allocation"))
+        (flush-strategy     (getopt :long-name "flush-strategy"))
+        (control-uri        (when-let ((string (getopt :long-name "control-uri")))
+                              (puri:parse-uri string)))
+        (progress-style     (getopt :long-name "progress-style")))
     (rsb.formatting:with-print-limits (*standard-output*)
-        ;; Create a reader and start the receiving and printing loop.
-        (let+ ((error-policy    (maybe-relay-to-thread
-                                 (process-error-handling-options)))
-               (control-uri     (when-let ((string (getopt :long-name "control-uri")))
-                                (puri:parse-uri string)))
-               (uris            (mapcar #'puri:parse-uri (remainder)))
-               (output/pathname (or (getopt :long-name "output-file")
-                                    (unless control-uri
-                                      (error "~@<No output file specified.~@:>"))))
-               (force           (getopt :long-name "force"))
-               (timestamp       (make-keyword
-                                 (getopt :long-name "index-timestamp")))
-               (channel-alloc   (parse-instantiation-spec
-                                 (getopt :long-name "channel-allocation")))
-               (filters         (iter (for spec next (getopt :long-name "filter"))
-                                      (while spec)
-                                      (collect (apply #'rsb.filter:filter
-                                                      (parse-instantiation-spec spec)))))
-               (flush-strategy  (when-let ((value (getopt :long-name "flush-strategy")))
-                                  (parse-instantiation-spec value)))
-               (progress-style  (case (getopt :long-name "progress-style")
-                                  (:entries  #'progress-style/entries)
-                                  (:channels #'progress-style/channels)))
-               ((&flet make-connection (filename)
-                  (apply #'events->bag uris filename
-                         :error-policy     error-policy
-                         :timestamp        timestamp
-                         :channel-strategy channel-alloc
-                         :filters          filters
-                         :start?           (not control-uri)
-                         :if-exists        (if force :supersede :error)
-                         (when flush-strategy
-                           (list :flush-strategy flush-strategy)))))
-               ((&flet recording-loop (connection wait-thunk)
-                  (with-open-connection (connection connection)
-                    (with-interactive-interrupt-exit ()
-                      (funcall wait-thunk))))))
+      (with-logged-warnings
+        (rsb.common:with-error-policy (error-policy)
+          ;; Load IDLs as specified on the commandline.
+          (process-idl-options)
 
-          (log:info "~@<Using URIs ~@<~@;~{~A~^, ~}~@:>~@:>" uris)
-          (with-error-policy (error-policy)
-            (if control-uri
-                (invoke-with-control-service
-                 control-uri (when output/pathname
-                               (make-connection output/pathname))
-                 #'make-connection #'recording-loop)
-                (let ((connection (make-connection output/pathname)))
-                  (recording-loop connection
-                                  (lambda ()
-                                    (iter (sleep 10)
-                                          (when progress-style
-                                            (funcall progress-style connection))))))))))))
+          (let ((command
+                 (apply #'rsb.tools.commands:make-command :record
+                  :service                 'rsbag.tools.commands::command
+                  :uris                    uris
+                  :filters                 filters
+                  :output-file             output-file
+                  :force?                  force?
+                  :index-timestamp         index-timestamp
+                  :channel-allocation-spec channel-allocation
+                  :control-uri             control-uri
+                  :progress-style          progress-style
+                  (when flush-strategy
+                    (list :flush-strategy-spec flush-strategy)))))
+            (rsb.tools.commands:command-execute
+             command :error-policy error-policy)))))))

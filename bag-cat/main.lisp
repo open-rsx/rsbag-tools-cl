@@ -1,6 +1,6 @@
 ;;;; main.lisp --- Main function of the bag-cat program.
 ;;;;
-;;;; Copyright (C) 2011, 2012, 2013, 2014 Jan Moringen
+;;;; Copyright (C) 2011, 2012, 2013, 2014, 2015 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -20,7 +20,7 @@
            supported:~{~&+ ~4A (extension: \".~(~:*~A~)\")~}"
           (mapcar #'car (rsbag.backend:backend-classes))))
 
-(defun make-examples-string ()
+(defun make-examples-string (&key (program-name "bag cat"))
   "Make and return a string containing usage examples of the program."
   (format nil
           "~2T~A /tmp/everything.tide~@
@@ -54,10 +54,11 @@
            template in \"my-template-file.template\" to each ~
            event. See output of --help-for styles for more ~
            information."
-          "bag-cat"))
+          program-name))
 
 (defun update-synopsis (&key
-                        (show :default))
+                        (show         :default)
+                        (program-name "bag cat"))
   "Create and return a commandline option tree."
   (make-synopsis
    ;; Basic usage and specific options.
@@ -84,7 +85,8 @@
    :item    (make-idl-options)
    ;; Append examples.
    :item    (defgroup (:header "Examples")
-              (make-text :contents (make-examples-string)))))
+              (make-text :contents (make-examples-string
+                                    :program-name program-name)))))
 
 (defun make-channel-filter (specs)
   (when specs
@@ -94,71 +96,64 @@
                        (cl-ppcre:scan spec (channel-name channel))))
                    specs))))
 
-(defun main ()
+(defun main (program-pathname args)
   "Entry point function of the bag-cat program."
-  (update-synopsis)
-  (let ((*readtable* (copy-readtable *readtable*)))
+  (let ((program-name (concatenate
+                       'string (namestring program-pathname) " cat"))
+        (*readtable* (copy-readtable *readtable*))) ; TODO still necessary?
+    (update-synopsis :program-name program-name)
     (local-time:enable-read-macros)
     (process-commandline-options
+     :commandline     (list* program-name args)
      :version         (cl-rsbag-tools-cat-system:version/list :commit? t)
      :more-versions   (list :rsbag         (cl-rsbag-system:version/list :commit? t)
                             :rsbag-tidelog (cl-rsbag-system:version/list :commit? t))
-     :update-synopsis #'update-synopsis
+     :update-synopsis (curry #'update-synopsis :program-name program-name)
      :return          (lambda () (return-from main))))
 
   (unless (length= 1 (remainder))
     (error "~@<Specify input file.~@:>"))
 
-  (with-print-limits (*standard-output*)
-    (with-logged-warnings
-      ;; Load IDLs as specified on the commandline.
-      (process-idl-options)
+  (let+ ((error-policy (maybe-relay-to-thread
+                        (process-error-handling-options)))
+         (input-files  (remainder))
+         (channels     (let ((specs (iter (for channel next (getopt :long-name "channel"))
+                                          (while channel)
+                                          (collect channel))))
+                         (or (make-channel-filter specs) t)))
+         ((&values start-time start-index end-time end-index)
+          (process-bounds-options))
+         (loop            (getopt :long-name "loop"))
+         (replay-strategy (getopt :long-name "replay-strategy"))
+         (style           (getopt :long-name "style"))
+         (target-stream   (getopt :long-name "target-stream")))
+    (with-print-limits (*standard-output*)
+      (with-logged-warnings
+        (with-error-policy (error-policy)
+          ;; Load IDLs as specified on the commandline.
+          (process-idl-options)
 
-      ;; Gather the following things from commandline options:
-      ;; + input file(s)
-      ;; + selected channels for replay
-      ;; + temporal/index range for replay
-      ;; + formatting style
-      ;; Pass all of these to `bag->events' for and start the
-      ;; resulting connection.
-      (let+ ((error-policy  (maybe-relay-to-thread
-                             (process-error-handling-options)))
-             (input         (first (remainder)))
-             (channel-specs (iter (for channel next (getopt :long-name "channel"))
-                                  (while channel)
-                                  (collect channel)))
-             (channels      (or (make-channel-filter channel-specs) t))
-             ((&values start-time start-index end-time end-index)
-              (process-bounds-options))
-             (num-repetitions (getopt :long-name "loop"))
-             (replay-strategy (parse-instantiation-spec
-                               (getopt :long-name "replay-strategy")))
-             (style           (make-style (parse-instantiation-spec
-                                           (getopt :long-name "style"))))
-             (target          (ecase (getopt :long-name "target-stream")
-                                ((:stdout :standard-output) *standard-output*)
-                                ((:stderr :error-output)    *error-output*)))
-             (sink            (lambda (datum)
-                                (format-event datum style target))))
-        (with-interactive-interrupt-exit ()
-          (with-error-policy (error-policy)
-            (with-open-connection
-                (connection
-                 (apply #'bag->events input sink
-                        :error-policy    error-policy
-                        :channels        channels
-                        :transform       `(&from-source
-                                           :converter ,(default-converter 'nibbles:octet-vector))
-                        :replay-strategy replay-strategy
-                        (append (when start-time
-                                  (list :start-time start-time))
-                                (when start-index
-                                  (list :start-index start-index))
-                                (when end-time
-                                  (list :end-time end-time))
-                                (when end-index
-                                  (list :end-index end-index))
-                                (when num-repetitions
-                                  (list :num-repetitions num-repetitions)))))
-              (log:info "~@<Replaying using connection ~A~@:>" connection)
-              (replay connection (connection-strategy connection)))))))))
+          ;; Gather the following things from commandline options:
+          ;; + input file(s)
+          ;; + selected channels for replay
+          ;; + temporal/index range for replay
+          ;; + formatting style
+          ;; Pass all of these to `bag->events' for and start the
+          ;; resulting connection.
+          (let ((command
+                 (rsb.tools.commands:make-command
+                  :cat
+                  :service              'rsbag.tools.commands::command
+                  :input-files          input-files
+                  :channels             channels
+                  :start-time           start-time
+                  :start-index          start-index
+                  :end-time             end-time
+                  :end-index            end-index
+                  :num-repetitions      loop
+                  :replay-strategy-spec replay-strategy
+                  :style-spec           style
+                  :stream-spec          target-stream)))
+            (with-interactive-interrupt-exit ()
+              (rsb.tools.commands:command-execute
+               command :error-policy error-policy))))))))

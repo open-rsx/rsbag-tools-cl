@@ -1,6 +1,6 @@
 ;;;; help.lisp --- Help text generation for the bag-record program.
 ;;;;
-;;;; Copyright (C) 2012, 2013 Jan Moringen
+;;;; Copyright (C) 2012, 2013, 2015 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -117,7 +117,7 @@ and lists the available strategies."
       (print-classes-help-string (rsbag.backend:flush-strategy-classes) stream))))
 
 (defun make-examples-string (&key
-                             (program-name "bag-record"))
+                             (program-name "bag record"))
   "Make and return a string containing usage examples of the program."
   (format nil "~2@T~A -o /tmp/everything.tide spread://azurit:4803/~@
                ~@

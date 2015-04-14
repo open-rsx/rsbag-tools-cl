@@ -1,13 +1,14 @@
 ;;;; main.lisp --- Main function of the bag-play program.
 ;;;;
-;;;; Copyright (C) 2011, 2012, 2013, 2014 Jan Moringen
+;;;; Copyright (C) 2011, 2012, 2013, 2014, 2015 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
 (cl:in-package #:rsbag.tools.play)
 
 (defun update-synopsis (&key
-                        (show :default))
+                        (show         :default)
+                        (program-name "rsbag play"))
   "Create and return a commandline option tree."
   (make-synopsis
    :postfix "INPUT-FILE [BASE-URI]"
@@ -21,7 +22,8 @@
                         (and (listp show) (member :rsb show))))
    ;; Append examples.
    :item    (defgroup (:header "Examples")
-              (make-text :contents (make-examples-string)))))
+              (make-text :contents (make-examples-string
+                                    :program-name program-name)))))
 
 (defun make-channel-filter (specs)
   (when specs
@@ -29,82 +31,60 @@
            (mapcar (lambda (spec)
                      (lambda (channel)
                        (cl-ppcre:scan spec (channel-name channel))))
-                specs))))
+                   specs))))
 
-(defun print-progress (progress
-                       index start-index end-index
-                       timestamp)
-  "Print the progress of the current replay onto the stream that is
-the value of `*info-output*'."
-  (format *info-output* "~C~A ~6,2,2F % ~9:D [~9:D,~9:D]"
-          #\Return
-          timestamp
-          progress
-          index start-index end-index)
-  (force-output *info-output*))
-
-(defun main ()
+(defun main (program-pathname args)
   "Entry point function of the bag-play program."
-  (update-synopsis)
-  (setf *configuration* (options-from-default-sources))
-  (let ((*readtable* (copy-readtable *readtable*)))
+  (let ((program-name (concatenate
+                       'string (namestring program-pathname) " play"))
+        (*readtable* (copy-readtable *readtable*))) ; TODO still necessary?
+    (update-synopsis :program-name program-name)
+    (setf *configuration* (options-from-default-sources))
     (local-time:enable-read-macros)
     (process-commandline-options
+     :commandline     (list* program-name args)
      :version         (cl-rsbag-tools-play-system:version/list :commit? t)
      :more-versions   (list :rsbag         (cl-rsbag-system:version/list :commit? t)
                             :rsbag-tidelog (cl-rsbag-system:version/list :commit? t))
-     :update-synopsis #'update-synopsis
+     :update-synopsis (curry #'update-synopsis :program-name program-name)
      :return          (lambda () (return-from main))))
 
   (unless (<= 1 (length (remainder)) 2)
     (error "~@<Specify input file and, optionally, base URI.~@:>"))
 
-  (rsb.formatting:with-print-limits (*standard-output*)
-    (with-logged-warnings
+  (let+ ((error-policy (maybe-relay-to-thread
+                        (process-error-handling-options)))
+         ((input-file &optional (base-uri "/")) (remainder))
+         (channels (let ((specs (iter (for channel next (getopt :long-name "channel"))
+                                      (while channel)
+                                      (collect channel))))
+                     (or (make-channel-filter specs) t)))
+         ((&values start-time start-index end-time end-index)
+          (process-bounds-options))
+         (loop            (getopt :long-name "loop"))
+         (replay-strategy (getopt :long-name "replay-strategy"))
+         (progress-style  (getopt :long-name "show-progress")))
+    (rsb.formatting:with-print-limits (*standard-output*)
+      (with-logged-warnings
+        (rsb.common:with-error-policy (error-policy)
+          (let ((command
+                 (rsb.tools.commands:make-command
+                  :play
+                  :service             'rsbag.tools.commands::command
+                  :input-files          (list input-file)
+                  :channels             channels
+                  :start-time           start-time
+                  :start-index          start-index
+                  :end-time             end-time
+                  :end-index            end-index
+                  :num-repetitions      loop
+                  :replay-strategy-spec replay-strategy
+                  :destination          base-uri
+                  :progress-style       progress-style)))
 
-      ;; Create a reader and start the receiving and printing loop.
-      (let+ ((error-policy (maybe-relay-to-thread
-                            (process-error-handling-options)))
-             ((input &optional (base-uri "/")) (remainder))
-             (channel-specs    (iter (for channel next (getopt :long-name "channel"))
-                                     (while channel)
-                                     (collect channel)))
-             (channels         (or (make-channel-filter channel-specs) t))
-             ((&values start-time start-index end-time end-index)
-              (process-bounds-options))
-             (num-repetitions  (getopt :long-name "loop"))
-             (replay-strategy  (parse-instantiation-spec
-                                (getopt :long-name "replay-strategy")))
-             (progress         (getopt :long-name "show-progress")))
+            (with-interactive-interrupt-exit ()
+              (rsb.tools.commands:command-execute
+               command :error-policy error-policy))
 
-        (log:info "~@<Using ~:[~*all channels~;channels matching ~
-                   ~@<~@;~{~S~^, ~}~@:>~]~@:>"
-                  (not (eq channels t)) channel-specs)
-        (log:info "~@<Using base-URI ~A~@:>" base-uri)
-
-        (with-interactive-interrupt-exit ()
-          (with-error-policy (error-policy)
-            (with-open-connection
-                (connection (apply #'bag->events input base-uri
-                                   :error-policy    error-policy
-                                   :channels        channels
-                                   :replay-strategy replay-strategy
-                                   (append
-                                    (when start-time
-                                      (list :start-time start-time))
-                                    (when start-index
-                                      (list :start-index start-index))
-                                    (when end-time
-                                      (list :end-time end-time))
-                                    (when end-index
-                                      (list :end-index end-index))
-                                    (when num-repetitions
-                                      (list :num-repetitions num-repetitions)))))
-              (log:info "~@<Connection ~A~@:>" connection)
-              (replay connection (connection-strategy connection)
-                      :progress (when *info-output*
-                                  (case progress
-                                    (:line #'print-progress)))))))
-
-        (unless (eq progress :none)
-          (terpri *standard-output*))))))
+            (unless (eq progress-style :none)
+              (terpri *standard-output*))))))))

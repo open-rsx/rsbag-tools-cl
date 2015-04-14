@@ -1,6 +1,6 @@
 ;;;; rsbag-tools-cat.asd --- System definition for the bag-cat program.
 ;;;;
-;;;; Copyright (C) 2011, 2012, 2013, 2014 Jan Moringen
+;;;; Copyright (C) 2011, 2012, 2013, 2014, 2015 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -79,13 +79,15 @@ See `version/list' for details on keyword parameters."
                 :cl-ppcre ;; for regex-based channel selection
 
                 (:version :cl-rsbag                      #.(version/string :revision? nil))
-                (:version :cl-rsbag-common               #.(version/string))
 
                 (:version :cl-rsb                        #.(version/string :revision? nil)) ; TODO(jmoringe): not really required, functionality-wise
                 (:version :cl-rsb-common                 #.(version/string :revision? nil))
                 (:version :cl-rsb-formatting             #.(version/string :revision? nil))
                 (:version :rsb-formatting-and-rsb-common #.(version/string :revision? nil))
-                (:version :cl-rsb-stats                  #.(version/string :revision? nil)))
+                (:version :cl-rsb-stats                  #.(version/string :revision? nil))
+
+                (:version :cl-rsbag-common               #.(version/string))
+                (:version :rsbag-tools-commands          #.(version/string)))
   :components  ((:module     "bag-cat"
                  :components ((:file       "package")
                               (:file       "main"

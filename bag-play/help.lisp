@@ -1,6 +1,6 @@
 ;;;; help.lisp --- Help text generation for the bag-play program.
 ;;;;
-;;;; Copyright (C) 2012, 2013 Jan Moringen
+;;;; Copyright (C) 2012, 2013, 2015 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -25,11 +25,10 @@
                     the filename. Currently, the following file ~
                     formats are supported:~{~&+ ~4A (extension: ~
                     \".~(~:*~A~)\")~}"
-            (mapcar #'car (rsbag.backend:backend-classes))
-            "bag-play")))
+            (mapcar #'car (rsbag.backend:backend-classes)))))
 
 (defun make-examples-string (&key
-                             (program-name "bag-play"))
+                             (program-name "bag play"))
   "Make and return a string containing usage examples of the program."
   (format nil "~2@T~A /tmp/everything.tide spread://azurit:4803/~@
                ~@

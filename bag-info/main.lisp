@@ -1,6 +1,6 @@
 ;;;; main.lisp --- Main function of the bag-info program.
 ;;;;
-;;;; Copyright (C) 2011, 2012, 2013, 2014 Jan Moringen
+;;;; Copyright (C) 2011, 2012, 2013, 2014, 2015 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -23,7 +23,9 @@
           program-name))
 
 (defun update-synopsis (&key
-                        (show :default))
+                        (show         :default)
+                        (program-name "rsbag info"))
+  (declare (ignore program-name))
   "Create and return a commandline option tree."
   (make-synopsis
    :postfix "BAG-FILE"
@@ -42,74 +44,36 @@
                     :description
                     "Print format information for each channel."))))
 
-(defun main ()
+(defun main (program-pathname args)
   "Entry point function of the bag-info program."
-  (update-synopsis)
-  (process-commandline-options
-   :version         (cl-rsbag-tools-info-system:version/list :commit? t)
-   :more-versions   (list :rsbag         (cl-rsbag-system:version/list :commit? t)
-                          :rsbag-tidelog (cl-rsbag-system:version/list :commit? t))
-   :update-synopsis #'update-synopsis
-   :return          (lambda () (return-from main)))
+  (let ((program-name (concatenate
+                       'string (namestring program-pathname) " info")))
+    (update-synopsis :program-name program-name)
+    (process-commandline-options
+     :commandline     (list* program-name args)
+     :version         (cl-rsbag-tools-info-system:version/list :commit? t)
+     :more-versions   (list :rsbag         (cl-rsbag-system:version/list :commit? t)
+                            :rsbag-tidelog (cl-rsbag-system:version/list :commit? t))
+     :update-synopsis (curry #'update-synopsis :program-name program-name)
+     :return          (lambda () (return-from main))))
 
   (unless (length= 1 (remainder))
     (error "Specify exactly one log file."))
 
-  (with-print-limits (*standard-output*)
-    (with-logged-warnings
-      (let+ ((error-policy (maybe-relay-to-thread
-                            (process-error-handling-options)))
-             ((input) (remainder))
-             (sizes?  (getopt :long-name "compute-sizes"))
-             (format? (getopt :long-name "print-format"))
-             ((&flet channel-size (channel)
-                "Return the size of the content of CHANNEL in bytes."
-                (reduce #'+ channel :key #'length))))
+  (let ((error-policy  (maybe-relay-to-thread
+                        (process-error-handling-options)))
+        (input-files   (remainder))
+        (compute-sizes (getopt :long-name "compute-sizes"))
+        (print-format  (getopt :long-name "print-format")))
+    (with-print-limits (*standard-output*)
+      (with-logged-warnings
         (with-error-policy (error-policy)
-          (with-bag (bag input :direction :input
-                               :transform '(nil))
-            (format t "File ~S~&~2T~<~@;~@{~@(~8A~): ~
-                       ~:[N/A~;~:*~,,',:D~]~^~&~}~:>~&~2T~@<~@;~:{Channel ~
-                       ~S~&~4T~@<~@;~{~@(~8A~): ~
-                       ~:[N/A~;~:*~,,',:D~]~^~&~}~:>~&~}~:>~&"
-                    input
-                    (let+ (((&accessors-r/o start-timestamp end-timestamp) bag)
-                           (duration (when (and start-timestamp end-timestamp)
-                                       (local-time:timestamp-difference
-                                        end-timestamp start-timestamp))))
-                      `(:events ,(reduce #'+ (bag-channels bag) :key #'length)
-                        ,@(when sizes?
-                            `(:size ,(reduce #'+ (bag-channels bag)
-                                             :key #'channel-size)))
-                        :start    ,start-timestamp
-                        :end      ,end-timestamp
-                        :duration ,duration))
-                    (iter (for channel each (bag-channels bag))
-                          (let+ (((&accessors-r/o
-                                   length start-timestamp end-timestamp) channel)
-                                 (duration (when (and start-timestamp end-timestamp)
-                                             (local-time:timestamp-difference
-                                              end-timestamp start-timestamp))))
-                            (collect (list (channel-name channel)
-                                           `(:type     ,(meta-data channel :type)
-                                             :format   ,(when-let ((format (meta-data channel :format)))
-                                                          (case format?
-                                                            (:short
-                                                             (apply #'concatenate 'string
-                                                                    (subseq format 0 (min 100 (length format)))
-                                                                    (when (> (length format) 100)
-                                                                      (list "…"))))
-                                                            (:full
-                                                             format)))
-                                             :events   ,length
-                                             ,@(when sizes?
-                                                 `(:size ,(channel-size channel)))
-                                             :start    ,start-timestamp
-                                             :end      ,end-timestamp
-                                             :duration ,duration
-                                             :rate     ,(when (and duration (plusp duration))
-                                                          (/ length duration))))))))))))))
-
-;; Local Variables:
-;; coding: utf-8
-;; End:
+          (let ((command
+                 (rsb.tools.commands:make-command
+                  :info
+                  :service        'rsbag.tools.commands::command
+                  :input-files    input-files
+                  :compute-sizes? compute-sizes
+                  :print-format   print-format)))
+            (rsb.tools.commands:command-execute
+             command :error-policy error-policy)))))))

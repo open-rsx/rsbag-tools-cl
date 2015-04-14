@@ -1,6 +1,6 @@
 ;;;; rsbag-tools-info.asd --- System definition for bag-info program.
 ;;;;
-;;;; Copyright (C) 2011, 2012, 2013, 2014 Jan Moringen
+;;;; Copyright (C) 2011, 2012, 2013, 2014, 2015 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -75,10 +75,12 @@ See `version/list' for details on keyword parameters."
   :depends-on  (:alexandria
                 :let-plus
 
-                (:version :cl-rsbag          #.(version/string :revision? nil))
+                (:version :cl-rsbag             #.(version/string :revision? nil))
 
-                (:version :cl-rsb-common     #.(version/string :revision? nil))
-                (:version :cl-rsb-formatting #.(version/string :revision? nil)))
+                (:version :cl-rsb-common        #.(version/string :revision? nil))
+                (:version :cl-rsb-formatting    #.(version/string :revision? nil))
+
+                (:version :rsbag-tools-commands #.(version/string)))
   :components  ((:module     "bag-info"
                  :components ((:file       "package")
                               (:file       "main"

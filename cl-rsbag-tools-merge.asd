@@ -1,6 +1,6 @@
 ;;;; rsbag-tools-merge.asd --- System definition for merge program.
 ;;;;
-;;;; Copyright (C) 2011, 2012, 2013, 2014 Jan Moringen
+;;;; Copyright (C) 2011, 2012, 2013, 2014, 2015 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -78,15 +78,13 @@ in the process."
                 :let-plus
                 :cl-ppcre
 
-                (:version :cl-rsbag          #.(version/string :revision? nil))
+                (:version :cl-rsbag             #.(version/string :revision? nil))
 
-                (:version :cl-rsb-common     #.(version/string :revision? nil))
-                (:version :cl-rsb-formatting #.(version/string :revision? nil)))
+                (:version :cl-rsb-common        #.(version/string :revision? nil))
+                (:version :cl-rsb-formatting    #.(version/string :revision? nil))
+
+                (:version :rsbag-tools-commands #.(version/string)))
   :components  ((:module     "bag-merge"
                  :components ((:file       "package")
-                              (:file       "protocol"
-                               :depends-on ("package"))
-                              (:file       "transcoding"
-                               :depends-on ("package" "protocol"))
                               (:file       "main"
-                               :depends-on ("package" "protocol"))))))
+                               :depends-on ("package"))))))

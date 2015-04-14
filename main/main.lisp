@@ -1,115 +1,109 @@
 ;;;; main.lisp --- Dispatch function of the main bag program.
 ;;;;
-;;;; Copyright (C) 2011, 2012, 2013 Jan Moringen
+;;;; Copyright (C) 2011, 2012, 2013, 2015 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
 (cl:in-package #:rsbag.tools.main)
 
-(defvar *filename->entry-point*
-  '(("bag-record" . rsbag.tools.record:main)
-    ("bag-info"   . rsbag.tools.info:main)
-    ("bag-merge"  . rsbag.tools.merge:main)
-    ("bag-cat"    . rsbag.tools.cat:main)
-    ("bag-play"   . rsbag.tools.play:main))
+(defvar *name->entry-point*
+  '(("record" . rsbag.tools.record:main)
+    ("info"   . rsbag.tools.info:main)
+    ("merge"  . rsbag.tools.merge:main)
+    ("cat"    . rsbag.tools.cat:main)
+    ("play"   . rsbag.tools.play:main))
   "Stores a mapping from program names to entry point functions.")
+
+(defun program-pathname->name (program-pathname)
+  (apply #'concatenate 'string (pathname-name program-pathname)
+         (when (pathname-type program-pathname)
+           (list "." (pathname-type program-pathname)))))
+
+(defun main/program-name (program-pathname args)
+  (when-let* ((name  (pathname-name program-pathname))
+              (entry (assoc name *name->entry-point*
+                            :test (lambda (name entry)
+                                    (search entry name)))))
+    (let ((main-pathname #+unix (truename (format nil "/proc/~D/exe" (sb-posix:getpid)))
+                         #-unix "bag"))
+      (warn "~@<Selecting the command to execute via the program ~
+             name (i.e. running ~A~@[ ~{~A~^ ~}~]) is deprecated. Use~
+             ~@:_~@:_~
+             ~2@T~@<~A ~A~@[ ~{~A ~^~}~]~:>~
+             ~@:_~@:_~
+             instead.~@:>"
+            program-pathname args main-pathname (car entry) args)
+      (funcall (cdr entry) (program-pathname->name main-pathname) args))
+    t))
+
+(defun main/command (program-pathname command args)
+  (when-let ((entry (assoc command *name->entry-point* :test #'string=)))
+    (funcall (cdr entry) program-pathname args)
+    t))
 
 (defun main ()
   "Entry point function of the main bag program."
   (make-synopsis)
-  (let* ((args     (com.dvlsoft.clon::cmdline))
-         (pathname (pathname (first args)))
-         (name     (apply #'concatenate
-                          'string
-                          (pathname-name pathname)
-                          (when (pathname-type pathname)
-                            (list "." (pathname-type pathname)))))
-         (entry    (cdr (assoc name *filename->entry-point*
-                               :test (lambda (name entry)
-                                       (search entry name))))))
+  (let+ (((program-name &rest args) (com.dvlsoft.clon::cmdline))
+         (program-pathname (pathname program-name)))
     (cond
-      ;; If we found an entry point, use it.
-      (entry
-       (funcall entry))
+      ;; If we can find an entry point based on our program name, use
+      ;; it.
+      ((main/program-name program-pathname args))
+
+      ;; If the program name does not correspond to an entry-point,
+      ;; try to use the first commandline option as a sub-command.
+      ((when-let ((command (first args)))
+         (main/command program-pathname command (rest args))))
 
       ;; If the program has been called with the "create-links"
       ;; commandline option, create symbolic links for entry points as
       ;; necessary and exit.
-      ((string= "create-links" (second args))
-       (%maybe-create-links name (third args) (fourth args)))
+      ((string= "create-links" (first args))
+       (warn "~@<Selecting the command to execute via the program name ~
+              is deprecated.~@:>")
+       (%maybe-create-links program-pathname (second args) (third args)))
 
       ;; If the program has been called with the "redump" commandline
       ;; option, dump into a new binary with the specified library
       ;; loading behavior and the specified core compression.
-      ((string= "redump" (second args))
-       (destructuring-bind (&optional (name name) &rest local-args)
-           (nthcdr 2 args)
-
-         ;; Change behavior for foreign libraries. Either hard-wire
-         ;; their names into the dumped image ("static") or search for
-         ;; them on image restart.
-         (if (member "static" local-args :test #'string=)
-             (make-static)
-             (make-dynamic))
-
-         ;; Create new binary.
-         (eval
-          `(com.dvlsoft.clon:dump
-            ,name main
-            ,@(when (member "compress" local-args :test #'string=)
-                #+sb-core-compression '(:compression 9)
-                #-sb-core-compression
-                (progn
-                  (warn "~@<Compression is not supported in this ~
-                         implementation~@:>")
-                  '()))))))
+      ((string= "redump" (first args))
+       (let+ (((&optional (name (program-pathname->name
+                                 program-pathname))
+                          &rest local-args)
+               (rest args))
+              (static?   (member "static" local-args :test #'string=))
+              (compress? (member "compress" local-args :test #'string=)))
+         (setf uiop:*image-entry-point* "rsbag.tools.main:main") ; TODO temp
+         (rsb.tools.commands:command-execute
+          (rsb.tools.commands:make-command
+           :redump
+           :output-file name
+           :static?     static?
+           :compression (when compress? 9)))))
 
       ;; Otherwise display information regarding entry points and
       ;; symbolic links and offer to create these automatically if
       ;; necessary.
       (t
-       (format *error-output* "~@<Invoke this program as~_~_ ~5@T~A ~
-                               create-links [PREFIX [SUFFIX]] ~_~2@Tor ~
-                               ~:*~A redump ~
-                               [FILENAME (compress|static)*] ~
-                               ~{~_~2@Tor ~A~}~_~_(not ~2:*~S). The ~
-                               latter invocations are usually done by ~
-                               creating symbolic links~_~_ ~{~2@T~A ~
-                               -> bag~_~}~@:>~%"
-               name (mapcar #'car *filename->entry-point*))
-       (unless (every (compose #'probe-file #'car) *filename->entry-point*)
-         (format *query-io* "Create missing links now [yes/no]? ")
-         (finish-output *query-io*)
-         (when (member (read-line *query-io*) '("y" "yes")
-                       :test #'equal)
-           (%maybe-create-links name)))))))
-
-;;; Library loading behavior
-
-(defun make-static ()
-  "Hard-wire locations of foreign libraries."
-  ;; Do not reload Spread library.
-  #-win32 (unless (network.spread-system:spread-library-pathname)
-            (error "~@<Spread library pathname not provided (use ~
-                    SPREAD_LIBRARY environment variable).~@:>"))
-
-  #-win32 (network.spread:use-spread-library
-           :pathname (network.spread-system:spread-library-pathname))
-  #-win32 (network.spread:disable-reload-spread-library))
-
-(defun make-dynamic ()
-  "Enable dynamic search for and loading of foreign libraries."
-  ;; Try to reload Spread library.
-  #-win32 (ignore-errors
-           (network.spread:use-spread-library :pathname nil))
-  #-win32 (network.spread:enable-reload-spread-library :if-fails #'warn))
+       (format *error-output* "~@<Invoke this program as~
+                               ~@:_~@:_~
+                               ~5@T~A create-links [PREFIX [SUFFIX]]       (Deprecated)~
+                               ~@:_  or ~:*~A redump [FILENAME (compress|static)*]~
+                               ~{~@:_  or ~{~A ~A~}~}~
+                               ~@:_~@:_~
+                               (not ~2:*~A).~@:>~%"
+               program-pathname
+               (mapcar (lambda (entry)
+                         (list program-pathname (car entry)))
+                       *name->entry-point*))))))
 
 ;;; Utility functions
 
 (defun %maybe-create-link (target name &optional prefix suffix)
   "If NAME does not designate a filesystem object, create a symbolic
-link to TARGET named NAME. Note that existing filesystem objects named
-NAME can prevent the creation of the symbolic link."
+   link to TARGET named NAME. Note that existing filesystem objects
+   named NAME can prevent the creation of the symbolic link."
   (let ((name (format nil "~@[~A~]~A~@[~A~]" prefix name suffix)))
     (unless (probe-file name)
       #-(and sbcl (not win32)) (error "~@<Don't know how to create ~
@@ -122,7 +116,7 @@ NAME can prevent the creation of the symbolic link."
 
 (defun %maybe-create-links (target &optional prefix suffix)
   "Create symbolic links to TARGET for each entry in
-`*filename->entry-point*', if necessary."
-  (let ((names (mapcar #'car *filename->entry-point*)))
+   `*name->entry-point*', if necessary."
+  (let ((names (mapcar #'car *name->entry-point*)))
     (mapc (rcurry #'%maybe-create-link prefix suffix)
           (circular-list target) names)))
