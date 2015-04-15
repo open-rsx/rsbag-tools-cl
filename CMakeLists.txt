@@ -208,7 +208,7 @@ set(MAIN_NAME        "rsbag")
 set(MAIN_SYSTEM_NAME "cl-rsbag-tools-main")
 set(MAIN_EXECUTABLE  "${CMAKE_CURRENT_BINARY_DIR}/${MAIN_NAME}${CMAKE_EXECUTABLE_SUFFIX}")
 set(ASDF_EXTRA_OUTPUT_TRANSLATIONS "((\\\"${CMAKE_CURRENT_SOURCE_DIR}\\\" #P\\\"${MAIN_SYSTEM_NAME}\\\")
-                                    #P\\\"${MAIN_EXECUTABLE}\\\")")
+                                    #P\\\"${CMAKE_CURRENT_BINARY_DIR}/${MAIN_NAME}\\\")")
 configure_lisp_redirect("${MAIN_NAME}"
                         "--eval \"(load-system :iterate)\"
                          --eval \"(setf iterate::*always-declare-variables* t)\"
