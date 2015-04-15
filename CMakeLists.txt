@@ -204,7 +204,7 @@ set(VERSION_SUFFIX "${RSBAG_TOOLS_VERSION_MAJOR}.${RSBAG_TOOLS_VERSION_MINOR}")
 message(STATUS "Project is ${CMAKE_PROJECT_NAME} (${VERSION_FROM_LISP})")
 
 # Create binary.
-set(MAIN_NAME "bag")
+set(MAIN_NAME "rsbag")
 set(MAIN_EXECUTABLE "${CMAKE_CURRENT_BINARY_DIR}/${MAIN_NAME}${CMAKE_EXECUTABLE_SUFFIX}")
 file(GLOB     TOOLS
      RELATIVE "${CMAKE_CURRENT_SOURCE_DIR}"
@@ -220,7 +220,7 @@ add_custom_target(binary ALL DEPENDS "${MAIN_EXECUTABLE}")
 if(NOT CMAKE_SYSTEM_NAME STREQUAL "Windows")
     message(STATUS "Configuring tool ${TOOLS}")
     add_custom_command(OUTPUT  "${CMAKE_CURRENT_BINARY_DIR}/bag-info"
-                       COMMAND "${CMAKE_CURRENT_BINARY_DIR}/${MAIN_NAME}" create-links
+                       COMMAND "${CMAKE_CURRENT_BINARY_DIR}/${MAIN_NAME}" create-links "bag-"
                        DEPENDS "${MAIN_EXECUTABLE}"
                        COMMENT "Creating symlinks")
     add_custom_target(links ALL DEPENDS bag-info)
@@ -426,9 +426,9 @@ install(CODE "message(STATUS \"Compressing Lisp image ${MAIN_NAME} (this can tak
               execute_process(COMMAND \"${CMAKE_CURRENT_BINARY_DIR}/${MAIN_NAME}\"
                                       redump \"${CMAKE_CURRENT_BINARY_DIR}/${MAIN_NAME}\" compress)")
 
-set(BINARY_PREFIX    "")
+set(BINARY_PREFIX    "bag-")
 set(BINARY_SUFFIX    "cl${VERSION_SUFFIX}")
-set(MAIN_BINARY_NAME "${BINARY_PREFIX}${MAIN_NAME}${BINARY_SUFFIX}${CMAKE_EXECUTABLE_SUFFIX}")
+set(MAIN_BINARY_NAME "${MAIN_NAME}${BINARY_SUFFIX}${CMAKE_EXECUTABLE_SUFFIX}")
 install(PROGRAMS    "${MAIN_EXECUTABLE}"
         DESTINATION "bin"
         RENAME      "${MAIN_BINARY_NAME}")

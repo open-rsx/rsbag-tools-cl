@@ -21,5 +21,5 @@
 ;; Restart rsbag threadpool
 (rsbag:enable-restart-threadpool)
 
-(com.dvlsoft.clon:dump #-win32 "bag" #+win32 "bag.exe"
+(com.dvlsoft.clon:dump #-win32 "rsbag" #+win32 "rsbag.exe"
                        rsbag.tools.main:main)

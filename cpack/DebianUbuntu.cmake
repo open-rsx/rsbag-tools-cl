@@ -5,11 +5,11 @@ set(CPACK_DEBIAN_PACKAGE_VERSION     "${CPACK_PACKAGE_VERSION}${CPACK_PACKAGE_RE
 set(CPACK_DEBIAN_PACKAGE_MAINTAINER  "Jan Moringen <jmoringe@techfak.uni-bielefeld.de>")
 set(CPACK_DEBIAN_PACKAGE_DESCRIPTION "Tools for recording and replaying RSB events (Common Lisp implementation)
  Currently, the following tools are available
-  * bag-record
-  * bag-info
-  * bag-play
-  * bag-cat
-  * bag-merge")
+  * record
+  * info
+  * play
+  * cat
+  * transform")
 set(CPACK_DEBIAN_PACKAGE_PRIORITY    "optional")
 set(CPACK_DEBIAN_PACKAGE_SECTION     "net")
 #SET(CPACK_DEBIAN_ARCHITECTURE        "${CMAKE_SYSTEM_PROCESSOR}") # Debian uses different names here
@@ -39,7 +39,18 @@ file(APPEND "${POSTINST_SCRIPT}"
              )\n\n")
 
 # Update alternatives.
+file(APPEND "${POSTINST_SCRIPT}"
+            "update-alternatives --install    \\
+               /usr/bin/rsbag                 \\
+               rsbag                          \\
+               /usr/bin/rsbag${BINARY_SUFFIX} \\
+               ${PACKAGE_ALT_PRIORITY}\n\n")
+file(APPEND "${PRERM_SCRIPT}"
+            "update-alternatives --remove           \\
+               rsbag                                \\
+               /usr/bin/rsbag${VERSION_SUFFIX}\n\n")
 foreach(TOOL ${TOOLS})
+    string(REGEX REPLACE "^bag-(.*)$" "\\1" TOOL "${TOOL}")
     file(APPEND "${POSTINST_SCRIPT}"
                 "update-alternatives --install                       \\
                    /usr/bin/${BINARY_PREFIX}${TOOL}                  \\
