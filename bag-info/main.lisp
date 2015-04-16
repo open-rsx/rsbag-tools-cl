@@ -6,20 +6,19 @@
 
 (cl:in-package #:rsbag.tools.info)
 
-(defun make-help-string (&key
-                         (program-name "bag-info"))
+(defun make-help-string ()
   "Return a help that explains the commandline option interface."
   (format nil "Display information about BAG-FILE.~@
                ~@
                The file format of BAG-FILE is guessed based on the ~
                filename. Currently, the following file formats are ~
-               supported:~{~&+ ~4A (extension: \".~(~:*~A~)\")~}~@
-               ~@
-               Examples:~@
-               ~@
-               ~2@T~A /tmp/everything.tide~@
+               supported:~{~&+ ~4A (extension: \".~(~:*~A~)\")~}"
+          (mapcar #'car (rsbag.backend:backend-classes))))
+
+(defun make-example-string (&key (program-name "bag merge"))
+  "Make and return a string containing usage examples of the program."
+  (format nil "~2@T~A /tmp/everything.tide~@
                "
-          (mapcar #'car (rsbag.backend:backend-classes))
           program-name))
 
 (defun update-synopsis (&key
@@ -42,7 +41,10 @@
                     :enum          '(:no :short :full)
                     :default-value :short
                     :description
-                    "Print format information for each channel."))))
+                    "Print format information for each channel."))
+   :item    (defgroup (:header "Examples")
+                (make-text :contents (make-example-string
+                                      :program-name program-name)))))
 
 (defun main (program-pathname args)
   "Entry point function of the bag-info program."
