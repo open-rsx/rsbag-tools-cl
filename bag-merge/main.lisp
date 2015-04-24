@@ -95,38 +95,6 @@
                        (cl-ppcre:scan spec (channel-name channel))))
                    specs))))
 
-(defun collect-input-files (args)
-  "Collect and return a list of input files according to ARGS.
-ARGS can be
-+ A designator of a wild pathname matching one or more files
-+ A list of pathname designators of existing files"
-  (let+ ((parsed (mapcar #'parse-namestring args))
-         ((&flet existing-file (pathname)
-            (when-let ((probed (probe-file pathname)))
-              (and (pathname-name probed) (pathname-type probed))))))
-    (cond
-      ;; Neither glob expression nor filenames
-      ((null args)
-       (error "~@<No glob expression or one or more input log files ~
-               specified.~@:>"))
-
-      ;; A single glob expression. Does it match anything?
-      ((and (length= 1 parsed) (wild-pathname-p (first parsed)))
-       (or (directory (first parsed))
-           (error "~@<The specified input glob expression ~S did not ~
-                   match any files.~@:>"
-                  (first args))))
-
-      ;; Multiple arguments: should refer to existing files.
-      ((when-let ((invalid (remove-if #'existing-file parsed)))
-         (error "~@<The following specified input file~P~:* ~
-                 ~[~;does~:;do~] not exist: ~{~S~^, ~}.~@:>"
-                (length invalid) invalid)))
-
-      ;; We don't understand anything else.
-      (t
-       parsed))))
-
 (defun main (program-pathname args)
   "Entry point function of the bag-merge program."
   (let ((program-name (concatenate
@@ -142,7 +110,7 @@ ARGS can be
 
   (let ((error-policy        (maybe-relay-to-thread
                               (process-error-handling-options)))
-        (input-files         (collect-input-files (remainder)))
+        (input-files         (remainder))
         (output-files        (or (getopt :long-name "output-file")
                                  (error "~@<No output file specified.~@:>")))
         (force?              (getopt :long-name "force"))

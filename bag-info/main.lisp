@@ -59,8 +59,8 @@
      :update-synopsis (curry #'update-synopsis :program-name program-name)
      :return          (lambda () (return-from main))))
 
-  (unless (length= 1 (remainder))
-    (error "Specify exactly one log file."))
+  (when (emptyp (remainder))
+    (error "~@<Specify exactly at least one input file.~@:>"))
 
   (let ((error-policy  (maybe-relay-to-thread
                         (process-error-handling-options)))

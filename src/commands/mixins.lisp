@@ -45,6 +45,42 @@
     (defmethod documentation ((thing (eql slot)) (doc-type (eql t)))
       (augment-documentation-with-backends (call-next-method)))))
 
+(defun collect-input-files (spec)
+  "Collect and return a list of input files according to SPEC.
+
+   SPEC can be:
+   + A designator of a wild pathname matching one or more files
+   + A list of pathname designators of existing files"
+  (let+ ((parsed nil)
+         ((&flet parsed ()
+            (or parsed
+                (setf parsed (mapcar #'parse-namestring (ensure-list spec))))))
+         ((&flet existing-file (pathname)
+            (when-let ((probed (probe-file pathname)))
+              (and (pathname-name probed) (pathname-type probed))))))
+        (cond
+          ;; Neither glob expression nor filenames
+          ((null spec)
+           (error "~@<No glob expression or one or more input files ~
+                   specified.~@:>"))
+
+          ;; A single glob expression. Does it match anything?
+          ((and (length= 1 (parsed)) (wild-pathname-p (first (parsed))))
+           (or (directory (first (parsed)))
+               (error "~@<The specified input glob expression ~S did ~
+                       not match any files.~@:>"
+                      (first (parsed)))))
+
+          ;; Multiple arguments: should refer to existing files.
+          ((when-let ((invalid (remove-if #'existing-file (parsed))))
+             (error "~@<The following specified input file~P~:* ~
+                     ~[~;does~:;do~] not exist: ~{~S~^, ~}.~@:>"
+                    (length invalid) invalid)))
+
+          ;; We don't understand anything else.
+          (t
+           (parsed)))))
+
 ;;; `file-output-mixin'
 
 (eval-when (:compile-toplevel  :load-toplevel :execute)
@@ -90,7 +126,6 @@
 (eval-when (:compile-toplevel  :load-toplevel :execute)
   (defclass file-input-mixin ()
     ((input-files :type     (or null (cons pathname)) ; list-of pathnanmes
-                  :reader   command-input-files
                   :accessor command-%input-files
                   :documentation
                   "Stores a list of pathnames of input files."))
@@ -106,9 +141,11 @@
                                      (slot-names t)
                                      &key
                                      (input-files nil input-files-supplied?))
-  ;; TODO ensure files exist?
   (when input-files-supplied?
     (setf (command-%input-files instance) (mapcar #'pathname input-files))))
+
+(defmethod command-input-files ((command file-input-mixin))
+  (collect-input-files (command-%input-files command)))
 
 (defmethod print-items:print-items append ((object file-input-mixin))
   `((:input-file ,(command-input-files object) "~{~A~^, ~}"

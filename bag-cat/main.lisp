@@ -111,8 +111,8 @@
      :update-synopsis (curry #'update-synopsis :program-name program-name)
      :return          (lambda () (return-from main))))
 
-  (unless (length= 1 (remainder))
-    (error "~@<Specify input file.~@:>"))
+  (when (emptyp (remainder))
+    (error "~@<Specify at least one input file.~@:>"))
 
   (let+ ((error-policy (maybe-relay-to-thread
                         (process-error-handling-options)))
