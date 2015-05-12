@@ -207,6 +207,7 @@ message(STATUS "Project is ${CMAKE_PROJECT_NAME} (${VERSION_FROM_LISP})")
 set(MAIN_NAME        "rsbag")
 set(MAIN_SYSTEM_NAME "cl-rsbag-tools-main")
 set(MAIN_EXECUTABLE  "${CMAKE_CURRENT_BINARY_DIR}/${MAIN_NAME}${CMAKE_EXECUTABLE_SUFFIX}")
+set(TOOLS            record info play cat transform)
 set(ASDF_EXTRA_OUTPUT_TRANSLATIONS "((\\\"${CMAKE_CURRENT_SOURCE_DIR}\\\" #P\\\"${MAIN_SYSTEM_NAME}\\\")
                                     #P\\\"${CMAKE_CURRENT_BINARY_DIR}/${MAIN_NAME}\\\")")
 configure_lisp_redirect("${MAIN_NAME}"
@@ -218,19 +219,6 @@ add_custom_command(OUTPUT  "${MAIN_EXECUTABLE}"
                    COMMAND "${CMAKE_COMMAND}" -P "${CMAKE_CURRENT_BINARY_DIR}/sbcl.${MAIN_NAME}.cmake"
                    COMMENT "Creating Lisp image ${MAIN_NAME} (this can take a long time)")
 add_custom_target(binary ALL DEPENDS "${MAIN_EXECUTABLE}")
-
-# Create symlinks.
-file(GLOB     TOOLS
-     RELATIVE "${CMAKE_CURRENT_SOURCE_DIR}"
-     "bag-*")
-if(NOT CMAKE_SYSTEM_NAME STREQUAL "Windows")
-    message(STATUS "Configuring tool ${TOOLS}")
-    add_custom_command(OUTPUT  "${CMAKE_CURRENT_BINARY_DIR}/bag-info"
-                       COMMAND "${MAIN_EXECUTABLE}" create-links "bag-"
-                       DEPENDS "${MAIN_EXECUTABLE}"
-                       COMMENT "Creating symlinks")
-    add_custom_target(links ALL DEPENDS bag-info)
-endif()
 
 # Tests
 set(DATA_DIR "${cl-rsbag-tools_SOURCE_DIR}/test/data/")
@@ -250,11 +238,11 @@ endforeach()
 # --help, --help-all and --version for all binaries.
 foreach(TOOL ${TOOLS})
     add_test(NAME    "${TOOL}-help"
-             COMMAND "${CMAKE_CURRENT_BINARY_DIR}/${TOOL}" --help)
+             COMMAND "${MAIN_EXECUTABLE}" "${TOOL}" --help)
     add_test(NAME    "${TOOL}-help-all"
-             COMMAND "${CMAKE_CURRENT_BINARY_DIR}/${TOOL}" --help-for=all)
+             COMMAND "${MAIN_EXECUTABLE}" "${TOOL}" --help-for=all)
     add_test(NAME    "${TOOL}-version"
-             COMMAND "${CMAKE_CURRENT_BINARY_DIR}/${TOOL}" --version)
+             COMMAND "${MAIN_EXECUTABLE}" "${TOOL}" --version)
 endforeach()
 
 file(GLOB VALID_TIDE_FILES       "${DATA_DIR}/?.?/valid-*.tide")
@@ -265,26 +253,26 @@ file(GLOB ELAN_FILES             "${DATA_DIR}/elan/*.eaf")
 list(SORT VERSIONS)
 list(GET VERSIONS -1 CURRENT_SERIALIZATION_VERSION)
 
-# All on-error policies for bag-{info,cat,play,record}
+# All on-error policies for info, cat, play, record
 set(FILE "${DATA_DIR}/${CURRENT_SERIALIZATION_VERSION}/valid-empty.tide")
 foreach(POLICY continue abort)
-    add_test(NAME    "bag-info/on-error=${POLICY}"
-             COMMAND "${CMAKE_CURRENT_BINARY_DIR}/bag-info"
+    add_test(NAME    "info/on-error=${POLICY}"
+             COMMAND "${MAIN_EXECUTABLE}" info
                      --debug --on-error "${POLICY}" "${FILE}")
-    # bag-cat
-    add_test(NAME    "bag-cat/on-error=${POLICY}"
-             COMMAND "${CMAKE_CURRENT_BINARY_DIR}/bag-cat"
+    # cat
+    add_test(NAME    "cat/on-error=${POLICY}"
+             COMMAND "${MAIN_EXECUTABLE}" cat
                      --debug --on-error "${POLICY}"
                      "${FILE}")
-    # bag-play
-    add_test(NAME    "bag-play/on-error=${POLICY}"
-             COMMAND "${CMAKE_CURRENT_BINARY_DIR}/bag-play"
+    # play
+    add_test(NAME    "play/on-error=${POLICY}"
+             COMMAND "${MAIN_EXECUTABLE}" play
                      --debug --on-error "${POLICY}"
                      --replay-strategy as-fast-as-possible
                      "${FILE}" inprocess:)
-    # bag-record
-    add_test(NAME    "bag-record/on-error=${POLICY}"
-             COMMAND "${CMAKE_CURRENT_BINARY_DIR}/bag-record"
+    # record
+    add_test(NAME    "record/on-error=${POLICY}"
+             COMMAND "${MAIN_EXECUTABLE}" record
                      --load "${CMAKE_SOURCE_DIR}/test/send-test-events.lisp"
                      --debug --on-error "${POLICY}" --force
                      -o "bag-record-on-error=${POLICY}.tide" inprocess:)
@@ -297,8 +285,8 @@ foreach(FLUSH_STRATEGY_OPTION "property-limit :property :length/entries :limit 1
            TAG ${FLUSH_STRATEGY_OPTION})
     string(REGEX REPLACE "[:/]" ""
            TAG ${TAG})
-    add_test(NAME    "bag-record/${TAG}"
-             COMMAND "${CMAKE_CURRENT_BINARY_DIR}/bag-record"
+    add_test(NAME    "record/${TAG}"
+             COMMAND "${MAIN_EXECUTABLE}" record
                      --debug
                      --load "${CMAKE_SOURCE_DIR}/test/send-test-events.lisp"
                      --flush-strategy ${FLUSH_STRATEGY_OPTION}
@@ -307,8 +295,8 @@ foreach(FLUSH_STRATEGY_OPTION "property-limit :property :length/entries :limit 1
 endforeach()
 
 foreach(TIMESTAMP "CREATE" "SEND" "RECEIVE" "DELIVER")
-    add_test(NAME    "bag-record/timestamp=${TIMESTAMP}"
-             COMMAND "${CMAKE_CURRENT_BINARY_DIR}/bag-record"
+    add_test(NAME    "record/timestamp=${TIMESTAMP}"
+             COMMAND "${MAIN_EXECUTABLE}" record
                      --debug
                      --load "${CMAKE_SOURCE_DIR}/test/send-test-events.lisp"
                      --index-timestamp ${TIMESTAMP}
@@ -316,7 +304,7 @@ foreach(TIMESTAMP "CREATE" "SEND" "RECEIVE" "DELIVER")
                      -o "output-timetamp=${TIMESTAMP}.tide" inprocess:)
 endforeach()
 
-# bag-{info,cat,play} tests
+# info, cat, play tests
 foreach(FILE ${TIDE_FILES} ${ELAN_FILES})
     file(RELATIVE_PATH NAME "${DATA_DIR}" "${FILE}")
     list(FIND VALID_TIDE_FILES ${FILE} TEMP)
@@ -326,22 +314,22 @@ foreach(FILE ${TIDE_FILES} ${ELAN_FILES})
         set(CONTINUE)
     endif()
 
-    # bag-info
-    add_test(NAME    "bag-info${NAME}"
-             COMMAND "${CMAKE_CURRENT_BINARY_DIR}/bag-info"
+    # info
+    add_test(NAME    "info${NAME}"
+             COMMAND "${MAIN_EXECUTABLE}" info
                      --debug ${CONTINUE} "${FILE}")
     add_test(NAME    "bag-info${NAME}/compute-size"
-             COMMAND "${CMAKE_CURRENT_BINARY_DIR}/bag-info"
+             COMMAND "${MAIN_EXECUTABLE}" info
                      --debug ${CONTINUE} --compute-sizes "${FILE}")
 
-    # bag-merge
+    # transform
     string(REGEX REPLACE "/" "" OUTPUT "${NAME}")
-    add_test(NAME    "bag-merge${NAME}"
-             COMMAND "${CMAKE_CURRENT_BINARY_DIR}/bag-merge"
+    add_test(NAME    "merge${NAME}"
+             COMMAND "${MAIN_EXECUTABLE}" transform
                      --debug ${CONTINUE} --force -o "${OUTPUT}"
                      "${FILE}")
 
-    # bag-{cat,play}: range options
+    # cat, play: range options
     foreach(RANGE_OPTION ""
                          "--start-index=0" "--start-time=0"
                          "--end-index=0"   "--end-time=0"
@@ -349,16 +337,16 @@ foreach(FILE ${TIDE_FILES} ${ELAN_FILES})
         string(REGEX REPLACE "--([-a-z]+)[ =]+(.*)" "\\1=\\2"
                TAG "range-option:${RANGE_OPTION}")
 
-        # bag-cat
-        add_test(NAME    "bag-cat${NAME}/${TAG}"
-                 COMMAND "${CMAKE_CURRENT_BINARY_DIR}/bag-cat"
+        # cat
+        add_test(NAME    "cat${NAME}/${TAG}"
+                 COMMAND "${MAIN_EXECUTABLE}" cat
                          --debug ${CONTINUE}
                          ${RANGE_OPTION}
                          "${FILE}")
 
-        # bag-play
-        add_test(NAME    "bag-play${NAME}/${TAG}"
-                 COMMAND "${CMAKE_CURRENT_BINARY_DIR}/bag-play"
+        # play
+        add_test(NAME    "play${NAME}/${TAG}"
+                 COMMAND "${MAIN_EXECUTABLE}" play
                          --debug ${CONTINUE}
                          ${RANGE_OPTION}
                          --replay-strategy as-fast-as-possible
@@ -371,16 +359,16 @@ foreach(FILE ${TIDE_FILES} ${ELAN_FILES})
             string(REGEX REPLACE "--([-a-z]+)[ =]+(.*)" "\\1=\\2"
                    TAG "range-option:${RANGE_OPTION}")
 
-            # bag-cat
-            add_test(NAME    "bag-cat${NAME}/${TAG}"
-                     COMMAND "${CMAKE_CURRENT_BINARY_DIR}/bag-cat"
+            # cat
+            add_test(NAME    "cat${NAME}/${TAG}"
+                     COMMAND "${MAIN_EXECUTABLE}" cat
                              --debug ${CONTINUE}
                              ${RANGE_OPTION}
                              "${FILE}")
 
-            # bag-play
-            add_test(NAME    "bag-play${NAME}/${TAG}"
-                     COMMAND "${CMAKE_CURRENT_BINARY_DIR}/bag-play"
+            # play
+            add_test(NAME    "play${NAME}/${TAG}"
+                     COMMAND "${MAIN_EXECUTABLE}" play
                              --debug ${CONTINUE}
                              ${RANGE_OPTION}
                              --replay-strategy as-fast-as-possible
@@ -388,7 +376,7 @@ foreach(FILE ${TIDE_FILES} ${ELAN_FILES})
         endforeach()
     endif()
 
-    # bag-{cat,play}: replay strategies
+    # cat, play: replay strategies
     foreach(STRATEGY_OPTION ""
                             "--replay-strategy=recorded-timing :speed 100"
                             "--replay-strategy=recorded-timing :max-delay .0001"
@@ -399,18 +387,18 @@ foreach(FILE ${TIDE_FILES} ${ELAN_FILES})
                TEMP "replay-strategy:${STRATEGY_OPTION}")
         string(REGEX REPLACE "[ ]" "_" TAG "${TEMP}")
 
-        # bag-cat
-        add_test(NAME    "bag-cat${NAME}/${TAG}"
-                 COMMAND "${CMAKE_CURRENT_BINARY_DIR}/bag-cat"
+        # cat
+        add_test(NAME    "cat${NAME}/${TAG}"
+                 COMMAND "${MAIN_EXECUTABLE}" cat
                          --debug ${CONTINUE}
                          ${STRATEGY_OPTION}
                          "${FILE}")
 
-        # bag-play
+        # play
         if(NOT (FILE MATCHES "(simple\\.eaf$|recoverable-missing-index\\.tide$)")
            OR STRATEGY_OPTION)
-            add_test(NAME    "bag-play${NAME}/${TAG}"
-                     COMMAND "${CMAKE_CURRENT_BINARY_DIR}/bag-play"
+            add_test(NAME    "play${NAME}/${TAG}"
+                     COMMAND "${MAIN_EXECUTABLE}" play
                              --debug ${CONTINUE}
                              ${STRATEGY_OPTION}
                              "${FILE}" inprocess:)
@@ -421,8 +409,8 @@ endforeach()
 # bag-cat formatting styles tests
 foreach(STYLE discard meta-data payload detailed
               compact)
-    add_test(NAME    "bag-cat/style/${STYLE}"
-             COMMAND "${CMAKE_CURRENT_BINARY_DIR}/bag-cat"
+    add_test(NAME    "cat/style/${STYLE}"
+             COMMAND "${MAIN_EXECUTABLE}" cat
                      --debug --style "${STYLE}"
                      "${DATA_DIR}/${CURRENT_SERIALIZATION_VERSION}/valid-single-event.tide")
 endforeach()
@@ -432,7 +420,6 @@ install(CODE "message(STATUS \"Compressing Lisp image ${MAIN_NAME} (this can tak
               execute_process(COMMAND \"${CMAKE_CURRENT_BINARY_DIR}/${MAIN_NAME}\"
                                       redump \"${CMAKE_CURRENT_BINARY_DIR}/${MAIN_NAME}\" compress)")
 
-set(BINARY_PREFIX    "bag-")
 set(BINARY_SUFFIX    "cl${VERSION_SUFFIX}")
 set(MAIN_BINARY_NAME "${MAIN_NAME}${BINARY_SUFFIX}${CMAKE_EXECUTABLE_SUFFIX}")
 install(PROGRAMS    "${MAIN_EXECUTABLE}"
