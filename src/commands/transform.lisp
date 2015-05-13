@@ -1,121 +1,10 @@
 ;;;; transform.lisp --- Implementation of the transform command.
 ;;;;
-;;;; Copyright (C) 2013, 2014, 2015, 2016 Jan Moringen
+;;;; Copyright (C) 2013, 2014, 2015, 2016, 2017 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
 (cl:in-package #:rsbag.tools.commands)
-
-;;; Transcoding protocol
-
-(defgeneric make-channel-name (input-channel)
-  (:documentation
-   "Return a suitable name for the output channel into which entries
-    from INPUT-CHANNEL will be copied."))
-
-(defgeneric make-channel-type (input-channel)
-  (:documentation
-   "Return a suitable type for the output channel into which entries
-    from INPUT-CHANNEL will be copied."))
-
-(defgeneric make-channel-meta-data (input-channel)
-  (:documentation
-   "Return a suitable meta-data plist for the output channel into
-    which entries from INPUT-CHANNEL will be copied."))
-
-(defgeneric transcode (input output
-                       &key
-                       channels
-                       skip-empty-channels?
-                       entry-transform
-                       timestamp-transform
-                       progress)
-  (:documentation
-   "Copy and potentially transform the contents of INPUT to
-    OUTPUT. INPUT and OUTPUT can be bags or channels or sequences of
-    such.
-
-    When INPUT and OUTPUT are bags (or sequences of bags) and CHANNELS
-    is supplied, it is used to select channels from INPUT from
-    processing. When supplied, CHANNELS has be either t or a unary
-    predicate.
-
-    When INPUT and OUTPUT are bags (or sequences of bags)
-    SKIP-EMPTY-CHANNELS? can be used to control whether empty channels
-    should be created in the output bag for empty input channels.
-
-    If PROGRESS is non-nil it has to be a function accepting six
-    arguments: a current index, an overall length, an input bag, an
-    input channel, an output bag and an output channel. "))
-
-;;; Transcoding implementation
-
-(defmethod make-channel-name ((input-channel t))
-  (channel-name input-channel))
-
-(defmethod make-channel-type ((input-channel t))
-  (getf (channel-meta-data input-channel) :type))
-
-(defmethod make-channel-meta-data ((input-channel t))
-  (let ((meta-data (channel-meta-data input-channel)))
-    (append (list :type (make-channel-type input-channel))
-            (remove-from-plist meta-data :type))))
-
-(defmethod transcode ((input channel) (output channel)
-                      &key
-                      progress
-                      (entry-transform     #'identity)
-                      (timestamp-transform (lambda (timestamp datum)
-                                             (declare (ignore datum))
-                                             timestamp))
-                      &allow-other-keys)
-  (let+ ((length (length input))
-         ((&flet update-progress (i)
-            (cond
-              ((not progress))
-              ((eq i t)
-               (funcall progress t))
-              ((or (zerop (mod i 100)) (= i (1- length)))
-               (funcall progress i length
-                        (rsbag:channel-bag input) input
-                        (rsbag:channel-bag output) output))))))
-    (iter (for (timestamp datum) each (channel-items input))
-          (for i :from 0)
-          (let* ((datum/transformed     (funcall entry-transform datum))
-                 (timestamp/transformed (funcall timestamp-transform
-                                                 timestamp datum/transformed)))
-            (when datum/transformed
-              (setf (entry output timestamp/transformed) datum/transformed)))
-          (update-progress i))
-    (update-progress t)))
-
-(defmethod transcode ((input bag) (output bag)
-                      &rest args
-                      &key
-                      channels
-                      skip-empty-channels?
-                      &allow-other-keys)
-  (let+ (((&flet skip-channel? (channel)
-            (or (and skip-empty-channels? (emptyp channel))
-                (and (not (eq channels t))
-                     (not (funcall channels channel))))))
-         ((&flet clone-channel (source)
-            (let ((name      (make-channel-name source))
-                  (meta-data (make-channel-meta-data source)))
-              (or (bag-channel output name :if-does-not-exist nil)
-                  (setf (bag-channel output name) meta-data)))))
-         (in-channels  (remove-if #'skip-channel? (bag-channels input)))
-         (out-channels (mapcar #'clone-channel in-channels))
-         (other-args   (remove-from-plist
-                        args :channels :skip-empty-channels?)))
-    (iter (for in  each in-channels)
-          (for out each out-channels)
-          (apply #'transcode in out other-args))))
-
-(defmethod transcode ((input sequence) (output bag)
-                      &rest args &key
-                                   &allow-other-keys)
-  (map nil (lambda (bag) (apply #'transcode bag output args)) input))
 
 ;;; `transform' command class
 
@@ -163,70 +52,157 @@
 (service-provider:register-provider/class
  'command :transform :class 'transform)
 
-(defun print-transform-progress (stream index
-                                 &optional
-                                 length
-                                 input-bag  input-channel
-                                 output-bag output-channel)
-  (case index
-    ((t)
-     (fresh-line stream))
-    (t
-     (format stream "~C[~28A|~48A] -> [~28A|~48A] ~6,2,2F % ~9:D/~9:D"
-             #\Return
-             input-bag  (channel-name input-channel)
-             output-bag (channel-name output-channel)
-             (/ (1+ index) (max 1 length)) index (1- length))
-     (force-output stream))))
-
 (defmethod rsb.tools.commands:command-execute ((command transform)
                                                &key error-policy)
-  (declare (ignore error-policy))
-  (let+ (((&accessors-r/o (input               command-input-files)
+  (let+ (((&accessors-r/o (input-files         command-input-files)
                           (channels            command-replay-channels)
+                          ((&values start-time start-index end-time end-index)
+                           command-replay-bounds)
                           (output-file         command-output-file)
                           (force?              command-force?)
                           (transform/datum     command-transform/datum)
                           (transform/timestamp command-transform/timestamp)
                           (progress-style      command-progress-style))
           command)
-         (inputs '())
-         (output nil))
-    ;; Since `with-bag' only handles one bag, we have to handle the
-    ;; possibility of unwinding with multiple open bags manually.
-    (unwind-protect
-         (progn
-           ;; Open files and store resulting bags successively to
-           ;; ensure that open bags can be closed when unwinding.
-           (iter (for file in input)
-                 (format *info-output* "Opening input file ~S~%" file)
-                 (push (apply #'open-bag file
-                              :direction :input
-                              (when transform/datum
-                                (list :transform (coding-transform))))
-                       inputs))
-           (format *info-output* "Opening output file ~S~%" output-file)
-           (setf output (apply #'open-bag output-file
-                               :direction :output
-                               :if-exists (if force? :supersede :error)
-                               (when transform/datum
-                                 (list :transform (coding-transform)))))
+         ;; Plumbing starts here.
+         (sink)
+         ((&flet process-datum (timestamp datum)
+            (let+ ((datum/transformed     (if transform/datum
+                                              (funcall transform/datum datum)
+                                              datum))
+                   (timestamp/transformed (if transform/timestamp
+                                              (funcall transform/timestamp
+                                                       timestamp datum/transformed)
+                                              timestamp)))
+              (when datum/transformed
+                (rsbag.rsb.recording:process-event
+                 sink timestamp/transformed datum/transformed)))))
+         (channel-allocation (make-instance 'clone))
+         ((&flet wrap-process-datum-for-clone ()
+            (let+ (((&flet note-source (source timestamp event)
+                      (declare (ignore timestamp))
+                      (push (cons event source)
+                            (strategy-%events channel-allocation)))))
+              (note-source-channel #'process-datum #'note-source))))
+         (sink-function (wrap-process-datum-for-clone))
 
-           ;; Transcode individual input files into output file.
-           (apply #'transcode inputs output
-                  :channels channels
-                  :progress (case progress-style
-                              (:line (curry #'print-transform-progress *info-output*)))
-                  (append
-                   (when transform/datum
-                     (list :entry-transform transform/datum))
-                   (when transform/timestamp
-                     (list :timestamp-transform transform/timestamp)))))
+         (access         (%access transform/datum channel-allocation))
+         (make-transform (ecase access
+                           (:data  (lambda () (coding-transform t)))
+                           (:event (lambda () (coding-transform nil)))
+                           ((nil)  (constantly '(nil))))))
+    (rsbag.rsb:with-open-connection
+        (input (apply #'rsbag.rsb:bag->events
+                      input-files sink-function
+                      :error-policy    error-policy
+                      :channels        channels
+                      :transform       (funcall make-transform)
+                      :replay-strategy :as-fast-as-possible
+                      (append (when start-time
+                                (list :start-time start-time))
+                              (when start-index
+                                (list :start-index start-index))
+                              (when end-time
+                                (list :end-time end-time))
+                              (when end-index
+                                (list :end-index end-index)))))
+      (rsbag.rsb:with-open-connection
+          (output (rsbag.rsb:events->bag
+                   nil output-file
+                   :error-policy     error-policy
+                   :if-exists        (if force? :supersede :error)
+                   :transform        (funcall make-transform)
+                   :channel-strategy channel-allocation))
+        (setf sink output)
+        (rsbag.rsb.replay:replay
+         input (rsbag.rsb.replay:connection-strategy input)
+         :progress (case progress-style
+                     (:line  (curry #'print-replay-progress *info-output*))
+                     (:ready (curry #'print-ready *info-output*))))))))
 
-      (iter (for bag in (list* output inputs))
-            (when bag
-              (handler-case
-                  (close bag)
-                (error (condition)
-                  (warn "~@<Error closing bag ~A: ~A~@:>"
-                        bag condition))))))))
+;;; Determine required amount of de/encoding
+
+(defun %access (transform? channel-strategy)
+  (let+ ((processors channel-strategy)
+         ((&flet parts ()
+            (mapcar #'car rsb.event-processing:*event-parts*))))
+    (cond
+      ((or transform? (rsb.ep:access? processors :data :read))
+       :data)
+      ((rsb.ep:access? processors (parts) :read)
+       :event)
+      (t
+       nil))))
+
+;;; `clone' channel allocation strategy
+;;;
+;;; In the `channels' slot, the strategy instance stores a mapping
+;;; from channels in the source bag(s) to channels in the destination
+;;; bag. This mapping is initially empty when the strategy object is
+;;; created.
+;;;
+;;; When an event is processed, a cell of the form
+;;;
+;;;   (EVENT . SOURCE-CHANNEL)
+;;;
+;;; must be pushed onto the alist stored in the `events' slot. This is
+;;; used to look up SOURCE-CHANNEL when EVENT is processed in the
+;;; `ensure-channel-for' method.
+
+(defclass clone ()
+  ((channels :reader   strategy-channels
+             :initform (make-hash-table :test #'eq)
+             :documentation
+             "Maps channels in the source bag(s) to channels in the
+              destination bag.")
+   (events   :accessor strategy-%events
+             :initform '()
+             :documentation
+             "An always almost empty alist of elements of the form
+
+                (EVENT . SOURCE-CHANNEL)
+
+              ."))
+  (:documentation
+   "Clones channels in the source into the destination."))
+
+(defmethod rsbag.rsb.recording:ensure-channel-for ((connection t)
+                                                   (event      t)
+                                                   (strategy   clone))
+  (let+ (((&structure strategy- channels %events) strategy)
+         (source-channel (prog1
+                             (assoc-value %events event :test #'eq)
+                           (removef %events event :test #'eq :key #'car)))
+         (found? t)
+         ((&flet make-channel (condition)
+            (declare (ignore condition))
+            (setf found? nil)
+            (let ((meta-data (rsbag:channel-meta-data source-channel)))
+              (invoke-restart 'rsbag:create meta-data))))
+         ((&flet maybe-make-channel ()
+            (let ((bag  (rsbag.rsb:connection-bag connection))
+                  (name (rsbag:channel-name source-channel)))
+              (rsbag:bag-channel
+               bag name :if-does-not-exist #'make-channel)))))
+    (values (ensure-gethash source-channel channels (maybe-make-channel))
+            found?)))
+
+;;; `note-source-channel'
+;;;
+;;; Helper construct which wraps a function for recording source
+;;; channels of events around the function provided to `bag->events'.
+
+(defstruct (note-source-channel
+             (:constructor note-source-channel (function note-function))
+             (:predicate nil)
+             (:copier nil))
+  (function      nil :type function :read-only t)
+  (note-function nil :type function :read-only t))
+
+(defmethod rsbag.rsb:bag->events ((source channel) (dest note-source-channel)
+                                  &rest args &key)
+  (let+ (((&structure-r/o note-source-channel- function note-function) dest)
+         ((&flet note-channel (timestamp event)
+            (funcall note-function source timestamp event)
+            (funcall function timestamp event))))
+    (apply #'rsbag.rsb:bag->events source #'note-channel args)))
