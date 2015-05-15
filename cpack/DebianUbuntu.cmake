@@ -28,11 +28,7 @@ file(WRITE "${PRERM_SCRIPT}"    "#!/bin/sh\n\nset -e\n")
 
 # Uncompress binary. Create symbolic links.
 file(APPEND "${POSTINST_SCRIPT}"
-            "(                                 \\
-               cd /usr/bin/                    \\
-               && ./${MAIN_BINARY_NAME} redump \\
-             )\n\n
-             (                                                      \\
+            "(                                                      \\
                cd /usr/bin                                          \\
                && ./${MAIN_BINARY_NAME}                             \\
                     create-links \"${BINARY_PREFIX}\" \"${BINARY_SUFFIX}\" \\
