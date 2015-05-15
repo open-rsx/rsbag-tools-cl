@@ -34,9 +34,9 @@ file(APPEND "${POSTINST_SCRIPT}"
                /usr/bin/${MAIN_BINARY_NAME} \\
                ${PACKAGE_ALT_PRIORITY}")
 file(APPEND "${PRERM_SCRIPT}"
-            "update-alternatives --remove        \\
-               ${MAIN_NAME}                      \\
-               /usr/bin/rsbag${MAIN_BINARY_NAME}")
+            "update-alternatives --remove   \\
+               ${MAIN_NAME}                 \\
+               /usr/bin/${MAIN_BINARY_NAME}")
 execute_process(COMMAND chmod 755 "${POSTINST_SCRIPT}" "${PRERM_SCRIPT}")
 set(CPACK_DEBIAN_PACKAGE_CONTROL_EXTRA "${POSTINST_SCRIPT};${PRERM_SCRIPT}")
 
