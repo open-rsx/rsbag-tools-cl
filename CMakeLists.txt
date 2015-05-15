@@ -406,7 +406,7 @@ foreach(FILE ${TIDE_FILES} ${ELAN_FILES})
     endforeach()
 endforeach()
 
-# bag-cat formatting styles tests
+# cat formatting styles tests
 foreach(STYLE discard meta-data payload detailed
               compact)
     add_test(NAME    "cat/style/${STYLE}"
@@ -415,11 +415,9 @@ foreach(STYLE discard meta-data payload detailed
                      "${DATA_DIR}/${CURRENT_SERIALIZATION_VERSION}/valid-single-event.tide")
 endforeach()
 
-# Installation
-install(CODE "message(STATUS \"Compressing Lisp image ${MAIN_NAME} (this can take a long time)\")
-              execute_process(COMMAND \"${CMAKE_CURRENT_BINARY_DIR}/${MAIN_NAME}\"
-                                      redump \"${CMAKE_CURRENT_BINARY_DIR}/${MAIN_NAME}\" compress)")
-
+# Install binary
+install(CODE "message(STATUS \"Configuring Lisp image ${MAIN_NAME} for installation\")
+              execute_process(COMMAND \"${MAIN_EXECUTABLE}\" redump)")
 set(BINARY_SUFFIX    "cl${VERSION_SUFFIX}")
 set(MAIN_BINARY_NAME "${MAIN_NAME}${BINARY_SUFFIX}${CMAKE_EXECUTABLE_SUFFIX}")
 install(PROGRAMS    "${MAIN_EXECUTABLE}"
