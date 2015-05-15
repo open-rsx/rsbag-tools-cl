@@ -4,12 +4,11 @@ set(CPACK_DEBIAN_PACKAGE_NAME        "${PACKAGE_BASE_NAME}")
 set(CPACK_DEBIAN_PACKAGE_VERSION     "${CPACK_PACKAGE_VERSION}${CPACK_PACKAGE_REVISION}")
 set(CPACK_DEBIAN_PACKAGE_MAINTAINER  "Jan Moringen <jmoringe@techfak.uni-bielefeld.de>")
 set(CPACK_DEBIAN_PACKAGE_DESCRIPTION "Tools for recording and replaying RSB events (Common Lisp implementation)
- Currently, the following tools are available
-  * record
-  * info
-  * play
-  * cat
-  * transform")
+ Currently, the following tools are available")
+foreach(TOOL ${TOOLS})
+  set(CPACK_DEBIAN_PACKAGE_DESCRIPTION "${CPACK_DEBIAN_PACKAGE_DESCRIPTION}
+  * rsbag ${TOOL}")
+endforeach()
 set(CPACK_DEBIAN_PACKAGE_PRIORITY    "optional")
 set(CPACK_DEBIAN_PACKAGE_SECTION     "net")
 #SET(CPACK_DEBIAN_ARCHITECTURE        "${CMAKE_SYSTEM_PROCESSOR}") # Debian uses different names here
