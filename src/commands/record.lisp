@@ -46,6 +46,12 @@
                         process. Currently, the following methods are
                         provided:
 
+                        isstarted : void -> bool
+
+                          Return true if a log file has been opened
+                          for recording and recording is currently in
+                          progress and false otherwise.
+
                         start : void -> void
 
                           Start recording or restart after it has been
@@ -57,6 +63,12 @@
                           Stop recording allowing it to be restarted
                           later. Only applicable if a bag has been
                           opened.
+
+                        isopen : void -> string or false
+
+                          If a log file has been opened for recording,
+                          return its path as a string. Otherwise
+                          return false.
 
                         open : string -> void
 
@@ -162,6 +174,9 @@
     (rsb:with-participant (server :local-server uri)
       (rsb.patterns.request-reply:with-methods (server)
           (;; Connection level
+           ("isstarted" ()
+             (bt:with-lock-held (lock)
+               (and connection running?)))
            ("start" ()
              (bt:with-lock-held (lock)
                (check-connection "start recording")
@@ -182,6 +197,11 @@
              (values))
 
            ;; Bag level
+           ("isopen" ()
+             (bt:with-lock-held (lock)
+               (when connection
+                 (namestring
+                  (bag-location (rsbag.rsb:connection-bag connection))))))
            ("open" (filename string)
              (bt:with-lock-held (lock)
                (when connection
