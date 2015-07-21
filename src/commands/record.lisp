@@ -11,7 +11,8 @@
                   index-timestamp-mixin
                   progress-mixin
                   print-items:print-items-mixin)
-  ((channel-allocation :initarg  :channel-allocation
+  ((progress-style     :initform :entries)
+   (channel-allocation :initarg  :channel-allocation
                        :reader   record-channel-allocation
                        :accessor record-%channel-allocation
                        :initform (rsbag.rsb:make-channel-strategy :scope-and-type)

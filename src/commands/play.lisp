@@ -12,7 +12,7 @@
                   rsb.tools.commands:destination-mixin
                   progress-mixin
                   print-items:print-items-mixin)
-    ()
+    ((progress-style :initform :line))
     (:documentation
      "Publish events from a log file of recorded events.
 

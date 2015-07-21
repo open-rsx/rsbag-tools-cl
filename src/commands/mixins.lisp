@@ -12,7 +12,6 @@
   ((progress-style :initarg  :progress-style
                    :type     symbol
                    :reader   command-progress-style
-                   :initform :line
                    :documentation
                    "Indicate progress of the ongoing playback using
                     style STYLE."
