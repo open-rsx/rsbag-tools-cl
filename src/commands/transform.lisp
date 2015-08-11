@@ -204,6 +204,7 @@
                  (push (open-bag file :direction :input) inputs))
            (format *info-output* "Opening output file ~S~%" output-file)
            (setf output (open-bag output-file
+                                  :direction :output
                                   :if-exists (if force? :supersede :error)))
 
            ;; Transcode individual input files into output file.
