@@ -60,6 +60,10 @@
                        :description
                        "A URI specifying the root scope and transport configuration of an RPC server exposing methods which allow controlling the recording process. Currently, the following methods are provided:
 
+isstarted : void -> bool
+
+  Return true if a log file has been opened for recording and recording is currently in progress and false otherwise.
+
 start : void -> void
 
   Restart recording after it has been stopped. Only applicable if a bag has been opened.
@@ -67,6 +71,10 @@ start : void -> void
 stop : void -> void
 
   Stop recording allowing it to be restarted later. Only applicable if a bag has been opened.
+
+isopen : void -> string or false
+
+  If a log file has been opened for recording, return its path as a string. Otherwise return false.
 
 open : string -> void
 
