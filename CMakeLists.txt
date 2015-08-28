@@ -207,7 +207,7 @@ message(STATUS "Project is ${CMAKE_PROJECT_NAME} (${VERSION_FROM_LISP})")
 set(MAIN_NAME        "rsbag")
 set(MAIN_SYSTEM_NAME "cl-rsbag-tools-main")
 set(MAIN_EXECUTABLE  "${CMAKE_CURRENT_BINARY_DIR}/${MAIN_NAME}${CMAKE_EXECUTABLE_SUFFIX}")
-set(TOOLS            record info play cat transform)
+set(TOOLS            record info play cat transform introspect)
 set(ASDF_EXTRA_OUTPUT_TRANSLATIONS "((\\\"${CMAKE_CURRENT_SOURCE_DIR}\\\" #P\\\"${MAIN_SYSTEM_NAME}\\\")
                                     #P\\\"${CMAKE_CURRENT_BINARY_DIR}/${MAIN_NAME}\\\")")
 configure_lisp_redirect("${MAIN_NAME}"
@@ -256,8 +256,13 @@ list(GET VERSIONS -1 CURRENT_SERIALIZATION_VERSION)
 # All on-error policies for info, cat, play, record
 set(FILE "${DATA_DIR}/${CURRENT_SERIALIZATION_VERSION}/valid-empty.tide")
 foreach(POLICY continue abort)
+    # info
     add_test(NAME    "info/on-error=${POLICY}"
              COMMAND "${MAIN_EXECUTABLE}" info
+                     --debug --on-error "${POLICY}" "${FILE}")
+    # introspect
+    add_test(NAME    "introspect/on-error=${POLICY}"
+             COMMAND "${MAIN_EXECUTABLE}" play
                      --debug --on-error "${POLICY}" "${FILE}")
     # cat
     add_test(NAME    "cat/on-error=${POLICY}"
@@ -321,6 +326,11 @@ foreach(FILE ${TIDE_FILES} ${ELAN_FILES})
     add_test(NAME    "bag-info${NAME}/compute-size"
              COMMAND "${MAIN_EXECUTABLE}" info
                      --debug ${CONTINUE} --compute-sizes "${FILE}")
+
+    # introspect
+    add_test(NAME    "introspect${NAME}"
+             COMMAND "${MAIN_EXECUTABLE}" info
+                     --debug ${CONTINUE} "${FILE}")
 
     # transform
     string(REGEX REPLACE "/" "" OUTPUT "${NAME}")

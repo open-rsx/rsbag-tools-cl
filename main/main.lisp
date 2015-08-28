@@ -7,12 +7,13 @@
 (cl:in-package #:rsbag.tools.main)
 
 (defvar *name->entry-point*
-  '(("record"    . rsbag.tools.record:main)
-    ("info"      . rsbag.tools.info:main)
-    ("merge"     . rsbag.tools.merge:main)
-    ("transform" . rsbag.tools.merge:main)
-    ("cat"       . rsbag.tools.cat:main)
-    ("play"      . rsbag.tools.play:main))
+  '(("record"     . rsbag.tools.record:main)
+    ("info"       . rsbag.tools.info:main)
+    ("merge"      . rsbag.tools.merge:main)
+    ("transform"  . rsbag.tools.merge:main)
+    ("cat"        . rsbag.tools.cat:main)
+    ("play"       . rsbag.tools.play:main)
+    ("introspect" . rsbag.tools.introspect:main))
   "Stores a mapping from program names to entry point functions.")
 
 (defun program-pathname->name (program-pathname)
