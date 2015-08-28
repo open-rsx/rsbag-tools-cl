@@ -101,7 +101,8 @@
                               (:file       "record")
                               (:file       "play")
                               (:file       "cat")
-                              (:file       "transform"))))
+                              (:file       "transform")
+                              (:file       "introspect"))))
   :in-order-to ((test-op (test-op :rsbag-tools-commands-test))))
 
 (defsystem :rsbag-tools-commands-test
@@ -126,7 +127,8 @@
                               (:file       "record")
                               (:file       "play")
                               (:file       "cat")
-                              (:file       "transform")))))
+                              (:file       "transform")
+                              (:file       "introspect")))))
 
 (defmethod perform ((operation test-op)
                     (component (eql (find-system :rsbag-tools-commands-test))))
