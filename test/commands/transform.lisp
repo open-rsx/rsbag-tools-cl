@@ -33,10 +33,7 @@
           :start-index          0))
         ((:input-files          ("foo.tide")
           :output-file          "bar.tide"
-          :end-index            0))
-        ((:input-files          ("foo.tide")
-          :output-file          "bar.tide"
-          :num-repetitions      1)))
+          :end-index            0)))
 
     (let+ (((&flet do-it () (apply #'rsb.tools.commands:make-command :transform
                                    :service 'rsbag.tools.commands::command

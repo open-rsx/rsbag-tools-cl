@@ -121,7 +121,7 @@
 (eval-when (:compile-toplevel :load-toplevel :execute)
   (defclass transform (file-input-mixin
                        file-output-mixin
-                       replay-mixin
+                       bag->events-mixin
                        progress-mixin
                        print-items:print-items-mixin)
     ((transform/datum     :initarg  :transform/datum
@@ -142,8 +142,6 @@
                            the (potentially already transformed) entry
                            and must return the transformed
                            timestamp."))
-    (:default-initargs
-     :replay-strategy (rsbag.rsb:make-replay-strategy :as-fast-as-possible))
     (:documentation
      "Copy events from input log files into a new log file.
 

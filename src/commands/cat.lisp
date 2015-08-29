@@ -7,6 +7,7 @@
 (cl:in-package #:rsbag.tools.commands)
 
 (defclass cat (file-input-mixin
+               bag->events-mixin
                replay-mixin
                rsb.tools.commands:style-mixin
                rsb.tools.commands:output-stream-mixin

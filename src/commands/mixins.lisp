@@ -164,94 +164,120 @@
    "This class is intended to be mixed into command classes that store
     and index events based on a configurable timestamp."))
 
+;;; `bag->events-mixin'
+
+(defclass bag->events-mixin ()
+  ((channels    :initarg  :channels
+                :type     (or (eql t) function)
+                :reader   command-replay-channels
+                :initform t
+                :documentation
+                "Select the channels matching NAME-OR-REGEXP for
+                 replay. This option can be specified multiple times."
+                 #+later ( :short-name "c"
+                          :argument-name "NAME-OR-REGEXP"))
+   (start-time  :initarg  :start-time
+                :type     rsbag.rsb.replay:range-boundary/timestamp
+                :reader   command-replay-start-time
+                :initform nil
+                :documentation
+                "Start replaying entries at the point in time
+                 indicated by TIMESTAMP-OR-SECONDS.
+
+                 When the value should be parsed as a timestamp, the
+                 syntax @[YYYY-MM-DDT]HH:MM:SS has to be used.
+
+                 A single positive real number is interpreted as time
+                 in seconds relative to the beginning of the log
+                 file. Similarly, a single negative real number is
+                 interpreted as time in seconds relative to the end of
+                 the log file, e.g. -2.5 indicates \"2.5 seconds
+                 before the end of the log file\".
+
+                 Mutually exclusive with start-index."
+                #+later (:short-name    "s"
+                         :argument-name "TIMESTAMP-OR-SECONDS"))
+   (start-index :initarg  :start-index
+                :type     (or null integer)
+                :reader   command-replay-start-index
+                :initform nil
+                :documentation
+                "Index of the entry at which the replay should start.
+
+                 A non-negative integer N is interpreted as
+                 the (N+1)-th entry relative to the beginning of the
+                 log file, i.e. 0 designates the first entry. A
+                 negative integer N is interpreted as |N| entries back
+                 from the end of the log file.
+
+                 Mutually exclusive with start-time."
+                #+later (:short-name    "S"
+                         :argument-name "INDEX"))
+   (end-time    :initarg  :end-time
+                :type     rsbag.rsb.replay:range-boundary/timestamp
+                :reader   command-replay-end-time
+                :initform nil
+                :documentation
+                "Stop replaying entries at the point in time indicated
+                 by TIMESTAMP-OR-SECONDS.
+
+                 When the value should be parsed as a timestamp, the
+                 syntax @[YYYY-MM-DDT]HH:MM:SS has to be used.
+
+                 A single real number is interpreted as time in
+                 seconds relative to the beginning of the log
+                 file. Similarly, a single negative real number is
+                 interpreted as time in seconds relative to the end of
+                 the log file, e.g. -2.5 indicates \"2.5 seconds
+                 before the end of the log file\".
+
+                 Mutually exclusive with end-index."
+                #+later (:short-name    "e"
+                         :argument-name "TIMESTAMP-OR-SECONDS"))
+   (end-index   :initarg  :end-index
+                :type     (or null integer)
+                :reader   command-replay-end-index
+                :initform nil
+                :documentation
+                "Index of the entry at which the replay should end.
+
+                 A non-negative integer N is interpreted as
+                 the (N+1)-th entry relative to the beginning of the
+                 log file, i.e. 0 designates the first entry. A
+                 negative integer N is interpreted as |N| entries back
+                 from the end of the log file.
+
+                 Mutually exclusive with end-time."
+                #+later (:short-name    "E"
+                         :argument-name "INDEX"))))
+
+(defmethod shared-initialize :before
+    ((instance   bag->events-mixin)
+     (slot-names t)
+     &key
+     start-time
+     start-index
+     end-time
+     end-index)
+  (when (and start-time start-index)
+    (incompatible-initargs 'bag->events-mixin
+                           :start-time  start-time
+                           :start-index start-index))
+  (when (and end-time end-index)
+    (incompatible-initargs 'bag->events-mixin
+                           :end-time  end-time
+                           :end-index end-index)))
+
+(defun command-replay-bounds (command)
+  (let+ (((&structure-r/o
+           command-replay- start-time start-index end-time end-index)
+          command))
+    (values start-time start-index end-time end-index)))
+
 ;;; `replay-mixin'
 
 (defclass replay-mixin ()
-  ((channels        :initarg  :channels
-                    :type     (or (eql t) function)
-                    :reader   command-replay-channels
-                    :initform t
-                    :documentation
-                    "Select the channels matching NAME-OR-REGEXP for
-                     replay. This option can be specified multiple
-                     times."
-                    #+later ( :short-name "c"
-                              :argument-name "NAME-OR-REGEXP"))
-   (start-time      :initarg  :start-time
-                    :type     rsbag.rsb.replay:range-boundary/timestamp
-                    :reader   command-replay-start-time
-                    :initform nil
-                    :documentation
-                    "Start replaying entries at the point in time
-                     indicated by TIMESTAMP-OR-SECONDS.
-
-                     When the value should be parsed as a timestamp,
-                     the syntax @[YYYY-MM-DDT]HH:MM:SS has to be used.
-
-                     A single positive real number is interpreted as
-                     time in seconds relative to the beginning of the
-                     replay. Similarly, a single negative real number
-                     is interpreted as time in seconds relative to the
-                     end of the replay, e.g. -2.5 indicates \"2.5
-                     seconds before the end of the replay\".
-
-                     Mutually exclusive with start-index."
-                    #+later (:short-name    "s"
-                             :argument-name "TIMESTAMP-OR-SECONDS"))
-   (start-index     :initarg  :start-index
-                    :type     (or null integer)
-                    :reader   command-replay-start-index
-                    :initform nil
-                    :documentation
-                    "Index of the entry at which the replay should start.
-
-                     A non-negative integer N is interpreted as
-                     the (N+1)-th entry relative to the beginning of
-                     the replay, i.e. 0 designates the first entry. A
-                     negative integer N is interpreted as |N| entries
-                     back from the end of the replay.
-
-                     Mutually exclusive with start-time."
-                    #+later (:short-name    "S"
-                             :argument-name "INDEX"))
-   (end-time        :initarg  :end-time
-                    :type     rsbag.rsb.replay:range-boundary/timestamp
-                    :reader   command-replay-end-time
-                    :initform nil
-                    :documentation
-                    "Stop replaying entries at the point in time
-                     indicated by TIMESTAMP-OR-SECONDS.
-
-                     When the value should be parsed as a timestamp,
-                     the syntax @[YYYY-MM-DDT]HH:MM:SS has to be used.
-
-                     A single real number is interpreted as time in
-                     seconds relative to the beginning of the
-                     replay. Similarly, a single negative real number
-                     is interpreted as time in seconds relative to the
-                     end of the replay, e.g. -2.5 indicates \"2.5
-                     seconds before the end of the replay\".
-
-                     Mutually exclusive with end-index."
-                    #+later (:short-name    "e"
-                             :argument-name "TIMESTAMP-OR-SECONDS"))
-   (end-index       :initarg  :end-index
-                    :type     (or null integer)
-                    :reader   command-replay-end-index
-                    :initform nil
-                    :documentation
-                    "Index of the entry at which the replay should end.
-
-                     A non-negative integer N is interpreted as
-                     the (N+1)-th entry relative to the beginning of
-                     the replay, i.e. 0 designates the first entry. A
-                     negative integer N is interpreted as |N| entries
-                     back from the end of the replay.
-
-                     Mutually exclusive with end-time."
-                    #+later (:short-name    "E"
-                             :argument-name "INDEX"))
-   (num-repetitions :initarg  :num-repetitions
+  ((num-repetitions :initarg  :num-repetitions
                     :type     (or (eql t) positive-integer)
                     :reader   command-replay-num-repetitions
                     :initform 1
@@ -263,9 +289,9 @@
                     :documentation
                     "The replay strategy that should be used for
                      processing the selected entries."
-                     #+later (make-replay-strategy-help-string :show show)
-                     #+later (:short-name "r"
-                              :argument-name "SPEC"))))
+                    #+later (make-replay-strategy-help-string :show show)
+                    #+later (:short-name "r"
+                                         :argument-name "SPEC"))))
 
 (defmethod shared-initialize :before
     ((instance   replay-mixin)
@@ -291,17 +317,3 @@
     (setf (command-%replay-strategy instance)
           (rsbag.rsb:make-replay-strategy
            (parse-instantiation-spec replay-strategy-spec)))))
-
-(defun command-replay-bounds (command)
-  (let+ (((&structure-r/o
-           command-replay- start-time start-index end-time end-index)
-          command))
-    ;; Check mutually exclusive options.
-    (when (and start-time start-index)
-      (error "~@<The commandline options \"start-time\" and ~
-              \"start-index\" are mutually exclusive.~@:>"))
-    (when (and end-time end-index)
-      (error "~@<The commandline options \"end-time\" and ~
-              \"end-index\" are mutually exclusive.~@:>"))
-
-    (values start-time start-index end-time end-index)))

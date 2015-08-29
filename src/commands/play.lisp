@@ -8,6 +8,7 @@
 
 (eval-when (:compile-toplevel :load-toplevel :execute)
   (defclass play (file-input-mixin
+                  bag->events-mixin
                   replay-mixin
                   rsb.tools.commands:destination-mixin
                   progress-mixin
