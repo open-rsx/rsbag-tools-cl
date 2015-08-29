@@ -17,7 +17,6 @@
                ~@
                can be used to search directories recursively.~@
                ~@
-
                The file formats of input files and the output file are ~
                determined based on the file ~
                type (extension). Currently, the following file formats ~
