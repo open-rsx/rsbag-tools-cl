@@ -15,7 +15,7 @@
    :item    (make-text :contents (make-help-string :show show))
    :item    (make-common-options :show show)
    :item    (make-error-handling-options :show show)
-   :item    (make-replay-options :show show)
+   :item    (make-replay-options :show show :action "replay")
    ;; Append RSB options.
    :item    (make-options
              :show? (or (eq show t)

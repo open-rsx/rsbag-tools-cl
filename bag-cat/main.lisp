@@ -66,8 +66,10 @@
    :item    (make-text :contents (make-help-string))
    :item    (make-common-options :show show)
    :item    (make-error-handling-options :show show)
-   :item    (make-replay-options :show show
-                                 :replay-strategy-default "as-fast-as-possible")
+   :item    (make-replay-options
+             :show                    show
+             :replay-strategy-default "as-fast-as-possible"
+             :action                  "processing")
    :item    (defgroup (:header "Output Options")
               (stropt  :long-name     "style"
                        :default-value "payload"

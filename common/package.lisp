@@ -1,6 +1,6 @@
 ;;;; package.lisp --- Package definition for common module.
 ;;;;
-;;;; Copyright (C) 2011, 2012, 2013 Jan Moringen
+;;;; Copyright (C) 2011, 2012, 2013, 2015 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -9,6 +9,7 @@
    #:cl
    #:alexandria
    #:let-plus
+   #:more-conditions
 
    #:com.dvlsoft.clon
 
