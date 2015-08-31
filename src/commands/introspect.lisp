@@ -65,8 +65,7 @@
                 :channels        channels
                 :transform       `(&from-source
                                    :converter ,rsb.introspection::*introspection-all-converters*)
-                :replay-strategy (rsbag.rsb:make-replay-strategy
-                                  :as-fast-as-possible)
+                :replay-strategy :as-fast-as-possible
                 (append (when start-time
                           (list :start-time start-time))
                         (when start-index
