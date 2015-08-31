@@ -415,6 +415,16 @@ foreach(STYLE discard meta-data payload detailed
                      "${DATA_DIR}/${CURRENT_SERIALIZATION_VERSION}/valid-single-event.tide")
 endforeach()
 
+# redump test
+add_test("redump/simple"
+         sh -c "cp \"${MAIN_EXECUTABLE}\" ./temp && ./temp redump")
+add_test(NAME    "redump/name"
+         COMMAND "${MAIN_EXECUTABLE}" redump redumped)
+add_test(NAME    "redump/compress"
+         COMMAND "${MAIN_EXECUTABLE}" redump redumped-compress compress)
+add_test(NAME    "redump/static"
+         COMMAND "${MAIN_EXECUTABLE}" redump redumped-static static)
+
 # Install binary
 install(CODE "message(STATUS \"Configuring Lisp image ${MAIN_NAME} for installation\")
               execute_process(COMMAND \"${MAIN_EXECUTABLE}\" redump)")

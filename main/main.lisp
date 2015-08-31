@@ -42,7 +42,8 @@
                                  program-pathname))
                           &rest local-args)
                (rest args))
-              (static?   (member "static" local-args :test #'string=))
+              (static?   (when (member "static" local-args :test #'string=)
+                           t))
               (compress? (member "compress" local-args :test #'string=)))
          (rsb.tools.commands:command-execute
           (rsb.tools.commands:make-command
