@@ -93,6 +93,7 @@
                  :components ((:file       "package")
                               (:file       "protocol")
 
+                              (:file       "util")
                               (:file       "mixins")
 
                               (:file       "redump")

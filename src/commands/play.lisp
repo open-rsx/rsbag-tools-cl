@@ -30,13 +30,6 @@
 (service-provider:register-provider/class
  'command :play :class 'play)
 
-(defun print-replay-progress (stream
-                              progress index start-index end-index timestamp)
-  ;; Print the progress of the current replay onto STREAM.
-  (format stream "~C~A ~6,2,2F % ~9:D [~9:D,~9:D]"
-          #\Return timestamp progress index start-index end-index)
-  (force-output stream))
-
 (defmethod rsb.tools.commands:command-execute ((command play)
                                                &key error-policy)
   ;; Create a reader and start the receiving and printing loop.
