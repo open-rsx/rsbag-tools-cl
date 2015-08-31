@@ -343,7 +343,7 @@ foreach(FILE ${TIDE_FILES} ${ELAN_FILES})
                      --debug ${CONTINUE} --force -o "${OUTPUT}"
                      "${FILE}")
 
-    # cat, play: range options
+    # cat, play, introspect: range options
     foreach(RANGE_OPTION ""
                          "--start-index=0" "--start-time=0"
                          "--end-index=0"   "--end-time=0"
@@ -365,6 +365,14 @@ foreach(FILE ${TIDE_FILES} ${ELAN_FILES})
                          ${RANGE_OPTION}
                          --replay-strategy as-fast-as-possible
                          "${FILE}" inprocess:)
+
+        # introspect
+        if (NOT (RANGE_OPTION MATCHES ".*loop.*"))
+            add_test(NAME    "introspect${NAME}/${TAG}"
+                     COMMAND "${MAIN_EXECUTABLE}" introspect
+                             --debug ${CONTINUE}
+                             ${RANGE_OPTION} "${FILE}")
+        endif()
     endforeach()
 
     if(FILE MATCHES two-events)
@@ -387,6 +395,12 @@ foreach(FILE ${TIDE_FILES} ${ELAN_FILES})
                              ${RANGE_OPTION}
                              --replay-strategy as-fast-as-possible
                              "${FILE}" inprocess:)
+
+            # introspect
+            add_test(NAME    "introspect${NAME}/${TAG}"
+                     COMMAND "${MAIN_EXECUTABLE}" introspect
+                             --debug ${CONTINUE}
+                             ${RANGE_OPTION} "${FILE}")
         endforeach()
     endif()
 

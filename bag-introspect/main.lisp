@@ -89,8 +89,8 @@
   (let+ ((error-policy (maybe-relay-to-thread
                         (process-error-handling-options)))
          (input-files  (remainder))
-         #+later ((&values start-time start-index end-time end-index)
-                  (process-bounds-options))
+         ((&values start-time start-index end-time end-index)
+          (process-bounds-options))
          (style           (getopt :long-name "style"))
          (target-stream   (getopt :long-name "target-stream"))
          (progress-style  (getopt :long-name "show-progress")))
@@ -108,11 +108,10 @@
                   :introspect
                   :service        'rsbag.tools.commands::command
                   :input-files    input-files
-                  ;; TODO later
-                  ;; :start-time     start-time
-                  ;; :start-index    start-index
-                  ;; :end-time       end-time
-                  ;; :end-index      end-index
+                  :start-time     start-time
+                  :start-index    start-index
+                  :end-time       end-time
+                  :end-index      end-index
                   :style-spec     style
                   :stream-spec    target-stream
                   :progress-style progress-style)))
