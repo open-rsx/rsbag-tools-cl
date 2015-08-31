@@ -40,11 +40,12 @@
    :item    (make-text :contents (make-help-string))
    :item    (make-common-options :show show)
    :item    (make-error-handling-options :show show)
-   :item    (make-replay-options :show             show
-                                 :action           "introspection"
-                                 :channel?         nil
-                                 :loop?            nil
-                                 :replay-strategy? nil)
+   :item    (make-replay-options :show                  show
+                                 :action                "introspection"
+                                 :channel?              nil
+                                 :loop?                 nil
+                                 :replay-strategy?      nil
+                                 :show-progress-default :line)
    :item    (defgroup (:header "Output Options")
               (stropt  :long-name     "style"
                        :default-value "object-tree"
