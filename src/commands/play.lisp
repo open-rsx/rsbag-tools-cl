@@ -43,7 +43,7 @@
                           (progress-style  command-progress-style))
           command))
    (rsbag.rsb:with-open-connection
-       (connection (apply #'rsbag.rsb:bag->events (first input-files) base-uri ; TODO all inputs
+       (connection (apply #'rsbag.rsb:bag->events input-files base-uri
                           :error-policy    error-policy
                           :channels        channels
                           :replay-strategy replay-strategy

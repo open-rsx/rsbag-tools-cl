@@ -60,7 +60,7 @@
               (rsb.ep:handle database event)))))
     (rsbag.rsb:with-open-connection
         (connection
-         (apply #'rsbag.rsb:bag->events (first input-files) #'process-event ; TODO all input files
+         (apply #'rsbag.rsb:bag->events input-files #'process-event
                 :error-policy    error-policy
                 :channels        channels
                 :transform       `(&from-source

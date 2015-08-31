@@ -46,7 +46,7 @@
                  (rsb.formatting:format-event datum style stream)))) ; TODO should be a mixin from rsb-tools-cl
     (rsbag.rsb:with-open-connection
         (connection
-         (apply #'rsbag.rsb:bag->events (first input-files) sink ; TODO all input files
+         (apply #'rsbag.rsb:bag->events input-files sink  ; TODO should return connection and strategy as two values
                 :error-policy    error-policy
                 :channels        channels
                 :transform       *coding-transform*
