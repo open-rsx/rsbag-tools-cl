@@ -397,10 +397,12 @@ foreach(FILE ${TIDE_FILES} ${ELAN_FILES})
                              "${FILE}" inprocess:)
 
             # introspect
-            add_test(NAME    "introspect${NAME}/${TAG}"
-                     COMMAND "${MAIN_EXECUTABLE}" introspect
-                             --debug ${CONTINUE}
-                             ${RANGE_OPTION} "${FILE}")
+            if (FILE MATCHES introspection) # currently no such file
+                add_test(NAME    "introspect${NAME}/${TAG}"
+                         COMMAND "${MAIN_EXECUTABLE}" introspect
+                                 --debug ${CONTINUE}
+                                 ${RANGE_OPTION} "${FILE}")
+            endif()
         endforeach()
     endif()
 
