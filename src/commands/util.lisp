@@ -9,6 +9,7 @@
 (defun print-replay-progress (stream
                               progress index start-index end-index timestamp)
   ;; Print the progress of the current replay onto STREAM.
-  (format stream "~C~A ~6,2,2F % ~9:D [~9:D,~9:D]"
-          #\Return timestamp progress index start-index end-index)
-  (force-output stream))
+  (when (and progress index start-index end-index)
+    (format stream "~C~:[N/A~:;~:*~A~] ~:*~6,2,2F % ~9:D [~9:D,~9:D]"
+            #\Return timestamp progress index start-index end-index)
+    (force-output stream)))
