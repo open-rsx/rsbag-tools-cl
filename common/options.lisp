@@ -144,7 +144,7 @@
                    (make-replay-strategy-help-string :show show)))
    (make-enum    :long-name     "show-progress"
                  :short-name    "p"
-                 :enum          '(:none :line)
+                 :enum          '(:none :line :ready)
                  :default-value show-progress-default
                  :argument-name "STYLE"
                  :description

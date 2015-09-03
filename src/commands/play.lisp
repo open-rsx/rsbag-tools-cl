@@ -61,4 +61,5 @@
      (log:info "~@<Connection ~A~@:>" connection)
      (rsbag.rsb:replay connection (rsbag.rsb:connection-strategy connection)
                        :progress (case progress-style
-                                   (:line (curry #'print-replay-progress *info-output*)))))))
+                                   (:line  (curry #'print-replay-progress *info-output*))
+                                   (:ready (curry #'print-ready *info-output*)))))))

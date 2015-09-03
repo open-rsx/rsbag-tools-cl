@@ -375,6 +375,32 @@ foreach(FILE ${TIDE_FILES} ${ELAN_FILES})
         endif()
     endforeach()
 
+    # cat, play, introspect: show-progress
+    foreach(PROGRESS_STYLE "none" "line" "ready")
+        set(TAG "show-progress:${PROGRESS_STYLE}")
+        # cat
+        add_test(NAME    "cat${NAME}/${TAG}"
+                 COMMAND "${MAIN_EXECUTABLE}" cat
+                         --debug ${CONTINUE}
+                         --show-progress "${PROGRESS-STYLE}"
+                         "${FILE}")
+
+        # play
+        add_test(NAME    "play${NAME}/${TAG}"
+                 COMMAND "${MAIN_EXECUTABLE}" play
+                         --debug ${CONTINUE}
+                         --show-progress "${PROGRESS-STYLE}"
+                         --replay-strategy as-fast-as-possible
+                         "${FILE}" inprocess:)
+
+        # introspect
+        add_test(NAME    "introspect${NAME}/${TAG}"
+                 COMMAND "${MAIN_EXECUTABLE}" introspect
+                         --debug ${CONTINUE}
+                         --show-progress "${PROGRESS-STYLE}"
+                         "${FILE}")
+    endforeach()
+
     if(FILE MATCHES two-events)
         foreach(RANGE_OPTION "--start-index=-1" "--start-time=-1"
                              "--end-index=-1"   "--end-time=-1")

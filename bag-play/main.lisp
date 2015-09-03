@@ -86,5 +86,5 @@
               (rsb.tools.commands:command-execute
                command :error-policy error-policy))
 
-            (unless (eq progress-style :none)
+            (when (eq progress-style :line)
               (terpri *standard-output*))))))))
