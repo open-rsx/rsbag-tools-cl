@@ -322,6 +322,16 @@ foreach(TIMESTAMP "CREATE" "SEND" "RECEIVE" "DELIVER")
                      -o "output-timetamp=${TIMESTAMP}.tide" inprocess:)
 endforeach()
 
+foreach(VALUE "yes" "no")
+    add_test(NAME    "record/introspection-survey=${VALUE}"
+             COMMAND "${MAIN_EXECUTABLE}" record
+                     --debug
+                     --load "${CMAKE_SOURCE_DIR}/test/send-test-events.lisp"
+                     "--introspection-survey=${VALUE}"
+                     --force
+                     -o "output-introspection-survey=${VALUE}.tide" inprocess:)
+endforeach()
+
 # info, cat, play tests
 foreach(FILE ${TIDE_FILES} ${ELAN_FILES})
     file(RELATIVE_PATH NAME "${DATA_DIR}" "${FILE}")

@@ -87,6 +87,15 @@ close : void -> void
 terminate : void -> void
 
   Terminate the recording process and the program.")
+              (switch  :long-name     "introspection-survey"
+                       :default-value t
+                       :description
+                       (format nil "Perform an introspection survey at ~
+                                    the beginning of the recording to ~
+                                    ensure it contains a complete ~
+                                    snapshot of the system structure ~
+                                    from which incremental changes can ~
+                                    be tracked."))
               (enum    :long-name     "progress-style"
                        :short-name    "p"
                        :enum          '(:none :entries :channels)
@@ -125,22 +134,23 @@ terminate : void -> void
     (error "~@<Specify at least one URI from which events should be ~
             recorded.~@:>"))
 
-  (let ((error-policy       (maybe-relay-to-thread
-                             (process-error-handling-options)))
-        (uris               (remainder))
-        (filters            (iter (for spec next (getopt :long-name "filter"))
-                                  (while spec)
-                                  (collect (apply #'rsb.filter:filter
-                                                  (parse-instantiation-spec spec)))))
-        (output-file        (getopt :long-name "output-file"))
-        (force?             (getopt :long-name "force"))
-        (index-timestamp    (make-keyword
-                             (getopt :long-name "index-timestamp")))
-        (channel-allocation (getopt :long-name "channel-allocation"))
-        (flush-strategy     (getopt :long-name "flush-strategy"))
-        (control-uri        (when-let ((string (getopt :long-name "control-uri")))
-                              (puri:parse-uri string)))
-        (progress-style     (getopt :long-name "progress-style")))
+  (let ((error-policy          (maybe-relay-to-thread
+                                (process-error-handling-options)))
+        (uris                  (remainder))
+        (filters               (iter (for spec next (getopt :long-name "filter"))
+                                     (while spec)
+                                     (collect (apply #'rsb.filter:filter
+                                                     (parse-instantiation-spec spec)))))
+        (output-file           (getopt :long-name "output-file"))
+        (force?                (getopt :long-name "force"))
+        (index-timestamp       (make-keyword
+                                (getopt :long-name "index-timestamp")))
+        (channel-allocation    (getopt :long-name "channel-allocation"))
+        (flush-strategy        (getopt :long-name "flush-strategy"))
+        (control-uri           (when-let ((string (getopt :long-name "control-uri")))
+                                 (puri:parse-uri string)))
+        (introspection-survey? (getopt :long-name "introspection-survey"))
+        (progress-style        (getopt :long-name "progress-style")))
     (rsb.formatting:with-print-limits (*standard-output*)
       (with-logged-warnings
         (rsb.common:with-error-policy (error-policy)
@@ -157,6 +167,7 @@ terminate : void -> void
                   :index-timestamp         index-timestamp
                   :channel-allocation-spec channel-allocation
                   :control-uri             control-uri
+                  :introspection-survey?   introspection-survey?
                   :progress-style          progress-style
                   (when flush-strategy
                     (list :flush-strategy-spec flush-strategy)))))

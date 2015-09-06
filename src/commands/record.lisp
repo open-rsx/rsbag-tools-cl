@@ -11,82 +11,90 @@
                   index-timestamp-mixin
                   progress-mixin
                   print-items:print-items-mixin)
-  ((progress-style     :initform :entries)
-   (channel-allocation :initarg  :channel-allocation
-                       :reader   record-channel-allocation
-                       :accessor record-%channel-allocation
-                       :initform (rsbag.rsb:make-channel-strategy :scope-and-type)
-                       :documentation
-                       "TODO" #+later (make-channel-strategy-help-string :show show)
-                           #+later (:short-name    "a"
-                                    :argument-name "SPEC"))
-   (filters            :initarg  :filters
-                       :type     list
-                       :reader   record-filters
-                       :initform '()
-                       :documentation
-                       "TODO" #+later (make-filter-help-string :show show)
-                           #+later (:short-name    "f"
-                                    :argument-name "SPEC"))
-   (flush-strategy     :initarg  :flush-strategy
-                       :reader   record-flush-strategy
-                       :accessor record-%flush-strategy
-                       :initform nil
-                       :documentation
-                       "TODO" #+later (make-flush-strategy-help-string :show show)
-                           #+later (:argument-name "SPEC"))
-   (control-uri        :initarg  :control-uri
-                       :type     (or null puri:uri)
-                       :reader   record-control-uri
-                       :initform nil
-                       :documentation
-                       "A URI specifying the root scope and transport
-                        configuration of an RPC server exposing
-                        methods which allow controlling the recording
-                        process. Currently, the following methods are
-                        provided:
+  ((progress-style        :initform :entries)
+   (channel-allocation    :initarg  :channel-allocation
+                          :reader   record-channel-allocation
+                          :accessor record-%channel-allocation
+                          :initform (rsbag.rsb:make-channel-strategy :scope-and-type)
+                          :documentation
+                          "TODO" #+later (make-channel-strategy-help-string :show show)
+                              #+later (:short-name    "a"
+                                       :argument-name "SPEC"))
+   (filters               :initarg  :filters
+                          :type     list
+                          :reader   record-filters
+                          :initform '()
+                          :documentation
+                          "TODO" #+later (make-filter-help-string :show show)
+                              #+later (:short-name    "f"
+                                       :argument-name "SPEC"))
+   (flush-strategy        :initarg  :flush-strategy
+                          :reader   record-flush-strategy
+                          :accessor record-%flush-strategy
+                          :initform nil
+                          :documentation
+                          "TODO" #+later (make-flush-strategy-help-string :show show)
+                              #+later (:argument-name "SPEC"))
+   (control-uri           :initarg  :control-uri
+                          :type     (or null puri:uri)
+                          :reader   record-control-uri
+                          :initform nil
+                          :documentation
+                          "A URI specifying the root scope and
+                           transport configuration of an RPC server
+                           exposing methods which allow controlling
+                           the recording process. Currently, the
+                           following methods are provided:
 
-                        isstarted : void -> bool
+                           isstarted : void -> bool
 
-                          Return true if a log file has been opened
-                          for recording and recording is currently in
-                          progress and false otherwise.
+                             Return true if a log file has been opened
+                             for recording and recording is currently
+                             in progress and false otherwise.
 
-                        start : void -> void
+                           start : void -> void
 
-                          Start recording or restart after it has been
-                          stopped. Only applicable if a bag has been
-                          opened.
+                             Start recording or restart after it has
+                             been stopped. Only applicable if a bag
+                             has been opened.
 
-                        stop : void -> void
+                           stop : void -> void
 
-                          Stop recording allowing it to be restarted
-                          later. Only applicable if a bag has been
-                          opened.
+                             Stop recording allowing it to be
+                             restarted later. Only applicable if a bag
+                             has been opened.
 
-                        isopen : void -> string or false
+                           isopen : void -> string or false
 
-                          If a log file has been opened for recording,
-                          return its path as a string. Otherwise
-                          return false.
+                             If a log file has been opened for
+                             recording, return its path as a
+                             string. Otherwise return false.
 
-                        open : string -> void
+                           open : string -> void
 
-                          Open the specified file to record into
-                          it. Does not start recording. Only
-                          applicable if not bag is currently open.
+                             Open the specified file to record into
+                             it. Does not start recording. Only
+                             applicable if not bag is currently open.
 
-                        close : void -> void
+                           close : void -> void
 
-                          Close the current bag. Only applicable if a
-                          bag is open.
+                             Close the current bag. Only applicable if
+                             a bag is open.
 
-                        terminate : void -> void
+                           terminate : void -> void
 
-                          Terminate the recording process and the
-                          program."
-                       #+later (:short-name "c"
-                                            :argument-name "URI")))
+                             Terminate the recording process and the
+                             program."
+                          #+later (:short-name "c"
+                                               :argument-name "URI"))
+   (introspection-survey? :initarg  :introspection-survey?
+                          :type     boolean
+                          :reader   record-introspection-survey?
+                          :initform t
+                          :documentation
+                          "Controls whether in introspection survey is
+                           performed at the beginning of the
+                           recording."))
   (:default-initargs
    :uris        (missing-required-initarg 'record :uris)
    :output-file nil)
@@ -265,24 +273,27 @@
 
 (defmethod rsb.tools.commands:command-execute ((command record)
                                                &key error-policy)
-  (let+ (((&accessors-r/o (uris               rsb.tools.commands:command-uris)
-                          (filters            record-filters)
-                          (output-file        command-output-file)
-                          (force?             command-force?)
-                          (index-timestamp    command-index-timestamp)
-                          (channel-allocation record-channel-allocation)
-                          (flush-strategy     record-flush-strategy)
-                          (control-uri        record-control-uri)
-                          (progress-style     command-progress-style))
+  (let+ (((&accessors-r/o
+           (uris                  rsb.tools.commands:command-uris)
+           (filters               record-filters)
+           (output-file           command-output-file)
+           (force?                command-force?)
+           (index-timestamp       command-index-timestamp)
+           (channel-allocation    record-channel-allocation)
+           (flush-strategy        record-flush-strategy)
+           (control-uri           record-control-uri)
+           (introspection-survey? record-introspection-survey?)
+           (progress-style        command-progress-style))
           command)
          ((&flet make-connection (filename)
             (apply #'rsbag.rsb:events->bag uris filename
-                   :error-policy     error-policy
-                   :timestamp        index-timestamp
-                   :channel-strategy channel-allocation
-                   :filters          filters
-                   :start?           (not control-uri)
-                   :if-exists        (if force? :supersede :error)
+                   :error-policy          error-policy
+                   :timestamp             index-timestamp
+                   :channel-strategy      channel-allocation
+                   :filters               filters
+                   :start?                (not control-uri)
+                   :if-exists             (if force? :supersede :error)
+                   :introspection-survey? introspection-survey?
                    (when flush-strategy
                      (list :flush-strategy flush-strategy)))))
          ((&flet recording-loop (connection wait-thunk)
