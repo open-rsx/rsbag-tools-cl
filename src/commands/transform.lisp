@@ -84,7 +84,8 @@
           (let* ((datum/transformed     (funcall entry-transform datum))
                  (timestamp/transformed (funcall timestamp-transform
                                                  timestamp datum/transformed)))
-            (setf (entry output timestamp/transformed) datum/transformed))
+            (when datum/transformed
+              (setf (entry output timestamp/transformed) datum/transformed)))
           (update-progress i))
     (update-progress t)))
 
