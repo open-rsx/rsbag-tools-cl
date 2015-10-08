@@ -6,6 +6,13 @@
 
 (cl:in-package #:rsbag.tools.commands)
 
+;;;
+
+(defvar *coding-transform*
+  `(&from-source :converter ,(rsb:default-converter 'nibbles:octet-vector)))
+
+;;;
+
 (defun print-replay-progress (stream
                               progress index start-index end-index timestamp)
   ;; Print the progress of the current replay onto STREAM.

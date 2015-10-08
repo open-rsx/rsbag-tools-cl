@@ -49,8 +49,7 @@
          (apply #'rsbag.rsb:bag->events (first input-files) sink ; TODO all input files
                 :error-policy    error-policy
                 :channels        channels
-                :transform       `(&from-source
-                                   :converter ,(rsb:default-converter 'nibbles:octet-vector))
+                :transform       *coding-transform*
                 :replay-strategy replay-strategy
                 (append (when start-time
                           (list :start-time start-time))

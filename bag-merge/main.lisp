@@ -83,6 +83,8 @@
                        :argument-name "STYLE"
                        :description
                        "Indicate progress of the ongoing playback using style STYLE."))
+   ;; Append IDL options.
+   :item    (make-idl-options)
    :item    (defgroup (:header "Examples")
               (make-text :contents (make-example-string
                                     :program-name program-name)))))
@@ -119,33 +121,40 @@
                                                 (collect channel))))
                                (or (make-channel-filter specs) t)))
         (progress-style      (getopt :long-name "show-progress"))
-        (transform/datum     (when-let ((spec (getopt :long-name "transform-datum")))
-                               (eval (read-from-string spec))))
-        (transform/timestamp (when-let ((spec (getopt :long-name "transform-timestamp")))
-                               (read-from-string spec))))
+        (transform/datum     (getopt :long-name "transform-datum"))
+        (transform/timestamp (getopt :long-name "transform-timestamp")))
     (rsb.common:with-error-policy (error-policy)
       (rsb.formatting:with-print-limits (*standard-output*)
         (with-logged-warnings
-          (let ((command
-                 (apply #'rsb.tools.commands:make-command
-                        :transform
-                        :service        'rsbag.tools.commands::command
-                        :input-files    input-files
-                        :output-file    output-files
-                        :force?         force?
-                        :channels       channels
-                        :progress-style progress-style
-                        (append
-                         (when transform/datum
-                           (list :transform/datum transform/datum))
-                         (etypecase transform/timestamp
-                           (null
-                            '())
-                           (keyword
-                            (list :transform/timestamp
-                                  (lambda (timestamp datum)
-                                    (declare (ignore timestamp))
-                                    (rsb:timestamp datum transform/timestamp)))))))))
+          ;; Load IDLs as specified on the commandline.
+          (process-idl-options :purpose '(:packed-size :serializer :deserializer))
+
+          (let* ((transform/datum
+                   (when transform/datum
+                     (eval (read-from-string transform/datum))))
+                 (transform/timestamp
+                   (when transform/timestamp
+                     (read-from-string transform/timestamp)))
+                 (command
+                   (apply #'rsb.tools.commands:make-command
+                          :transform
+                          :service        'rsbag.tools.commands::command
+                          :input-files    input-files
+                          :output-file    output-files
+                          :force?         force?
+                          :channels       channels
+                          :progress-style progress-style
+                          (append
+                           (when transform/datum
+                             (list :transform/datum transform/datum))
+                           (etypecase transform/timestamp
+                             (null
+                              '())
+                             (keyword
+                              (list :transform/timestamp
+                                    (lambda (timestamp datum)
+                                      (declare (ignore timestamp))
+                                      (rsb:timestamp datum transform/timestamp)))))))))
 
             (rsb.tools.commands:command-execute
              command :error-policy error-policy)))))))
