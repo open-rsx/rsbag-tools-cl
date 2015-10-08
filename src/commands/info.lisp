@@ -69,7 +69,9 @@
                           :start    ,start-timestamp
                           :end      ,end-timestamp
                           :duration ,duration))
-                      (iter (for channel each (bag-channels bag))
+                      (iter (for channel each (sort (copy-seq (bag-channels bag))
+                                                    #'string<
+                                                    :key #'channel-name))
                             (let+ (((&accessors-r/o
                                      length start-timestamp end-timestamp) channel)
                                    (duration (when (and start-timestamp end-timestamp)
