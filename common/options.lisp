@@ -37,7 +37,19 @@
                    :description
                    (format nil "Select the channels matching ~
                                 NAME-OR-REGEXP for ~A. This option can ~
-                                be supplied multiple times."
+                                be supplied multiple times.~@
+                                ~@
+                                By default, NAME-OR-REGEXP can match ~
+                                any substring of the channel name. to ~
+                                match the whole name instead, ^REGEXP$ ~
+                                can used.~@
+                                ~@
+                                Again by default, channel names are of ~
+                                the form SCOPE:TYPE-NAME. To only ~
+                                match the scope or type, the regular ~
+                                expressions ^SCOPE-REGEXP: or ~
+                                :TYPE-REGEXP$ can be used ~
+                                respectively."
                            action)))
    (make-lispobj :long-name     "start-time"
                  :short-name    "s"
