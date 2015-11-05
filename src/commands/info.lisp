@@ -95,9 +95,12 @@
 ;;; `info' command class
 
 (defclass info (file-input-mixin
+                rsb.tools.commands:style-mixin
                 rsb.tools.commands:output-stream-mixin
                 print-items:print-items-mixin)
-  ((compute-sizes? :initarg  :compute-sizes?
+  ((style-service  :allocation :class
+                   :initform 'info-style)
+   (compute-sizes? :initarg  :compute-sizes?
                    :type     boolean
                    :reader   info-compute-sizes?
                    :initform nil
@@ -127,18 +130,21 @@
 (defmethod rsb.tools.commands:command-execute ((command info)
                                                &key error-policy)
   (declare (ignore error-policy))
-  (let+ (((&accessors-r/o (input-files    command-input-files)
-                          (stream         rsb.tools.commands:command-stream)
-                          (compute-sizes? info-compute-sizes?)
-                          (print-format   info-print-format))
+  (let+ (((&accessors-r/o (input-files command-input-files)
+                          (style       rsb.tools.commands:command-style)
+                          (stream      rsb.tools.commands:command-stream))
           command)
-         (builder (make-instance 'rsbag.builder:unbuilder
-                                 :compute-sizes? compute-sizes?
-                                 :format?        print-format))
-         (style   (rsb.formatting:make-style :tree
-                                             :builder builder
-                                             :service 'info-style))
          ((&flet process-bag (input)
             (with-bag (bag input :direction :input :transform '(nil))
               (rsb.formatting:format-event bag style stream)))))
     (mapc #'process-bag input-files)))
+
+(defmethod rsb.tools.commands:command-make-style ((command info)
+                                                  (spec    cons)
+                                                  (service t))
+  (let+ (((&structure-r/o info- compute-sizes? print-format) command)
+         (builder (make-instance 'rsbag.builder:unbuilder
+                                 :compute-sizes? compute-sizes?
+                                 :format?        print-format))
+         (spec    (append spec (list :builder builder))))
+    (call-next-method command spec service)))

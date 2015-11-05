@@ -75,12 +75,13 @@ See `version/list' for details on keyword parameters."
   :depends-on  (:alexandria
                 :let-plus
 
-                (:version :cl-rsbag             #.(version/string :revision? nil))
+                (:version :cl-rsbag                      #.(version/string :revision? nil))
 
-                (:version :rsb-tools-common     #.(version/string :revision? nil))
-                (:version :cl-rsb-formatting    #.(version/string :revision? nil))
+                (:version :rsb-tools-common              #.(version/string :revision? nil))
+                (:version :cl-rsb-formatting             #.(version/string :revision? nil))
+                (:version :rsb-formatting-and-rsb-common #.(version/string :revision? nil))
 
-                (:version :rsbag-tools-commands #.(version/string)))
+                (:version :rsbag-tools-commands          #.(version/string)))
   :components  ((:module     "bag-info"
                  :serial     t
                  :components ((:file       "package")

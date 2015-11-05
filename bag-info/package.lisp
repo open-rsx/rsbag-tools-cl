@@ -17,6 +17,9 @@
    #:rsb.tools.common
    #:rsb.formatting)
 
+  (:shadow
+   #:make-style-help-string)
+
   (:export
    #:main)
 

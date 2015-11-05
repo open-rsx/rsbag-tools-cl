@@ -1,6 +1,6 @@
 ;;;; info.lisp --- Tests for the info command class.
 ;;;;
-;;;; Copyright (C) 2015 Jan Moringen
+;;;; Copyright (C) 2015, 2016 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -19,13 +19,24 @@
   (ensure-cases (initargs &optional expected)
       `(;; Some invalid cases with missing initargs.
         (()                               missing-required-initarg) ; :input-files is missing
+        ((:input-files   ("foo.tide"))    missing-required-initarg) ; :style[-spec] is missing
+
+        ;; Incompatible initargs.
+        ((:input-files   ("foo.tide")
+          :style         1
+          :style-spec "tree")
+                                          incompatible-initargs)
 
         ;; These are Ok.
-        ((:input-files   ("foo.tide")))
-        ((:input-files   (,#P"foo.tide")))
         ((:input-files   ("foo.tide")
+          :style-spec    "tree"))
+        ((:input-files   (,#P"foo.tide")
+          :style-spec    "tree"))
+        ((:input-files   ("foo.tide")
+          :style-spec    "tree"
           :stream        ,*standard-output*))
         ((:input-files   ("foo.tide")
+          :style-spec    "tree"
           :stream-spec   :error-output)))
 
     (let+ (((&flet do-it () (apply #'rsb.tools.commands:make-command :info

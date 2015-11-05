@@ -13,6 +13,14 @@
     ~@
     The file format of BAG-FILE is guessed based on the filename."))
 
+(defun make-style-help-string (&key (show :default))
+  (with-output-to-string (stream)
+    (with-abbreviation (stream :styles show)
+      (write-string (rsb.formatting::make-style-service-help-string
+                     :service           'rsbag.tools.commands::info-style
+                     :initarg-blacklist '(:builder))
+                    stream))))
+
 (defun make-example-string (&key (program-name "bag info"))
   "Make and return a string containing usage examples of the program."
   (format nil "~2@T~A /tmp/everything.tide~@
@@ -29,16 +37,21 @@
    :item    (make-common-options :show show)
    :item    (make-error-handling-options :show show)
    :item    (defgroup (:header "Output Options")
-              (flag :long-name  "compute-sizes"
-                    :short-name "s"
-                    :description
-                    "Compute the sizes of the content of the whole log file and individual channels. This may take some time for large files.")
-              (enum :long-name     "print-format"
-                    :short-name    "f"
-                    :enum          '(:no :short :full)
-                    :default-value :short
-                    :description
-                    "Print format information for each channel."))
+              (stropt  :long-name     "style"
+                       :default-value "tree"
+                       :argument-name "SPEC"
+                       :description
+                       (make-style-help-string :show show))
+              (flag    :long-name     "compute-sizes"
+                       :short-name    "s"
+                       :description
+                       "Compute the sizes of the content of the whole log file and individual channels. This may take some time for large files.")
+              (enum    :long-name     "print-format"
+                       :short-name    "f"
+                       :enum          '(:no :short :full)
+                       :default-value :short
+                       :description
+                       "Print format information for each channel."))
    :item    (defgroup (:header "Examples")
               (make-text :contents (make-example-string
                                     :program-name program-name)))))
@@ -62,6 +75,7 @@
   (let ((error-policy  (maybe-relay-to-thread
                         (process-error-handling-options)))
         (input-files   (remainder))
+        (style         (getopt :long-name "style"))
         (compute-sizes (getopt :long-name "compute-sizes"))
         (print-format  (getopt :long-name "print-format")))
     (with-print-limits (*standard-output*)
@@ -72,6 +86,7 @@
                   :info
                   :service        'rsbag.tools.commands::command
                   :input-files    input-files
+                  :style-spec     style
                   :compute-sizes? compute-sizes
                   :print-format   (case print-format
                                     (:no)

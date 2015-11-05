@@ -16,5 +16,8 @@
 
    #:rsb.tools.common)
 
+  (:import-from #:rsb.tools.commands
+   #:style-service)
+
   (:documentation
    "Package definition for the commands module."))
