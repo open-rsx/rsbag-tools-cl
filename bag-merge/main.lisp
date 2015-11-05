@@ -59,8 +59,7 @@
                                     supported:~{~&+ ~4A (extension: ~
                                     \".~(~:*~A~)\")~}."
                                (mapcar #'car (rsbag.backend:backend-classes))))
-              (switch  :long-name     "force"
-                       :default-value nil
+              (flag    :long-name     "force"
                        :description
                        "Should the output file be overwritten in case it already exists?")
               (stropt  :long-name     "channel"
