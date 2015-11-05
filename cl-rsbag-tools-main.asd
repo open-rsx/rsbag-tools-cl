@@ -88,3 +88,7 @@ tools."
                               (:file       "main"
                                :depends-on ("package")))))
   :entry-point "rsbag.tools.main:main")
+
+(defmethod perform :before ((operation program-op)
+                            (component (eql (find-system :cl-rsbag-tools-main))))
+  (mapc #'register-immutable-system (already-loaded-systems)))
