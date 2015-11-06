@@ -11,7 +11,7 @@
    #:let-plus
    #:more-conditions
 
-   #:com.dvlsoft.clon
+   #:net.didierverna.clon
 
    #:rsbag.rsb.replay
 

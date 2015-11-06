@@ -10,7 +10,7 @@
    #:alexandria
    #:iterate
    #:let-plus
-   #:com.dvlsoft.clon
+   #:net.didierverna.clon
 
    #:rsbag
 

@@ -1,6 +1,6 @@
 ;;;; package.lisp --- Package definition for the bag-record program.
 ;;;;
-;;;; Copyright (C) 2011, 2012, 2013, 2014 Jan Moringen
+;;;; Copyright (C) 2011, 2012, 2013, 2014, 2015 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -20,7 +20,7 @@
    #:alexandria
    #:iterate
    #:let-plus
-   #:com.dvlsoft.clon
+   #:net.didierverna.clon
 
    #:rsb
    #:rsb.patterns.request-reply
