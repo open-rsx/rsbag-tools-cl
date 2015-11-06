@@ -1,6 +1,6 @@
 ;;;; package.lisp --- Package definition for the bag-cat program.
 ;;;;
-;;;; Copyright (C) 2011, 2012, 2013 Jan Moringen
+;;;; Copyright (C) 2011, 2012, 2013, 2015 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -20,7 +20,7 @@
    #:alexandria
    #:let-plus
    #:iterate
-   #:com.dvlsoft.clon
+   #:net.didierverna.clon
 
    #:rsb
    #:rsb.common

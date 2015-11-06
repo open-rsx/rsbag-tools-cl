@@ -10,7 +10,7 @@
    #:alexandria
    #:let-plus
 
-   #:com.dvlsoft.clon
+   #:net.didierverna.clon
 
    #:rsbag.rsb.replay
 

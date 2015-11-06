@@ -45,7 +45,7 @@
 (defun main ()
   "Entry point function of the main bag program."
   (make-synopsis)
-  (let+ (((program-name &rest args) (com.dvlsoft.clon::cmdline))
+  (let+ (((program-name &rest args) (uiop:raw-command-line-arguments))
          (program-pathname (pathname program-name)))
     (cond
       ;; If we can find an entry point based on our program name, use
