@@ -24,7 +24,6 @@
 (defun update-synopsis (&key
                         (show         :default)
                         (program-name "rsbag info"))
-  (declare (ignore program-name))
   "Create and return a commandline option tree."
   (make-synopsis
    :postfix "BAG-FILE"
