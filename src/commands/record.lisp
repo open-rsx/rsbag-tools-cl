@@ -242,6 +242,7 @@
         (loop :until exit? :do
            (wait-for-connection
             (lambda () (funcall loop connection #'wait-for-close)))
+           #+sbcl (sb-ext:gc :full t)
            (bt:with-lock-held (lock)
              (if close?
                  (progn
