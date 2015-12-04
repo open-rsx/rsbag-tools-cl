@@ -256,10 +256,12 @@
           (bag-channels (rsbag.rsb:connection-bag connection))))
 
 (defun progress-style/entries (stream connection)
-  (format stream "~A ~:D entr~:@P~%"
-          (local-time:now)
-          (reduce #'+ (bag-channels (rsbag.rsb:connection-bag connection))
-                  :key #'length)))
+  (let* ((bag      (rsbag.rsb:connection-bag connection))
+         (channels (bag-channels bag)))
+    (format stream "~A ~:D entr~:@P in ~:D channel~:P~%"
+            (local-time:now)
+            (reduce #'+ channels :key #'length)
+            (length channels))))
 
 (defmethod rsb.tools.commands:command-execute ((command record)
                                                &key error-policy)
