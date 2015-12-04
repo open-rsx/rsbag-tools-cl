@@ -41,7 +41,7 @@
                        "Name of the timestamp which should be used to index events in the created log file.")
               (stropt  :long-name     "channel-allocation"
                        :short-name    "a"
-                       :default-value "scope-and-type"
+                       :default-value "collapse-reserved :next :scope-and-type"
                        :argument-name "SPEC"
                        :description
                        (make-channel-strategy-help-string :show show))
