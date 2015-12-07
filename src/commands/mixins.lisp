@@ -143,8 +143,9 @@
   (when input-files-supplied?
     (setf (command-%input-files instance) (mapcar #'pathname input-files))))
 
-(defmethod command-input-files ((command file-input-mixin))
-  (collect-input-files (command-%input-files command)))
+(defgeneric command-input-files (command)
+  (:method ((command file-input-mixin))
+    (collect-input-files (command-%input-files command))))
 
 (defmethod print-items:print-items append ((object file-input-mixin))
   `((:input-file ,(command-input-files object) "~{~A~^, ~}"
