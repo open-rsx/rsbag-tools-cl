@@ -7,5 +7,5 @@
   (sleep 1)
   (sb-ext:exit))
 
-(let ((timer (sb-ext:make-timer #'send-test-event-and-exit)))
+(let ((timer (sb-ext:make-timer #'send-test-event-and-exit :thread t)))
   (sb-ext:schedule-timer timer 2))
