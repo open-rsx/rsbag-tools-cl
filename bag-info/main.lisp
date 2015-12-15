@@ -26,11 +26,11 @@
                         (program-name "rsbag info"))
   "Create and return a commandline option tree."
   (make-synopsis
-   :postfix "BAG-FILE"
+   :postfix "BAG-FILE+"
    :item    (make-text :contents (make-help-string))
    :item    (make-common-options :show show)
    :item    (make-error-handling-options :show show)
-   :item    (defgroup (:header "Display Options")
+   :item    (defgroup (:header "Output Options")
               (flag :long-name  "compute-sizes"
                     :short-name "s"
                     :description
@@ -42,8 +42,8 @@
                     :description
                     "Print format information for each channel."))
    :item    (defgroup (:header "Examples")
-                (make-text :contents (make-example-string
-                                      :program-name program-name)))))
+              (make-text :contents (make-example-string
+                                    :program-name program-name)))))
 
 (defun main (program-pathname args)
   "Entry point function of the bag-info program."
