@@ -1,6 +1,6 @@
 ;;;; package.lisp --- Package definition for the bag-info program.
 ;;;;
-;;;; Copyright (C) 2011, 2012, 2013, 2015 Jan Moringen
+;;;; Copyright (C) 2011, 2012, 2013, 2015, 2016 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -14,7 +14,7 @@
 
    #:rsbag
 
-   #:rsb.common
+   #:rsb.tools.common
    #:rsb.formatting)
 
   (:export

@@ -15,7 +15,7 @@
 
    #:rsbag.rsb.replay
 
-   #:rsb.common)
+   #:rsb.tools.common)
 
   ;; Commandline options
   (:export

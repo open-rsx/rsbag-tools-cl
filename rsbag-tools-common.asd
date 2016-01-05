@@ -76,9 +76,9 @@ RSBag-related systems."
   :depends-on  (:alexandria
                 :let-plus
 
-                (:version :cl-rsbag      #.(version/string :revision? nil))
+                (:version :cl-rsbag         #.(version/string :revision? nil))
 
-                (:version :cl-rsb-common #.(version/string :revision? nil)))
+                (:version :rsb-tools-common #.(version/string :revision? nil)))
   :components  ((:module     "common"
                  :pathname   "src/common"
                  :components ((:file       "package")

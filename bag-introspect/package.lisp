@@ -12,7 +12,7 @@
    #:iterate
    #:net.didierverna.clon
 
-   #:rsb.common
+   #:rsb.tools.common
 
    #:rsbag.tools.common)
 

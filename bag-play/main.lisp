@@ -1,6 +1,6 @@
 ;;;; main.lisp --- Main function of the bag-play program.
 ;;;;
-;;;; Copyright (C) 2011, 2012, 2013, 2014, 2015 Jan Moringen
+;;;; Copyright (C) 2011, 2012, 2013, 2014, 2015, 2016 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -68,7 +68,7 @@
          (progress-style  (getopt :long-name "show-progress")))
     (rsb.formatting:with-print-limits (*standard-output*)
       (with-logged-warnings
-        (rsb.common:with-error-policy (error-policy)
+        (with-error-policy (error-policy)
           (let ((command
                  (rsb.tools.commands:make-command
                   :play

@@ -1,6 +1,6 @@
 ;;;; package.lisp --- Package definition for the commands module.
 ;;;;
-;;;; Copyright (C) 2013, 2014, 2015 Jan Moringen
+;;;; Copyright (C) 2013, 2014, 2015, 2016 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -14,7 +14,7 @@
 
    #:rsbag
 
-   #:rsb.common)
+   #:rsb.tools.common)
 
   (:documentation
    "Package definition for the commands module."))

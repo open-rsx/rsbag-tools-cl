@@ -1,6 +1,6 @@
 ;;;; main.lisp --- Main function of the bag-merge program.
 ;;;;
-;;;; Copyright (C) 2011, 2012, 2013, 2014, 2015 Jan Moringen
+;;;; Copyright (C) 2011, 2012, 2013, 2014, 2015, 2016 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -121,7 +121,7 @@
         (progress-style      (getopt :long-name "show-progress"))
         (transform/datum     (getopt :long-name "transform-datum"))
         (transform/timestamp (getopt :long-name "transform-timestamp")))
-    (rsb.common:with-error-policy (error-policy)
+    (with-error-policy (error-policy)
       (rsb.formatting:with-print-limits (*standard-output*)
         (with-logged-warnings
           ;; Load IDLs as specified on the commandline.

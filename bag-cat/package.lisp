@@ -23,7 +23,7 @@
    #:net.didierverna.clon
 
    #:rsb
-   #:rsb.common
+   #:rsb.tools.common
    #:rsb.formatting
 
    #:rsbag

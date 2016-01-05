@@ -81,7 +81,7 @@ See `version/list' for details on keyword parameters."
 
                 (:version :cl-rsb               #.(version/string :revision? nil))
 
-                (:version :cl-rsb-common        #.(version/string :revision? nil))
+                (:version :rsb-tools-common     #.(version/string :revision? nil))
                 (:version :cl-rsb-formatting    #.(version/string :revision? nil))
 
                 (:version :rsbag-tools-common   #.(version/string))

@@ -81,7 +81,7 @@ See `version/list' for details on keyword parameters."
                 (:version :cl-rsbag                      #.(version/string :revision? nil))
 
                 (:version :cl-rsb                        #.(version/string :revision? nil)) ; TODO(jmoringe): not really required, functionality-wise
-                (:version :cl-rsb-common                 #.(version/string :revision? nil))
+                (:version :rsb-tools-common              #.(version/string :revision? nil))
                 (:version :cl-rsb-formatting             #.(version/string :revision? nil))
                 (:version :rsb-formatting-and-rsb-common #.(version/string :revision? nil))
                 (:version :cl-rsb-stats                  #.(version/string :revision? nil))

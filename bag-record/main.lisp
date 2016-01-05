@@ -1,6 +1,6 @@
 ;;;; main.lisp --- Main function of the bag-record program.
 ;;;;
-;;;; Copyright (C) 2011, 2012, 2013, 2014, 2015 Jan Moringen
+;;;; Copyright (C) 2011, 2012, 2013, 2014, 2015, 2016 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -153,7 +153,7 @@ terminate : void -> void
         (progress-style        (getopt :long-name "progress-style")))
     (rsb.formatting:with-print-limits (*standard-output*)
       (with-logged-warnings
-        (rsb.common:with-error-policy (error-policy)
+        (with-error-policy (error-policy)
           ;; Load IDLs as specified on the commandline.
           (process-idl-options)
 
