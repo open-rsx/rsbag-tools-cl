@@ -1,15 +1,14 @@
 ;;;; help.lisp --- Automatic generation of help strings.
 ;;;;
-;;;; Copyright (C) 2012, 2013, 2014 Jan Moringen
+;;;; Copyright (C) 2012, 2013, 2014, 2016 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
-(cl:in-package #:rsbag.common)
+(cl:in-package #:rsbag.tools.common)
 
-(defun make-replay-strategy-help-string (&key
-                                         (show :default))
+(defun make-replay-strategy-help-string (&key (show :default))
   "Return a help string that explains how to specify replay strategies
-and lists the available replay strategies."
+   and lists the available replay strategies."
   (with-output-to-string (stream)
     (format stream "Replay events form the specified input file ~
                     according to SPEC which has to be of the form~@

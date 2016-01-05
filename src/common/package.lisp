@@ -1,10 +1,10 @@
 ;;;; package.lisp --- Package definition for common module.
 ;;;;
-;;;; Copyright (C) 2011, 2012, 2013, 2015 Jan Moringen
+;;;; Copyright (C) 2011, 2012, 2013, 2015, 2016 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
-(cl:defpackage #:rsbag.common
+(cl:defpackage #:rsbag.tools.common
   (:use
    #:cl
    #:alexandria
@@ -28,5 +28,5 @@
 
   (:documentation
    "This package contains some common utility functions for RSBag:
-+ Commandline option definition and processing
-+ Help text generation"))
+    + Commandline option definition and processing
+    + Help text generation"))

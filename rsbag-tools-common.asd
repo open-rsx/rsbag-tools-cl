@@ -1,10 +1,10 @@
-;;;; cl-rsbag-tools-common.asd --- Common functions for cl-rsbag-based utilities.
+;;;; rsbag-tools-common.asd --- Common functions for rsbag-based utilities.
 ;;;;
-;;;; Copyright (C) 2012, 2013, 2014 Jan Moringen
+;;;; Copyright (C) 2012, 2013, 2014, 2016 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
-(cl:defpackage #:cl-rsbag-common-system
+(cl:defpackage #:rsbag-tools-common-system
   (:use
    #:cl
    #:asdf)
@@ -13,7 +13,7 @@
    #:version/list
    #:version/string))
 
-(cl:in-package #:cl-rsbag-common-system)
+(cl:in-package #:rsbag-tools-common-system)
 
 ;;; Version stuff
 
@@ -66,7 +66,7 @@ See `version/list' for details on keyword parameters."
 
 ;;; System definition
 
-(defsystem :cl-rsbag-common
+(defsystem :rsbag-tools-common
   :author      "Jan Moringen <jmoringe@techfak.uni-bielefeld.de>"
   :maintainer  "Jan Moringen <jmoringe@techfak.uni-bielefeld.de>"
   :version     #.(version/string)
@@ -80,6 +80,7 @@ RSBag-related systems."
 
                 (:version :cl-rsb-common #.(version/string :revision? nil)))
   :components  ((:module     "common"
+                 :pathname   "src/common"
                  :components ((:file       "package")
                               (:file       "help"
                                :depends-on ("package"))

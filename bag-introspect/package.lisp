@@ -1,6 +1,6 @@
 ;;;; package.lisp --- Package definition for the bag-introspect program.
 ;;;;
-;;;; Copyright (C) 2015 Jan Moringen
+;;;; Copyright (C) 2015, 2016 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -14,7 +14,7 @@
 
    #:rsb.common
 
-   #:rsbag.common)
+   #:rsbag.tools.common)
 
   (:export
    #:main)

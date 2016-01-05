@@ -1,10 +1,10 @@
 ;;;; options.lisp --- Common functions related to commandline options.
 ;;;;
-;;;; Copyright (C) 2012, 2013, 2014, 2015 Jan Moringen
+;;;; Copyright (C) 2012, 2013, 2014, 2015, 2016 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
-(cl:in-package #:rsbag.common)
+(cl:in-package #:rsbag.tools.common)
 
 (defun %make-group (header &rest items)
   (apply #'make-group :header header

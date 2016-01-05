@@ -1,6 +1,6 @@
 ;;;; rsbag-tools-cat.asd --- System definition for the bag-cat program.
 ;;;;
-;;;; Copyright (C) 2011, 2012, 2013, 2014, 2015 Jan Moringen
+;;;; Copyright (C) 2011, 2012, 2013, 2014, 2015, 2016 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -86,7 +86,7 @@ See `version/list' for details on keyword parameters."
                 (:version :rsb-formatting-and-rsb-common #.(version/string :revision? nil))
                 (:version :cl-rsb-stats                  #.(version/string :revision? nil))
 
-                (:version :cl-rsbag-common               #.(version/string))
+                (:version :rsbag-tools-common            #.(version/string))
                 (:version :rsbag-tools-commands          #.(version/string)))
   :components  ((:module     "bag-cat"
                  :components ((:file       "package")
