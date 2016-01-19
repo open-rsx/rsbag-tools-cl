@@ -1,6 +1,6 @@
 ;;;; record.lisp --- Implementation of the record command.
 ;;;;
-;;;; Copyright (C) 2013, 2014, 2015 Jan Moringen
+;;;; Copyright (C) 2013, 2014, 2015, 2016 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -152,36 +152,55 @@
     (setf (record-%flush-strategy instance)
           (parse-instantiation-spec flush-strategy-spec))))
 
+;; TODO move to rsb-tools. use in bridge-service command
+(defun uri-ensure-directory-path (uri)
+  (let+ (((&accessors (path puri:uri-path)) uri))
+        (if (ends-with #\/ path)
+            uri
+            (puri:copy-uri uri :path  (concatenate 'string path "/")))))
+
 (defun call-with-control-service (uri connection make-connection loop)
   "Expose an RPC server at URI that allows remote clients to control
    CONNECTION while LOOP executes."
   (log:info "~@<Exposing control interface at URI ~A~@:>" uri)
-  (let+ ((connection connection)
-         (running?   nil)
-         (close?     nil)
-         (exit?      nil)
-         (lock       (bt:make-lock))
-         (condition  (bt:make-condition-variable :name "Connection"))
-         ((&flet wait-for-connection (&optional thunk)
-            (bt:with-lock-held (lock)
-              (loop :until (or exit? connection) :do
-                 (bt:condition-wait condition lock)))
-            (when (and connection thunk) (funcall thunk))))
-         ((&flet wait-for-close (&optional thunk)
-            (bt:with-lock-held (lock)
-              (loop :until (or close? exit?) :do
-                 (bt:condition-wait condition lock))
-              (when thunk (funcall thunk)))))
-         ((&flet check-connection (context)
-            (unless connection
-              (error "~@<Cannot ~A without open bag.~@:>" context))))
-         ((&flet close-connection ()
-            (log:info "~@<Closing ~A~@:>" connection)
-            (setf close? t)
-            (bt:condition-notify condition))))
-    (rsb:with-participant (server :local-server uri)
+  (rsb:with-participants
+      ((server   :local-server uri)
+       (informer :informer     (puri:merge-uris "state" uri)))
+    (let+ (((&flet notify (state &optional (value rsb.converter:+no-value+))
+              (let ((scope (rsb:merge-scopes
+                            (rsb:make-scope (list state))
+                            (rsb:participant-scope informer))))
+                (rsb:send informer (rsb:make-event scope value)))))
+           ((&flet notify/location (state connection)
+              (notify state (namestring
+                             (bag-location
+                              (rsbag.rsb:connection-bag connection))))))
+           ;; State
+           (connection connection)
+           (running?   nil)
+           (close?     nil)
+           (exit?      nil)
+           (lock       (bt:make-lock))
+           (condition  (bt:make-condition-variable :name "Connection"))
+           ((&flet wait-for-connection (&optional thunk)
+              (bt:with-lock-held (lock)
+                (loop :until (or exit? connection) :do
+                   (bt:condition-wait condition lock)))
+              (when (and connection thunk) (funcall thunk))))
+           ((&flet wait-for-close (&optional thunk)
+              (bt:with-lock-held (lock)
+                (loop :until (or close? exit?) :do
+                   (bt:condition-wait condition lock))
+                (when thunk (funcall thunk)))))
+           ((&flet check-connection (context)
+              (unless connection
+                (error "~@<Cannot ~A without open bag.~@:>" context))))
+           ((&flet close-connection ()
+              (log:info "~@<Closing ~A~@:>" connection)
+              (setf close? t)
+              (bt:condition-notify condition))))
       (rsb.patterns.request-reply:with-methods (server)
-          (;; Connection level
+          ( ;; Connection level
            ("isstarted" ()
              (bt:with-lock-held (lock)
                (and connection running?)))
@@ -192,7 +211,8 @@
                  (error "~@<~A is already recording.~@:>" connection))
                (log:info "~@<Starting recording with ~A~@:>" connection)
                (rsbag.rsb:start connection)
-               (setf running? t))
+               (setf running? t)
+               (notify/location "recording" connection))
              (values))
            ("stop" ()
              (bt:with-lock-held (lock)
@@ -201,7 +221,8 @@
                  (error "~@<~A is not recording.~@:>" connection))
                (log:info "~@<Stopping recording with ~A~@:>" connection)
                (rsbag.rsb:stop connection)
-               (setf running? nil))
+               (setf running? nil)
+               (notify/location "open" connection))
              (values))
 
            ;; Bag level
@@ -220,7 +241,8 @@
                (setf connection (funcall make-connection filename)
                      running?   nil
                      close?     nil)
-               (bt:condition-notify condition))
+               (bt:condition-notify condition)
+               (notify/location "open" connection))
              (values))
            ("close" ()
              (bt:with-lock-held (lock)
@@ -228,7 +250,8 @@
                (close-connection))
              (bt:with-lock-held (lock)
                (loop :while connection :do
-                  (bt:condition-wait condition lock)))
+                  (bt:condition-wait condition lock))
+               (notify "ready"))
              (values))
 
            ;; Process level
@@ -236,16 +259,12 @@
              (log:info "~@<Terminating~@:>")
              (bt:with-lock-held (lock)
                (setf exit? t)
-               (bt:condition-notify condition))
+               (bt:condition-notify condition)
+               (notify "terminated"))
              (values)))
 
         ;; Send ready event for clients to wait on.
-        (let+ (((&accessors (path puri:uri-path)) uri))
-          (unless (ends-with #\/ path)
-            (setf path (concatenate 'string path "/")))
-          (rsb:with-participant
-              (informer :informer (puri:merge-uris "state/ready" uri))
-            (rsb:send informer rsb.converter:+no-value+)))
+        (notify "ready")
 
         (loop :until exit? :do
            (wait-for-connection
@@ -307,7 +326,8 @@
                                   *info-output*))))
     (if control-uri
         (call-with-control-service
-         control-uri (when output-file (make-connection output-file))
+         (uri-ensure-directory-path control-uri)
+         (when output-file (make-connection output-file))
          #'make-connection #'recording-loop)
         (let ((connection (make-connection output-file)))
           (recording-loop connection
