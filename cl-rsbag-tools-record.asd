@@ -86,8 +86,7 @@ rsbag log files."
 
                 (:version :rsbag-tools-commands #.(version/string)))
   :components  ((:module     "bag-record"
+                 :serial     t
                  :components ((:file       "package")
-                              (:file       "help"
-                               :depends-on ("package"))
-                              (:file       "main"
-                               :depends-on ("package" "help"))))))
+                              (:file       "help")
+                              (:file       "main")))))

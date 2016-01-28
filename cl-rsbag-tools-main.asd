@@ -84,9 +84,9 @@ tools."
                 (:version :cl-rsbag-tools-play       #.(version/string))
                 (:version :cl-rsbag-tools-introspect #.(version/string)))
   :components  ((:module     "main"
+                 :serial     t
                  :components ((:file       "package")
-                              (:file       "main"
-                               :depends-on ("package")))))
+                              (:file       "main"))))
   :entry-point "rsbag.tools.main:main")
 
 (defmethod perform :before ((operation program-op)
