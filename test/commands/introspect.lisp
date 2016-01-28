@@ -1,6 +1,6 @@
 ;;;; introspect.lisp --- Tests for the introspect command class.
 ;;;;
-;;;; Copyright (C) 2015 Jan Moringen
+;;;; Copyright (C) 2015, 2016 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -39,7 +39,9 @@
           :end-index            10))
         ((:input-files          ("foo.tide")
           :style-spec            "object-tree"
-          :end-time             -5.0)))
+          :end-time             -5.0))
+        ((:input-files          ("foo.tide")
+          :style-spec            "object-tree :stateful? t")))
 
     (let+ (((&flet do-it () (apply #'rsb.tools.commands:make-command :introspect
                                    :service 'rsbag.tools.commands::command
