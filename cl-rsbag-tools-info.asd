@@ -82,6 +82,6 @@ See `version/list' for details on keyword parameters."
 
                 (:version :rsbag-tools-commands #.(version/string)))
   :components  ((:module     "bag-info"
+                 :serial     t
                  :components ((:file       "package")
-                              (:file       "main"
-                               :depends-on ("package"))))))
+                              (:file       "main")))))

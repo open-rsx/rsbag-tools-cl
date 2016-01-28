@@ -85,6 +85,6 @@ in the process."
 
                 (:version :rsbag-tools-commands #.(version/string)))
   :components  ((:module     "bag-merge"
+                 :serial     t
                  :components ((:file       "package")
-                              (:file       "main"
-                               :depends-on ("package"))))))
+                              (:file       "main")))))
