@@ -8,21 +8,18 @@
 
 (defun make-help-string ()
   "Return a help that explains the commandline option interface."
-  (format nil "Copy entries from input files matching GLOB-EXPRESSION ~
-               or from an explicitly given list of INPUT-FILEs into ~
-               the specified output file. In addition to the canonical ~
-               globbing syntax, expressions of the form~@
-               ~@
-               ~2@TSOMESTUFF/**/MORESTUFF~@
-               ~@
-               can be used to search directories recursively.~@
-               ~@
-               The file formats of input files and the output file are ~
-               determined based on the file ~
-               type (extension). Currently, the following file formats ~
-               are supported:~{~&+ ~4A (extension: \".~(~:*~A~)\")~}.~@
-               "
-          (mapcar #'car (rsbag.backend:backend-classes))))
+  (rsbag.tools.commands::augment-documentation-with-backends
+   "Copy entries from input files matching GLOB-EXPRESSION or from an ~
+    explicitly given list of INPUT-FILEs into the specified output ~
+    file. In addition to the canonical globbing syntax, expressions of ~
+    the form~@
+    ~@
+    ~2@TSOMESTUFF/**/MORESTUFF~@
+    ~@
+    can be used to search directories recursively.~@
+    ~@
+    The file formats of input files and the output file are determined ~
+    based on the file type (extension)."))
 
 (defun make-example-string (&key (program-name "bag merge"))
   "Make and return a string containing usage examples of the program."
@@ -50,15 +47,11 @@
                        :short-name    "o"
                        :type          :file
                        :description
-                       (format nil "Name of the file into which ~
-                                    captured events should be ~
-                                    written. The file format is ~
-                                    determined based on the file ~
-                                    type (extension). Currently, the ~
-                                    following file formats are ~
-                                    supported:~{~&+ ~4A (extension: ~
-                                    \".~(~:*~A~)\")~}."
-                               (mapcar #'car (rsbag.backend:backend-classes))))
+                       (rsbag.tools.commands::augment-documentation-with-backends
+                        "Name of the file into which captured events ~
+                         should be written. The file format is ~
+                         determined based on the file ~
+                         type (extension)."))
               (flag    :long-name     "force"
                        :description
                        "Should the output file be overwritten in case it already exists?")

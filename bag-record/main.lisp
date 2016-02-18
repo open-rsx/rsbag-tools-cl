@@ -21,15 +21,11 @@
                        :short-name    "o"
                        :type          :file
                        :description
-                       (format nil "Name of the file into which ~
-                                    captured events should be ~
-                                    written. The file format is ~
-                                    determined based on the file ~
-                                    type (extension). Currently, the ~
-                                    following file formats are ~
-                                    supported:~{~&+ ~4A (extension: ~
-                                    \".~(~:*~A~)\")~}."
-                               (mapcar #'car (rsbag.backend:backend-classes))))
+                       (rsbag.tools.commands::augment-documentation-with-backends
+                        "Name of the file into which captured events ~
+                         should be written. The file format is ~
+                         determined based on the file ~
+                         type (extension)."))
               (switch  :long-name     "force"
                        :default-value nil
                        :description

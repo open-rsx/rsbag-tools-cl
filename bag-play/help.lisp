@@ -1,6 +1,6 @@
 ;;;; help.lisp --- Help text generation for the bag-play program.
 ;;;;
-;;;; Copyright (C) 2012, 2013, 2015 Jan Moringen
+;;;; Copyright (C) 2012, 2013, 2015, 2016 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -19,13 +19,11 @@
                       ~@
                       ~2@T")
       (print-uri-help stream :uri-var "BASE-URI"))
-    (format stream "~@
-                    ~@
-                    The file format of INPUT-FILE is guessed based on ~
-                    the filename. Currently, the following file ~
-                    formats are supported:~{~&+ ~4A (extension: ~
-                    \".~(~:*~A~)\")~}"
-            (mapcar #'car (rsbag.backend:backend-classes)))))
+    (rsbag.tools.commands::augment-documentation-with-backends
+     "~@
+      ~@
+      The file format of INPUT-FILE is guessed based on the ~
+      filename.")))
 
 (defun make-examples-string (&key
                              (program-name "bag play"))

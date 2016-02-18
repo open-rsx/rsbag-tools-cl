@@ -10,15 +10,13 @@
 
 (defun make-help-string ()
   "Return a help that explains the commandline option interface."
-  (format nil
-          "Gather introspection information from the log file ~
-           INPUT-FILE-OR-- (or standard input, if \"-\" is specified) ~
-           and display it on standard output (or otherwise process it).~@
-           ~@
-           The file format of INPUT-FILE is guessed based on the ~
-           filename. Currently, the following file formats are ~
-           supported:~{~&+ ~4A (extension: \".~(~:*~A~)\")~}"
-          (mapcar #'car (rsbag.backend:backend-classes))))
+  (rsbag.tools.commands::augment-documentation-with-backends
+   "Gather introspection information from the log file ~
+    INPUT-FILE-OR-- (or standard input, if \"-\" is specified) and ~
+    display it on standard output (or otherwise process it).~@
+    ~@
+    The file format of INPUT-FILE is guessed based on the ~
+    filename."))
 
 (defun make-examples-string (&key (program-name "bag introspect"))
   "Make and return a string containing usage examples of the program."

@@ -1,6 +1,6 @@
 ;;;; main.lisp --- Main function of the bag-info program.
 ;;;;
-;;;; Copyright (C) 2011, 2012, 2013, 2014, 2015 Jan Moringen
+;;;; Copyright (C) 2011-2016 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -8,12 +8,10 @@
 
 (defun make-help-string ()
   "Return a help that explains the commandline option interface."
-  (format nil "Display information about BAG-FILE.~@
-               ~@
-               The file format of BAG-FILE is guessed based on the ~
-               filename. Currently, the following file formats are ~
-               supported:~{~&+ ~4A (extension: \".~(~:*~A~)\")~}"
-          (mapcar #'car (rsbag.backend:backend-classes))))
+  (rsbag.tools.commands::augment-documentation-with-backends
+   "Display information about BAG-FILE.~@
+    ~@
+    The file format of BAG-FILE is guessed based on the filename."))
 
 (defun make-example-string (&key (program-name "bag merge"))
   "Make and return a string containing usage examples of the program."

@@ -1,6 +1,6 @@
 ;;;; main.lisp --- Main function of the bag-cat program.
 ;;;;
-;;;; Copyright (C) 2011, 2012, 2013, 2014, 2015 Jan Moringen
+;;;; Copyright (C) 2011-2016 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -10,15 +10,12 @@
 
 (defun make-help-string ()
   "Return a help that explains the commandline option interface."
-  (format nil
-          "Outputs data from channels in the bag file ~
-           INPUT-FILE-OR-- (or standard input, if \"-\" is specified) ~
-           on standard output.~@
-           ~@
-           The file format of INPUT-FILE is guessed based on the ~
-           filename. Currently, the following file formats are ~
-           supported:~{~&+ ~4A (extension: \".~(~:*~A~)\")~}"
-          (mapcar #'car (rsbag.backend:backend-classes))))
+
+  (rsbag.tools.commands::augment-documentation-with-backends
+   "Outputs data from channels in the bag file INPUT-FILE-OR-- (or ~
+    standard input, if \"-\" is specified) on standard output.~@
+    ~@
+    The file format of INPUT-FILE is guessed based on the filename."))
 
 (defun make-examples-string (&key (program-name "bag cat"))
   "Make and return a string containing usage examples of the program."

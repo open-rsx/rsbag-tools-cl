@@ -1,6 +1,6 @@
 ;;;; mixins.lisp --- Mixin classes used by the RSBag command classes.
 ;;;;
-;;;; Copyright (C) 2013, 2014, 2015 Jan Moringen
+;;;; Copyright (C) 2013, 2014, 2015, 2016 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -24,10 +24,10 @@
 ;;; File-related stuff
 
 (defun augment-documentation-with-backends (next-documentation)
-  (format nil "~@<~A Currently, the following file formats are supported:~@
+  (format nil "~@<~? Currently, the following file formats are supported:~@
                ~:@_~
                ~{+ ~4A (extension: \".~(~:*~A~)\")~^~@:_~}~@:>"
-          next-documentation
+          next-documentation '()
           (mapcar #'car (rsbag.backend:backend-classes))))
 
 (defun augment-class-documentation-with-backends (class-name)
