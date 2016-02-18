@@ -1,6 +1,6 @@
 ;;;; help.lisp --- Help text generation for the bag-record program.
 ;;;;
-;;;; Copyright (C) 2012, 2013, 2015 Jan Moringen
+;;;; Copyright (C) 2012, 2013, 2015, 2016 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -48,7 +48,13 @@ allocation strategies and lists the available strategies."
       (format stream "Currently, the following strategies are supported:~@
                       ~@
                       ")
-      (print-classes-help-string (channel-strategy-classes) stream))))
+      (print-classes-help-string
+       (mapcar (lambda (provider)
+                 (list (service-provider:provider-name provider)
+                       (service-provider:provider-class provider)))
+               (service-provider:service-providers
+                'rsbag.rsb:channel-strategy))
+       stream))))
 
 (defun make-filter-help-string (&key
                                 (show :default))
