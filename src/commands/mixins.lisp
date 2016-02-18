@@ -28,7 +28,8 @@
                ~:@_~
                ~{+ ~4A (extension: \".~(~:*~A~)\")~^~@:_~}~@:>"
           next-documentation '()
-          (mapcar #'car (rsbag.backend:backend-classes))))
+          (mapcar #'car (service-provider:service-providers/alist
+                         'rsbag.backend:backend))))
 
 (defun augment-class-documentation-with-backends (class-name)
   (let ((class (find-class class-name)))
