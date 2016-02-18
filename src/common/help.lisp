@@ -32,7 +32,11 @@
                       ~@
                       ")
       (print-classes-help-string
-       (rsbag.rsb:replay-strategy-classes) stream
+       (mapcar (lambda (provider)
+                 (list (service-provider:provider-name provider)
+                       (service-provider:provider-class provider)))
+               (service-provider:service-providers 'rsbag.rsb:replay-strategy))
+       stream
        :initarg-blacklist '(:start-index :end-index
                             :start-time  :end-time
                             :num-repetitions
