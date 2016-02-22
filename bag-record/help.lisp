@@ -114,7 +114,13 @@ and lists the available strategies."
       (format stream "Currently, the following strategies are supported:~@
                       ~@
                       ")
-      (print-classes-help-string (rsbag.backend:flush-strategy-classes) stream))))
+      (print-classes-help-string
+       (mapcar (lambda (provider)
+                 (list (service-provider:provider-name provider)
+                       (service-provider:provider-class provider)))
+               (service-provider:service-providers
+                'rsbag.backend:flush-strategy))
+       stream))))
 
 (defun make-examples-string (&key
                              (program-name "bag record"))
