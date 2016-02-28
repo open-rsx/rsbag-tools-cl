@@ -1,6 +1,6 @@
 ;;;; transform.lisp --- Implementation of the transform command.
 ;;;;
-;;;; Copyright (C) 2013, 2014, 2015 Jan Moringen
+;;;; Copyright (C) 2013, 2014, 2015, 2016 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -203,14 +203,14 @@
                  (push (apply #'open-bag file
                               :direction :input
                               (when transform/datum
-                                (list :transform *coding-transform*)))
+                                (list :transform (coding-transform))))
                        inputs))
            (format *info-output* "Opening output file ~S~%" output-file)
            (setf output (apply #'open-bag output-file
                                :direction :output
                                :if-exists (if force? :supersede :error)
                                (when transform/datum
-                                 (list :transform *coding-transform*))))
+                                 (list :transform (coding-transform)))))
 
            ;; Transcode individual input files into output file.
            (apply #'transcode inputs output

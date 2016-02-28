@@ -42,17 +42,18 @@
                           (style           rsb.tools.commands:command-style)
                           (stream          rsb.tools.commands:command-stream))
           command)
-         (sink (lambda (datum) ; TODO should be a mixin from rsb-tools-cl
-                 (if (typep datum 'rsb:event)
-                     (rsb.formatting:format-event datum style stream)
-                     (rsb.formatting:format-payload
-                      datum (rsb.formatting:style-payload-style style) stream)))))
+         (access? (rsb.ep:access? style :data :read))
+         (sink    (lambda (datum) ; TODO should be a mixin from rsb-tools-cl
+                    (if (typep datum 'rsb:event)
+                        (rsb.formatting:format-event datum style stream)
+                        (rsb.formatting:format-payload
+                         datum (rsb.formatting:style-payload-style style) stream)))))
     (rsbag.rsb:with-open-connection
         (connection
          (apply #'rsbag.rsb:bag->events input-files sink  ; TODO should return connection and strategy as two values
                 :error-policy    error-policy
                 :channels        channels
-                :transform       *coding-transform*
+                :transform       (coding-transform access?)
                 :replay-strategy replay-strategy
                 (append (when start-time
                           (list :start-time start-time))

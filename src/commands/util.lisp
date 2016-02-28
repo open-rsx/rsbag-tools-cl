@@ -1,6 +1,6 @@
 ;;;; util.lisp --- Utilities used by commands.
 ;;;;
-;;;; Copyright (C) 2013, 2014, 2015 Jan Moringen
+;;;; Copyright (C) 2013, 2014, 2015, 2016 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -8,8 +8,11 @@
 
 ;;;
 
-(defvar *coding-transform*
-  `(&from-source :converter ,(rsb:default-converter 'nibbles:octet-vector)))
+(defun coding-transform (&optional (data-access? t))
+  (let ((converter (if data-access?
+                       (rsb:default-converter 'nibbles:octet-vector)
+                       :fundamental-null)))
+    `(&from-source :converter ,converter)))
 
 ;;;
 
