@@ -54,35 +54,79 @@
                        :short-name    "c"
                        :argument-name "URI"
                        :description
-                       "A URI specifying the root scope and transport configuration of an RPC server exposing methods which allow controlling the recording process. Currently, the following methods are provided:
-
-isstarted : void -> bool
-
-  Return true if a log file has been opened for recording and recording is currently in progress and false otherwise.
-
-start : void -> void
-
-  Restart recording after it has been stopped. Only applicable if a bag has been opened.
-
-stop : void -> void
-
-  Stop recording allowing it to be restarted later. Only applicable if a bag has been opened.
-
-isopen : void -> string or false
-
-  If a log file has been opened for recording, return its path as a string. Otherwise return false.
-
-open : string -> void
-
-  Open the specified file to record into it. Does not start recording. Only applicable if not bag is currently open.
-
-close : void -> void
-
-  Close the current bag. Only applicable if a bag is open.
-
-terminate : void -> void
-
-  Terminate the recording process and the program.")
+                       (format nil "An URI specifying the root scope ~
+and transport configuration of a remote interface which allows ~
+controlling the recording process. The remote interface consists of ~
+two parts: 1) an event-based interface for change notification 2) a ~
+request-reply interface for manipulating the recording.~@_
+~@_
+Event-based Part~@_
+  ~@_
+  State changes are communicated using an event-based interface below ~
+  the scope CONTROL-SCOPE/state with the following sub-scopes:~@_
+  ~@_
+  CONTROL-SCOPE/state/ready : void~@_
+    ~@_
+    An event without payload is published on this scope when the ~
+    recording and its remote interface become available.~@_
+  ~@_
+  CONTROL-SCOPE/state/terminated : void~@_
+    ~@_
+    An event without payload is published on this scope when the ~
+    remote interface terminates.~@_
+  ~@_
+  CONTROL-SCOPE/state/open : string~@_
+    ~@_
+    An event carrying the name of the currently opened log file as its ~
+    payload is published on this scope when a log file is newly opened ~
+    or a recording is stopped.~@_
+  ~@_
+  CONTROL-SCOPE/state/started : string~@_
+    ~@_
+    An event carrying the name of the currently opened log file as its ~
+    payload is published on this scope when a recording is started.~@_
+  ~@_
+  The following state transitions can occur:~@_
+    ~@_
+    --> ready <-> open <-> started~@_
+          |~@_
+          v~@_
+        terminated~@_
+~@_
+Request/Reply Part~@_
+  ~@_
+  CONTROL-SCOPE/isstarted : void -> bool~@_
+    ~@_
+    Return true if a log file has been opened for recording and ~
+    recording is currently in progress and false otherwise.~@_
+  ~@_
+  CONTROL-SCOPE/start : void -> void~@_
+    ~@_
+    Restart recording after it has been stopped. Only applicable if a ~
+    bag has been opened.
+  ~@_
+  CONTROL-SCOPE/stop : void -> void~@_
+    ~@_
+    Stop recording allowing it to be restarted later. Only applicable ~
+    if a bag has been opened.~@_
+  ~@_
+  CONTROL-SCOPE/isopen : void -> string or false~@_
+    ~@_
+    If a log file has been opened for recording, return its path as a ~
+    string. Otherwise return false.~@_
+  ~@_
+  CONTROL-SCOPE/open : string -> void~@_
+    ~@_
+    Open the specified file to record into it. Does not start ~
+    recording. Only applicable if not bag is currently open.
+  ~@_
+  CONTROL-SCOPE/close : void -> void~@_
+    ~@_
+    Close the current bag. Only applicable if a bag is open.
+  ~@_
+  CONTROL-SCOPE/terminate : void -> void~@_
+    ~@_
+    Terminate the recording process and the program."))
               (switch  :long-name     "introspection-survey"
                        :default-value t
                        :description
