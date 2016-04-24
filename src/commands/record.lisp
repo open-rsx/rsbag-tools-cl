@@ -1,6 +1,6 @@
 ;;;; record.lisp --- Implementation of the record command.
 ;;;;
-;;;; Copyright (C) 2013, 2014, 2015 Jan Moringen
+;;;; Copyright (C) 2013, 2014, 2015, 2016 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -240,12 +240,9 @@
              (values)))
 
         ;; Send ready event for clients to wait on.
-        (let+ (((&accessors (path puri:uri-path)) uri))
-          (unless (ends-with #\/ path)
-            (setf path (concatenate 'string path "/")))
-          (rsb:with-participant
-              (informer :informer (puri:merge-uris "state/ready" uri))
-            (rsb:send informer rsb.converter:+no-value+)))
+        (rsb:with-participant
+            (informer :informer (puri:merge-uris "state/ready" uri))
+          (rsb:send informer rsb.converter:+no-value+))
 
         (loop :until exit? :do
            (wait-for-connection
@@ -307,7 +304,8 @@
                                   *info-output*))))
     (if control-uri
         (call-with-control-service
-         control-uri (when output-file (make-connection output-file))
+         (rsb.tools.commands:uri-ensure-directory-path control-uri)
+         (when output-file (make-connection output-file))
          #'make-connection #'recording-loop)
         (let ((connection (make-connection output-file)))
           (recording-loop connection
