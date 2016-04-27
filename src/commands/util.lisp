@@ -10,7 +10,8 @@
 
 (defun coding-transform (&optional (data-access? t))
   (let ((converter (if data-access?
-                       (rsb:default-converter 'nibbles:octet-vector)
+                       (rsb.tools.common::maybe-ensure-idl-loading-converter
+                        :converters (rsb:default-converter 'nibbles:octet-vector))
                        :fundamental-null)))
     `(&from-source :converter ,converter)))
 
