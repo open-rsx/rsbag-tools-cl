@@ -82,6 +82,7 @@
                 (:version :cl-rsbag                      #.(version/string :revision? nil))
 
                 (:version :cl-rsb                        #.(version/string :revision? nil))
+                (:version :rsb-patterns-request-reply    #.(version/string :revision? nil))
 
                 (:version :rsb-tools-common              #.(version/string :revision? nil))
                 (:version :cl-rsb-formatting             #.(version/string :revision? nil))
