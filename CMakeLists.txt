@@ -423,8 +423,13 @@ foreach(FILE ${TIDE_FILES} ${ELAN_FILES})
                          --replay-strategy as-fast-as-possible
                          "${FILE}" inprocess:)
 
-        # introspect
+        # transform and introspect
         if (NOT (RANGE_OPTION MATCHES ".*loop.*"))
+            add_test(NAME    "transform/${NAME}/${TAG}"
+                     COMMAND "${MAIN_EXECUTABLE}" transform
+                             --debug ${CONTINUE} --force -o "${OUTPUT}"
+                             ${RANGE_OPTION} "${FILE}")
+
             add_test(NAME    "introspect/${NAME}/${TAG}"
                      COMMAND "${MAIN_EXECUTABLE}" introspect
                              --debug ${CONTINUE}
@@ -449,6 +454,13 @@ foreach(FILE ${TIDE_FILES} ${ELAN_FILES})
                          --show-progress "${PROGRESS-STYLE}"
                          --replay-strategy as-fast-as-possible
                          "${FILE}" inprocess:)
+        # transform
+        string(REGEX REPLACE "/" "" OUTPUT "${NAME}")
+        add_test(NAME    "transform/${NAME}/${TAG}"
+                 COMMAND "${MAIN_EXECUTABLE}" transform
+                         --debug ${CONTINUE}
+                         --show-progress "${PROGRESS-STYLE}"
+                         --force -o "${OUTPUT}" "${FILE}")
 
         # introspect
         add_test(NAME    "introspect/${NAME}/${TAG}"
@@ -478,6 +490,14 @@ foreach(FILE ${TIDE_FILES} ${ELAN_FILES})
                              ${RANGE_OPTION}
                              --replay-strategy as-fast-as-possible
                              "${FILE}" inprocess:)
+
+            # transform
+            string(REGEX REPLACE "/" "" OUTPUT "${NAME}")
+            add_test(NAME    "transform/${NAME}/${TAG}"
+                     COMMAND "${MAIN_EXECUTABLE}" transform
+                             --debug ${CONTINUE}
+                             ${RANGE_OPTION}
+                             --force -o "${OUTPUT}" "${FILE}")
         endif()
 
         # introspect

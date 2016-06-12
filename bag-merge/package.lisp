@@ -14,7 +14,8 @@
 
    #:rsbag
 
-   #:rsb.tools.common)
+   #:rsb.tools.common
+   #:rsbag.tools.common)
 
   (:export
    #:main)

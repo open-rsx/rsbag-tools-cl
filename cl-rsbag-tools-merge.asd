@@ -83,6 +83,7 @@ in the process."
                 (:version :rsb-tools-common     #.(version/string :revision? nil))
                 (:version :cl-rsb-formatting    #.(version/string :revision? nil))
 
+                (:version :rsbag-tools-common   #.(version/string))
                 (:version :rsbag-tools-commands #.(version/string)))
   :components  ((:module     "bag-merge"
                  :serial     t

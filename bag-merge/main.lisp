@@ -1,6 +1,6 @@
 ;;;; main.lisp --- Main function of the bag-merge program.
 ;;;;
-;;;; Copyright (C) 2011, 2012, 2013, 2014, 2015, 2016 Jan Moringen
+;;;; Copyright (C) 2011-2017 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -42,6 +42,11 @@
    :item    (make-text :contents (make-help-string))
    :item    (make-common-options :show show)
    :item    (make-error-handling-options :show show)
+   :item    (make-replay-options
+             :show                    show
+             :replay-strategy-default "as-fast-as-possible"
+             :show-progress-default   :line
+             :action                  "processing")
    :item    (defgroup (:header "Transform Options")
               (path    :long-name     "output-file"
                        :short-name    "o"
@@ -55,25 +60,13 @@
               (flag    :long-name     "force"
                        :description
                        "Should the output file be overwritten in case it already exists?")
-              (stropt  :long-name     "channel"
-                       :short-name    "c"
-                       :argument-name "NAME-OR-REGEXP"
-                       :description
-                       "Select the channels matching NAME-OR-REGEXP for merging. This option can be specified multiple times.")
               (stropt  :long-name     "transform-datum"
                        #+todo :argument-name
                        #+todo :description #+todo "TODO")
               (stropt  :long-name     "transform-timestamp"
                        :argument-name "TIMESTAMP-NAME"
                        :description
-                       "Index events by TIMESTAMP-NAME instead of the create timestamp.")
-              (enum    :long-name     "show-progress"
-                       :short-name    "p"
-                       :enum          '(:none :line)
-                       :default-value :line
-                       :argument-name "STYLE"
-                       :description
-                       "Indicate progress of the ongoing playback using style STYLE."))
+                       "Index events by TIMESTAMP-NAME instead of the create timestamp."))
    ;; Append IDL options.
    :item    (make-idl-options)
    :item    (defgroup (:header "Examples")
@@ -91,8 +84,10 @@
 (defun main (program-pathname args)
   "Entry point function of the bag-merge program."
   (let ((program-name (concatenate
-                       'string (namestring program-pathname) " merge")))
+                       'string (namestring program-pathname) " merge"))
+        (*readtable* (copy-readtable *readtable*)))
     (update-synopsis :program-name program-name)
+    (local-time:enable-read-macros)
     (process-commandline-options
      :commandline     (list* program-name args)
      :version         (cl-rsbag-tools-merge-system:version/list :commit? t)
@@ -101,51 +96,57 @@
      :update-synopsis (curry #'update-synopsis :program-name program-name)
      :return          (lambda () (return-from main))))
 
-  (let ((error-policy        (maybe-relay-to-thread
-                              (process-error-handling-options)))
-        (input-files         (remainder))
-        (output-files        (or (getopt :long-name "output-file")
-                                 (error "~@<No output file specified.~@:>")))
-        (force?              (getopt :long-name "force"))
-        (channels            (let ((specs (iter (for channel next (getopt :long-name "channel"))
-                                                (while channel)
-                                                (collect channel))))
-                               (or (make-channel-filter specs) t)))
-        (progress-style      (getopt :long-name "show-progress"))
-        (transform/datum     (getopt :long-name "transform-datum"))
-        (transform/timestamp (getopt :long-name "transform-timestamp")))
-    (with-error-policy (error-policy)
-      (rsb.formatting:with-print-limits (*standard-output*)
-        (with-logged-warnings
+  (let+ ((error-policy        (maybe-relay-to-thread
+                               (process-error-handling-options)))
+         (input-files         (remainder))
+         (channels            (let ((specs (iter (for channel next (getopt :long-name "channel"))
+                                                 (while channel)
+                                                 (collect channel))))
+                                (or (make-channel-filter specs) t)))
+         ((&values start-time start-index end-time end-index)
+          (process-bounds-options))
+         (progress-style      (getopt :long-name "show-progress"))
+         (transform/datum     (getopt :long-name "transform-datum"))
+         (transform/timestamp (getopt :long-name "transform-timestamp"))
+         (output-files        (or (getopt :long-name "output-file")
+                                  (error "~@<No output file specified.~@:>")))
+         (force?              (getopt :long-name "force")))
+    (rsb.formatting:with-print-limits (*standard-output*)
+      (with-logged-warnings
+        (with-error-policy (error-policy)
           ;; Load IDLs as specified on the commandline.
           (process-idl-options :purpose '(:packed-size :serializer :deserializer))
 
           (let* ((transform/datum
-                   (when transform/datum
-                     (eval (read-from-string transform/datum))))
+                  (when transform/datum
+                    (eval (read-from-string transform/datum))))
                  (transform/timestamp
-                   (when transform/timestamp
-                     (read-from-string transform/timestamp)))
+                  (when transform/timestamp
+                    (read-from-string transform/timestamp)))
                  (command
-                   (apply #'rsb.tools.commands:make-command
-                          :transform
-                          :service        'rsbag.tools.commands::command
-                          :input-files    input-files
-                          :output-file    output-files
-                          :force?         force?
-                          :channels       channels
-                          :progress-style progress-style
-                          (append
-                           (when transform/datum
-                             (list :transform/datum transform/datum))
-                           (etypecase transform/timestamp
-                             (null
-                              '())
-                             (keyword
-                              (list :transform/timestamp
-                                    (lambda (timestamp datum)
-                                      (declare (ignore timestamp))
-                                      (rsb:timestamp datum transform/timestamp)))))))))
+                  (apply #'rsb.tools.commands:make-command
+                         :transform
+                         :service        'rsbag.tools.commands::command
+                         :input-files    input-files
+                         :channels       channels
+                         :start-time     start-time
+                         :start-index    start-index
+                         :end-time       end-time
+                         :end-index      end-index
+                         :progress-style progress-style
+                         :output-file    output-files
+                         :force?         force?
+                         (append
+                          (when transform/datum
+                            (list :transform/datum transform/datum))
+                          (etypecase transform/timestamp
+                            (null
+                             '())
+                            (keyword
+                             (list :transform/timestamp
+                                   (lambda (timestamp datum)
+                                     (declare (ignore timestamp))
+                                     (rsb:timestamp datum transform/timestamp)))))))))
 
             (rsb.tools.commands:command-execute
              command :error-policy error-policy)))))))
