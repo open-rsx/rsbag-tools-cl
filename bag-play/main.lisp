@@ -11,7 +11,7 @@
                         (program-name "rsbag play"))
   "Create and return a commandline option tree."
   (make-synopsis
-   :postfix "INPUT-FILE [BASE-URI]"
+   :postfix "INPUT-FILE+ [BASE-URI]"
    :item    (make-text :contents (make-help-string :show show))
    :item    (make-common-options :show show)
    :item    (make-error-handling-options :show show)
@@ -35,6 +35,11 @@
                        (cl-ppcre:scan spec (channel-name channel))))
                    specs))))
 
+(defun parse-inputs-and-uri (arguments)
+  (case (length arguments)
+    (1 (values arguments           "/"))
+    (t (values (butlast arguments) (lastcar arguments)))))
+
 (defun main (program-pathname args)
   "Entry point function of the bag-play program."
   (let ((program-name (concatenate
@@ -51,12 +56,14 @@
      :update-synopsis (curry #'update-synopsis :program-name program-name)
      :return          (lambda () (return-from main))))
 
-  (unless (<= 1 (length (remainder)) 2)
-    (error "~@<Specify input file and, optionally, base URI.~@:>"))
+  (unless (>= (length (remainder)) 1)
+    (error "~@<Specify one or more input files and, optionally, base
+            URI.~@:>"))
 
   (let+ ((error-policy (maybe-relay-to-thread
                         (process-error-handling-options)))
-         ((input-file &optional (base-uri "/")) (remainder))
+         ((&values input-files base-uri)
+          (parse-inputs-and-uri (remainder)))
          (channels (let ((specs (iter (for channel next (getopt :long-name "channel"))
                                       (while channel)
                                       (collect channel))))
@@ -77,7 +84,7 @@
                  (rsb.tools.commands:make-command
                   :play
                   :service             'rsbag.tools.commands::command
-                  :input-files          (list input-file)
+                  :input-files          input-files
                   :channels             channels
                   :start-time           start-time
                   :start-index          start-index

@@ -1,6 +1,6 @@
 ;;;; main.lisp --- Main function of the bag-introspect program.
 ;;;;
-;;;; Copyright (C) 2015, 2016 Jan Moringen
+;;;; Copyright (C) 2015, 2016, 2017 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -11,12 +11,12 @@
 (defun make-help-string ()
   "Return a help that explains the commandline option interface."
   (rsbag.tools.commands::augment-documentation-with-backends
-   "Gather introspection information from the log file ~
-    INPUT-FILE-OR-- (or standard input, if \"-\" is specified) and ~
+   "Gather introspection information from the log file(s) ~
+    INPUT-FILE+ (or standard input, if \"-\" is specified) and ~
     display it on standard output (or otherwise process it).~@
     ~@
-    The file format of INPUT-FILE is guessed based on the ~
-    filename."))
+    The file format(s) of INPUT-FILE+ is/are guessed based on the ~
+    filename(s)."))
 
 (defun make-examples-string (&key (program-name "bag introspect"))
   "Make and return a string containing usage examples of the program."
@@ -34,7 +34,7 @@
   "Create and return a commandline option tree."
   (make-synopsis
    ;; Basic usage and specific options.
-   :postfix "INPUT-FILE-OR--"
+   :postfix "INPUT-FILE+ or -"
    :item    (make-text :contents (make-help-string))
    :item    (make-common-options :show show)
    :item    (make-error-handling-options :show show)

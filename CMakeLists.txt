@@ -373,6 +373,33 @@ foreach(FILE ${TIDE_FILES} ${ELAN_FILES})
                      --replay-strategy as-fast-as-possible
                      "${FILE}" inprocess:/prefix/)
 
+    # cat, play, introspect, transform: multiple input files
+    # cat
+    add_test(NAME    "cat/${NAME}/multiple-inputs"
+             COMMAND "${MAIN_EXECUTABLE}" cat
+                     --debug ${CONTINUE}
+                     "${FILE}" "${FILE}")
+
+    # play
+    add_test(NAME    "play/${NAME}/multiple-inputs"
+             COMMAND "${MAIN_EXECUTABLE}" play
+             --debug ${CONTINUE}
+             --replay-strategy as-fast-as-possible
+             "${FILE}" "${FILE}" inprocess:)
+
+    # introspect
+    add_test(NAME    "introspect/${NAME}/multiple-inputs"
+             COMMAND "${MAIN_EXECUTABLE}" introspect
+             --debug ${CONTINUE}
+             "${FILE}" "${FILE}")
+
+    # transform
+    string(REGEX REPLACE "/" "" OUTPUT "${NAME}")
+    add_test(NAME    "merge/${NAME}/multiple-inputs"
+             COMMAND "${MAIN_EXECUTABLE}" transform
+                     --debug ${CONTINUE} --force -o "${OUTPUT}"
+                     "${FILE}" "${FILE}")
+
     # cat, play, introspect: range options
     foreach(RANGE_OPTION ""
                          "--start-index=0" "--start-time=0"
