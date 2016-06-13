@@ -149,7 +149,7 @@
     (collect-input-files (command-%input-files command))))
 
 (defmethod print-items:print-items append ((object file-input-mixin))
-  `((:input-file ,(command-input-files object) "~{~A~^, ~}"
+  `((:input-file ,(command-%input-files object) "~{~A~^, ~}"
      ((:before :output-file-marker)))))
 
 ;;; `index-timestamp-mixin'
