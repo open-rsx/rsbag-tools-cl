@@ -1,10 +1,88 @@
 ;;;; info.lisp --- Implementation of the info command.
 ;;;;
-;;;; Copyright (C) 2014, 2015 Jan Moringen
+;;;; Copyright (C) 2014, 2015, 2016 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
 (cl:in-package #:rsbag.tools.commands)
+
+;;; `bag-style-tree' class
+
+(defclass bag-style-tree ()
+  ((builder :initarg  :builder
+            :reader   style-builder
+            :documentation
+            "Stores the builder that should be used to traverse the
+             bag and its channels."))
+  (:default-initargs
+   :builder (missing-required-initarg 'bag-style-tree :builder))
+  (:documentation
+   "Format bag and channel info as a textual tree."))
+
+(declaim (special *stream*))
+
+(defmethod rsb.formatting:format-event ((event  bag)
+                                        (style  bag-style-tree)
+                                        (stream t)
+                                        &key)
+  (let+ (((&structure-r/o style- builder) style)
+         ((&flet format* (format-control &rest format-arguments)
+            (apply #'format *stream* format-control format-arguments)))
+         ((&flet format-slot (name value
+                              &key
+                              (format   "~A")
+                              (newline? t))
+            (format *stream* "~@(~8A~): ~:[~2*N/A~;~?~]~:[~;~@:_~]"
+                    name value format (list value) newline?)))
+         ((&flet format-default-slots (&key
+                                       event-count data-size
+                                       start end duration rate
+                                       &allow-other-keys)
+            (format-slot :events   event-count :format "~,,',:D")
+            (when data-size
+              (format-slot :size data-size       :format "~,,',:D"))
+            (format-slot :start    start)
+            (format-slot :end      end)
+            (format-slot :duration duration    :format "~,6F")
+            (format-slot :rate     rate        :format "~,3F" :newline? nil)))
+         ((&flet format-bag (recurse
+                             &rest initargs &key location &allow-other-keys)
+            (format* "File ~S~@:_~2@T" location)
+            (pprint-logical-block (*stream* nil)
+              (apply #'format-default-slots initargs)
+              (pprint-newline :mandatory *stream*)
+              (funcall recurse))))
+         ((&flet format-channel (recurse
+                                 &rest initargs &key name &allow-other-keys)
+            (format* "Channel ~S~@:_~2@T" name)
+            (pprint-logical-block (*stream* nil)
+              (funcall recurse)
+              (apply #'format-default-slots initargs))
+            (pprint-newline :mandatory *stream*)))
+         ((&flet format-node (recurse relation relation-args
+                              node kind relations &rest initargs)
+            (declare (ignore relation relation-args node relations))
+            (apply (ecase kind
+                     (rsbag:bag     #'format-bag)
+                     (rsbag:channel #'format-channel))
+                   recurse initargs)))
+         ((&flet peek (builder relation relation-args node)
+            (declare (ignore builder relation-args))
+            (case relation
+              ((:type :format)
+               (format-slot relation (list node) :format "~<~@;~A~:>"))
+              (t
+               t))))
+         (*stream* stream))
+    (pprint-logical-block (*stream* (list event))
+      (architecture.builder-protocol:with-unbuilder (builder builder)
+        (architecture.builder-protocol:walk-nodes
+         builder
+         (architecture.builder-protocol:peeking #'peek #'format-node)
+         event)))
+    (fresh-line stream)))
+
+;;; `info' command class
 
 (defclass info (file-input-mixin
                 rsb.tools.commands:output-stream-mixin
@@ -19,7 +97,7 @@
                     time for large files."
                    #+later (:short-name "s"))
    (print-format   :initarg  :print-format
-                   :type     (member :no :short :full)
+                   :type     (member nil :short :full)
                    :reader   info-print-format
                    :initform :short
                    :documentation
@@ -36,10 +114,6 @@
 (service-provider:register-provider/class
  'command :info :class 'info)
 
-(defun channel-size (channel)
-  "Return the size of the content of CHANNEL in bytes."
-  (reduce #'+ channel :key #'length))
-
 (defmethod rsb.tools.commands:command-execute ((command info)
                                                &key error-policy)
   (declare (ignore error-policy))
@@ -48,56 +122,11 @@
                           (compute-sizes? info-compute-sizes?)
                           (print-format   info-print-format))
           command)
+         (builder (make-instance 'rsbag.builder:unbuilder
+                                 :compute-sizes? compute-sizes?
+                                 :format?        print-format))
+         (style   (make-instance 'bag-style-tree :builder builder))
          ((&flet process-bag (input)
-            (with-bag (bag input :direction :input
-                                 :transform '(nil))
-              (format stream "File ~S~
-                              ~&~2T~<~@;~@{~@(~8A~): ~
-                              ~:[N/A~;~:*~,,',:D~]~^~&~}~:>~
-                              ~&~2T~@<~@;~:{Channel ~
-                              ~S~&~4T~@<~@;~{~@(~8A~): ~
-                              ~:[N/A~;~:*~,,',:D~]~^~&~}~:>~&~}~:>~&"
-                      input
-                      (let+ (((&accessors-r/o start-timestamp end-timestamp) bag)
-                             (duration (when (and start-timestamp end-timestamp)
-                                         (local-time:timestamp-difference
-                                          end-timestamp start-timestamp))))
-                        `(:events ,(reduce #'+ (bag-channels bag) :key #'length)
-                          ,@(when compute-sizes?
-                              `(:size ,(reduce #'+ (bag-channels bag)
-                                               :key #'channel-size)))
-                          :start    ,start-timestamp
-                          :end      ,end-timestamp
-                          :duration ,duration))
-                      (iter (for channel each (sort (copy-seq (bag-channels bag))
-                                                    #'string<
-                                                    :key #'channel-name))
-                            (let+ (((&accessors-r/o
-                                     length start-timestamp end-timestamp) channel)
-                                   (duration (when (and start-timestamp end-timestamp)
-                                               (local-time:timestamp-difference
-                                                end-timestamp start-timestamp))))
-                              (collect (list (channel-name channel)
-                                             `(:type     ,(meta-data channel :type)
-                                               :format   ,(when-let ((format (meta-data channel :format)))
-                                                            (case print-format
-                                                              (:short
-                                                               (apply #'concatenate 'string
-                                                                      (subseq format 0 (min 100 (length format)))
-                                                                      (when (> (length format) 100)
-                                                                        (list "…"))))
-                                                              (:full
-                                                               format)))
-                                               :events   ,length
-                                               ,@(when compute-sizes?
-                                                   `(:size ,(channel-size channel)))
-                                               :start    ,start-timestamp
-                                               :end      ,end-timestamp
-                                               :duration ,duration
-                                               :rate     ,(when (and duration (plusp duration))
-                                                            (/ length duration))))))))))))
+            (with-bag (bag input :direction :input :transform '(nil))
+              (rsb.formatting:format-event bag style stream)))))
     (mapc #'process-bag input-files)))
-
-;; Local Variables:
-;; coding: utf-8
-;; End:

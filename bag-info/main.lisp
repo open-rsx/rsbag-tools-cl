@@ -73,6 +73,8 @@
                   :service        'rsbag.tools.commands::command
                   :input-files    input-files
                   :compute-sizes? compute-sizes
-                  :print-format   print-format)))
+                  :print-format   (case print-format
+                                    (:no)
+                                    (t   print-format)))))
             (rsb.tools.commands:command-execute
              command :error-policy error-policy)))))))

@@ -80,6 +80,7 @@
                 (:version :utilities.print-items         "0.1")
 
                 (:version :cl-rsbag                      #.(version/string :revision? nil))
+                (:version :rsbag-builder                 #.(version/string :revision? nil))
 
                 (:version :cl-rsb                        #.(version/string :revision? nil))
                 (:version :rsb-patterns-request-reply    #.(version/string :revision? nil))
