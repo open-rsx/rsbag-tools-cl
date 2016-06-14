@@ -13,7 +13,7 @@
     ~@
     The file format of BAG-FILE is guessed based on the filename."))
 
-(defun make-example-string (&key (program-name "bag merge"))
+(defun make-example-string (&key (program-name "bag info"))
   "Make and return a string containing usage examples of the program."
   (format nil "~2@T~A /tmp/everything.tide~@
                "
