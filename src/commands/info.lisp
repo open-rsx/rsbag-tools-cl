@@ -6,6 +6,13 @@
 
 (cl:in-package #:rsbag.tools.commands)
 
+;;; `info-style' service
+
+(service-provider:define-service info-style
+  (:documentation
+   "Providers of this service implement printing and other processing
+    of bag information"))
+
 ;;; `bag-style-tree' class
 
 (defclass bag-style-tree ()
@@ -82,6 +89,9 @@
          event)))
     (fresh-line stream)))
 
+(service-provider:register-provider/class
+ 'info-style :tree :class 'bag-style-tree)
+
 ;;; `info' command class
 
 (defclass info (file-input-mixin
@@ -125,7 +135,9 @@
          (builder (make-instance 'rsbag.builder:unbuilder
                                  :compute-sizes? compute-sizes?
                                  :format?        print-format))
-         (style   (make-instance 'bag-style-tree :builder builder))
+         (style   (rsb.formatting:make-style :tree
+                                             :builder builder
+                                             :service 'info-style))
          ((&flet process-bag (input)
             (with-bag (bag input :direction :input :transform '(nil))
               (rsb.formatting:format-event bag style stream)))))
