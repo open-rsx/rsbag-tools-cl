@@ -13,6 +13,11 @@
    "Providers of this service implement printing and other processing
     of bag information"))
 
+(service-provider:register-provider/class
+ 'info-style :json
+ :class                   'rsb.formatting:style-json
+ :allow-forward-reference t)
+
 ;;; `bag-style-tree' class
 
 (defclass bag-style-tree ()

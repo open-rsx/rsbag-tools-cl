@@ -1,6 +1,6 @@
 # CMakeLists.txt --- CMake build description file.
 #
-# Copyright (C) 2011, 2012, 2013, 2014, 2015 Jan Moringen
+# Copyright (C) 2011-2016 Jan Moringen
 #
 # Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -486,6 +486,14 @@ foreach(FILE ${TIDE_FILES} ${ELAN_FILES})
                              "${FILE}" inprocess:)
         endif()
     endforeach()
+endforeach()
+
+# cat formatting styles tests
+foreach(STYLE tree json)
+    add_test(NAME    "info/style/${STYLE}"
+             COMMAND "${MAIN_EXECUTABLE}" info
+                     --debug --style "${STYLE}"
+                     "${DATA_DIR}/${CURRENT_SERIALIZATION_VERSION}/valid-single-event.tide")
 endforeach()
 
 # cat formatting styles tests

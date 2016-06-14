@@ -18,7 +18,9 @@
     (with-abbreviation (stream :styles show)
       (write-string (rsb.formatting::make-style-service-help-string
                      :service           'rsbag.tools.commands::info-style
-                     :initarg-blacklist '(:builder))
+                     :initarg-blacklist '(:builder
+                                          :event-peek-function
+                                          :payload-peek-function))
                     stream))))
 
 (defun make-example-string (&key (program-name "bag info"))
