@@ -1,6 +1,6 @@
 ;;;; play.lisp --- Tests for the play command class.
 ;;;;
-;;;; Copyright (C) 2015 Jan Moringen
+;;;; Copyright (C) 2015, 2016 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -57,7 +57,11 @@
         ((:input-files          ("foo.tide")
           :destination          "/"
           :replay-strategy-spec "as-fast-as-possible"
-          :num-repetitions      1)))
+          :num-repetitions      1))
+        ((:input-files          ("foo.tide")
+          :destination          "/"
+          :replay-strategy-spec "as-fast-as-possible"
+          :progress-style       :none)))
 
     (let+ (((&flet do-it () (apply #'rsb.tools.commands:make-command :play
                                    :service 'rsbag.tools.commands::command

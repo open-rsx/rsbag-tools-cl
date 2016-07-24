@@ -11,6 +11,7 @@
                replay-mixin
                rsb.tools.commands:style-mixin
                rsb.tools.commands:output-stream-mixin
+               progress-mixin
                print-items:print-items-mixin)
   ()
   (:documentation
@@ -40,7 +41,8 @@
                           (num-repetitions command-replay-num-repetitions)
                           (replay-strategy command-replay-strategy)
                           (style           rsb.tools.commands:command-style)
-                          (stream          rsb.tools.commands:command-stream))
+                          (stream          rsb.tools.commands:command-stream)
+                          (progress-style  command-progress-style))
           command)
          (access? (rsb.ep:access? style :data :read))
          (sink    (lambda (datum) ; TODO should be a mixin from rsb-tools-cl
@@ -66,4 +68,7 @@
                         (when num-repetitions
                           (list :num-repetitions num-repetitions)))))
       (log:info "~@<Replaying using connection ~A~@:>" connection)
-      (rsbag.rsb:replay connection (rsbag.rsb:connection-strategy connection)))))
+      (rsbag.rsb:replay connection (rsbag.rsb:connection-strategy connection)
+                        :progress (case progress-style
+                                    (:line  (curry #'print-replay-progress *info-output*))
+                                    (:ready (curry #'print-ready *info-output*)))))))

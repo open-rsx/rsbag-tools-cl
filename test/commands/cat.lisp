@@ -1,6 +1,6 @@
 ;;;; cat.lisp --- Tests for the cat command class.
 ;;;;
-;;;; Copyright (C) 2015 Jan Moringen
+;;;; Copyright (C) 2015, 2016 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -45,7 +45,11 @@
         ((:input-files          ("foo.tide")
           :replay-strategy      ,(rsbag.rsb:make-replay-strategy
                                   :as-fast-as-possible)
-          :style-spec           "detailed")))
+          :style-spec           "detailed"))
+        ((:input-files          ("foo.tide")
+          :replay-strategy      "as-fast-as-possible"
+          :style-spec           "detailed"
+          :progress-style       :line)))
 
     (let+ (((&flet do-it () (apply #'rsb.tools.commands:make-command :cat
                                    :service 'rsbag.tools.commands::command

@@ -125,7 +125,8 @@
          (loop            (getopt :long-name "loop"))
          (replay-strategy (getopt :long-name "replay-strategy"))
          (style           (getopt :long-name "style"))
-         (target-stream   (getopt :long-name "target-stream")))
+         (target-stream   (getopt :long-name "target-stream"))
+         (progress-style  (getopt :long-name "show-progress")))
     (with-print-limits (*standard-output*)
       (with-logged-warnings
         (with-error-policy (error-policy)
@@ -152,7 +153,8 @@
                   :num-repetitions      loop
                   :replay-strategy-spec replay-strategy
                   :style-spec           style
-                  :stream-spec          target-stream)))
+                  :stream-spec          target-stream
+                  :progress-style       progress-style)))
             (with-interactive-interrupt-exit ()
               (rsb.tools.commands:command-execute
                command :error-policy error-policy))))))))
