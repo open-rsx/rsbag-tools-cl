@@ -511,7 +511,9 @@ add_test(NAME    "redump/static"
 install(CODE "message(STATUS \"Configuring Lisp image ${MAIN_NAME} for installation\")
               execute_process(COMMAND \"${MAIN_EXECUTABLE}\" redump)")
 set(BINARY_SUFFIX    "cl${VERSION_SUFFIX}")
-set(MAIN_BINARY_NAME "${MAIN_NAME}${BINARY_SUFFIX}${CMAKE_EXECUTABLE_SUFFIX}")
+set(MAIN_BINARY_NAME "${MAIN_NAME}${BINARY_SUFFIX}${CMAKE_EXECUTABLE_SUFFIX}"
+    CACHE STRING
+    "Name of the installed binary.")
 install(PROGRAMS    "${MAIN_EXECUTABLE}"
         DESTINATION "bin"
         RENAME      "${MAIN_BINARY_NAME}")
