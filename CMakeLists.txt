@@ -81,8 +81,9 @@ if(LISP_INIT_CODE)
     set(LISP_INIT "${LISP_INIT} --eval \"${LISP_INIT_CODE}\"")
 endif()
 
+set(LISP_LOAD)
 function(add_silent_load SYSTEM)
-    set(LISP_INIT "${LISP_INIT} --eval \"(let* ((*standard-output* (make-broadcast-stream)) (*trace-output* *standard-output*)) (ql:quickload :${SYSTEM}))\"" PARENT_SCOPE)
+    set(LISP_LOAD "${LISP_LOAD} --eval \"(let* ((*standard-output* (make-broadcast-stream)) (*trace-output* *standard-output*)) (ql:quickload :${SYSTEM}))\"" PARENT_SCOPE)
 endfunction()
 
 option(WITH_SSL_SUPPORT "Enable support for HTTPS in client and server." OFF)
@@ -223,6 +224,7 @@ set(MAIN_EXECUTABLE  "${CMAKE_CURRENT_BINARY_DIR}/${MAIN_NAME}${CMAKE_EXECUTABLE
 set(TOOLS            record info play cat transform introspect)
 set(ASDF_EXTRA_OUTPUT_TRANSLATIONS "((\\\"${CMAKE_CURRENT_SOURCE_DIR}\\\" #P\\\"${MAIN_SYSTEM_NAME}\\\")
                                     #P\\\"${CMAKE_CURRENT_BINARY_DIR}/${MAIN_NAME}\\\")")
+set(LISP_INIT "${LISP_INIT} ${LISP_LOAD}")
 configure_lisp_redirect("${MAIN_NAME}"
                         "--eval \"(load-system :iterate)\"
                          --eval \"(setf iterate::*always-declare-variables* t)\"
