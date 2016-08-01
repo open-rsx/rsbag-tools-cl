@@ -17,6 +17,9 @@
    #:rsb.tools.common
    #:rsb.formatting)
 
+  (:shadowing-import-from #:rsb.formatting
+   #:create)
+
   (:shadow
    #:make-style-help-string)
 
