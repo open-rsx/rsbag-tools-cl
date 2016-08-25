@@ -277,7 +277,7 @@ foreach(POLICY continue abort)
                      --debug --on-error "${POLICY}" "${FILE}")
     # introspect
     add_test(NAME    "introspect/on-error=${POLICY}"
-             COMMAND "${MAIN_EXECUTABLE}" play
+             COMMAND "${MAIN_EXECUTABLE}" introspect
                      --debug --on-error "${POLICY}" "${FILE}")
     # cat
     add_test(NAME    "cat/on-error=${POLICY}"
@@ -334,7 +334,7 @@ foreach(VALUE "yes" "no")
                      -o "output-introspection-survey=${VALUE}.tide" inprocess:)
 endforeach()
 
-# info, cat, play tests
+# info, introspect, transform, cat, play tests
 foreach(FILE ${TIDE_FILES} ${ELAN_FILES})
     file(RELATIVE_PATH NAME "${DATA_DIR}" "${FILE}")
     list(FIND VALID_TIDE_FILES ${FILE} TEMP)
@@ -345,27 +345,27 @@ foreach(FILE ${TIDE_FILES} ${ELAN_FILES})
     endif()
 
     # info
-    add_test(NAME    "info${NAME}"
+    add_test(NAME    "info/${NAME}"
              COMMAND "${MAIN_EXECUTABLE}" info
                      --debug ${CONTINUE} "${FILE}")
-    add_test(NAME    "bag-info${NAME}/compute-size"
+    add_test(NAME    "info/${NAME}/compute-size"
              COMMAND "${MAIN_EXECUTABLE}" info
                      --debug ${CONTINUE} --compute-sizes "${FILE}")
 
     # introspect
-    add_test(NAME    "introspect${NAME}"
-             COMMAND "${MAIN_EXECUTABLE}" info
+    add_test(NAME    "introspect/${NAME}"
+             COMMAND "${MAIN_EXECUTABLE}" introspect
                      --debug ${CONTINUE} "${FILE}")
 
     # transform
     string(REGEX REPLACE "/" "" OUTPUT "${NAME}")
-    add_test(NAME    "merge${NAME}"
+    add_test(NAME    "merge/${NAME}"
              COMMAND "${MAIN_EXECUTABLE}" transform
                      --debug ${CONTINUE} --force -o "${OUTPUT}"
                      "${FILE}")
 
     # play with prefix scope
-    add_test(NAME    "bag-play${NAME}/${TAG}/prefix"
+    add_test(NAME    "play/${NAME}/${TAG}/prefix"
              COMMAND "${MAIN_EXECUTABLE}" play
                      --debug ${CONTINUE}
                      --replay-strategy as-fast-as-possible
@@ -380,14 +380,14 @@ foreach(FILE ${TIDE_FILES} ${ELAN_FILES})
                TAG "range-option:${RANGE_OPTION}")
 
         # cat
-        add_test(NAME    "cat${NAME}/${TAG}"
+        add_test(NAME    "cat/${NAME}/${TAG}"
                  COMMAND "${MAIN_EXECUTABLE}" cat
                          --debug ${CONTINUE}
                          ${RANGE_OPTION}
                          "${FILE}")
 
         # play
-        add_test(NAME    "play${NAME}/${TAG}"
+        add_test(NAME    "play/${NAME}/${TAG}"
                  COMMAND "${MAIN_EXECUTABLE}" play
                          --debug ${CONTINUE}
                          ${RANGE_OPTION}
@@ -396,7 +396,7 @@ foreach(FILE ${TIDE_FILES} ${ELAN_FILES})
 
         # introspect
         if (NOT (RANGE_OPTION MATCHES ".*loop.*"))
-            add_test(NAME    "introspect${NAME}/${TAG}"
+            add_test(NAME    "introspect/${NAME}/${TAG}"
                      COMMAND "${MAIN_EXECUTABLE}" introspect
                              --debug ${CONTINUE}
                              ${RANGE_OPTION} "${FILE}")
@@ -407,14 +407,14 @@ foreach(FILE ${TIDE_FILES} ${ELAN_FILES})
     foreach(PROGRESS_STYLE "none" "line" "ready")
         set(TAG "show-progress:${PROGRESS_STYLE}")
         # cat
-        add_test(NAME    "cat${NAME}/${TAG}"
+        add_test(NAME    "cat/${NAME}/${TAG}"
                  COMMAND "${MAIN_EXECUTABLE}" cat
                          --debug ${CONTINUE}
                          --show-progress "${PROGRESS-STYLE}"
                          "${FILE}")
 
         # play
-        add_test(NAME    "play${NAME}/${TAG}"
+        add_test(NAME    "play/${NAME}/${TAG}"
                  COMMAND "${MAIN_EXECUTABLE}" play
                          --debug ${CONTINUE}
                          --show-progress "${PROGRESS-STYLE}"
@@ -422,19 +422,19 @@ foreach(FILE ${TIDE_FILES} ${ELAN_FILES})
                          "${FILE}" inprocess:)
 
         # introspect
-        add_test(NAME    "introspect${NAME}/${TAG}"
+        add_test(NAME    "introspect/${NAME}/${TAG}"
                  COMMAND "${MAIN_EXECUTABLE}" introspect
                          --debug ${CONTINUE}
                          --show-progress "${PROGRESS-STYLE}"
                          "${FILE}")
     endforeach()
 
-    if(FILE MATCHES two-events)
-        foreach(RANGE_OPTION "--start-index=-1" "--start-time=-1"
-                             "--end-index=-1"   "--end-time=-1")
-            string(REGEX REPLACE "--([-a-z]+)[ =]+(.*)" "\\1=\\2"
-                   TAG "range-option:${RANGE_OPTION}")
+    foreach(RANGE_OPTION "--start-index=-1" "--start-time=-1"
+                         "--end-index=-1"   "--end-time=-1")
+        string(REGEX REPLACE "--([-a-z]+)[ =]+(.*)" "\\1=\\2"
+                     TAG "range-option:${RANGE_OPTION}")
 
+        if(FILE MATCHES two-events)
             # cat
             add_test(NAME    "cat${NAME}/${TAG}"
                      COMMAND "${MAIN_EXECUTABLE}" cat
@@ -449,16 +449,16 @@ foreach(FILE ${TIDE_FILES} ${ELAN_FILES})
                              ${RANGE_OPTION}
                              --replay-strategy as-fast-as-possible
                              "${FILE}" inprocess:)
+        endif()
 
-            # introspect
-            if (FILE MATCHES introspection) # currently no such file
-                add_test(NAME    "introspect${NAME}/${TAG}"
-                         COMMAND "${MAIN_EXECUTABLE}" introspect
-                                 --debug ${CONTINUE}
-                                 ${RANGE_OPTION} "${FILE}")
-            endif()
-        endforeach()
-    endif()
+        # introspect
+        if (FILE MATCHES introspection)
+            add_test(NAME    "introspect${NAME}/${TAG}"
+                     COMMAND "${MAIN_EXECUTABLE}" introspect
+                             --debug ${CONTINUE}
+                             ${RANGE_OPTION} "${FILE}")
+        endif()
+    endforeach()
 
     # cat, play: replay strategies
     foreach(STRATEGY_OPTION ""
@@ -472,7 +472,7 @@ foreach(FILE ${TIDE_FILES} ${ELAN_FILES})
         string(REGEX REPLACE "[ ]" "_" TAG "${TEMP}")
 
         # cat
-        add_test(NAME    "cat${NAME}/${TAG}"
+        add_test(NAME    "cat/${NAME}/${TAG}"
                  COMMAND "${MAIN_EXECUTABLE}" cat
                          --debug ${CONTINUE}
                          ${STRATEGY_OPTION}
@@ -481,7 +481,7 @@ foreach(FILE ${TIDE_FILES} ${ELAN_FILES})
         # play
         if(NOT (FILE MATCHES "(simple\\.eaf$|recoverable-missing-index\\.tide$)")
            OR STRATEGY_OPTION)
-            add_test(NAME    "play${NAME}/${TAG}"
+            add_test(NAME    "play/${NAME}/${TAG}"
                      COMMAND "${MAIN_EXECUTABLE}" play
                              --debug ${CONTINUE}
                              ${STRATEGY_OPTION}
@@ -490,7 +490,7 @@ foreach(FILE ${TIDE_FILES} ${ELAN_FILES})
     endforeach()
 endforeach()
 
-# cat formatting styles tests
+# info formatting styles tests
 foreach(STYLE tree json)
     add_test(NAME    "info/style/${STYLE}"
              COMMAND "${MAIN_EXECUTABLE}" info
