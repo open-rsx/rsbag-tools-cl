@@ -507,6 +507,14 @@ foreach(STYLE discard meta-data payload detailed
                      "${DATA_DIR}/${CURRENT_SERIALIZATION_VERSION}/valid-single-event.tide")
 endforeach()
 
+# introspect formatting styles tests
+foreach(STYLE json object-tree monitor/object-tree monitor/events)
+    add_test(NAME    "introspect/style/${STYLE}"
+             COMMAND "${MAIN_EXECUTABLE}" introspect
+                     --debug --style "${STYLE}"
+                     "${DATA_DIR}/${CURRENT_SERIALIZATION_VERSION}/introspection.tide")
+endforeach()
+
 # redump test
 add_test("redump/simple"
          sh -c "cp \"${MAIN_EXECUTABLE}\" ./temp && ./temp redump")
