@@ -46,7 +46,7 @@
                                  :show-progress-default :line)
    :item    (defgroup (:header "Output Options")
               (stropt  :long-name     "style"
-                       :default-value "object-tree :stateful? nil"
+                       :default-value "object-tree :stateful? nil :delay nil"
                        :argument-name "SPEC"
                        :description
                        (with-output-to-string (stream)
