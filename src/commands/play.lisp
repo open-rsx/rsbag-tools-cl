@@ -1,6 +1,6 @@
 ;;;; play.lisp --- Implementation of the play command.
 ;;;;
-;;;; Copyright (C) 2013, 2014, 2015 Jan Moringen
+;;;; Copyright (C) 2013, 2014, 2015, 2017 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -9,6 +9,7 @@
 (eval-when (:compile-toplevel :load-toplevel :execute)
   (defclass play (file-input-mixin
                   bag->events-mixin
+                  rsb.tools.commands:filter-mixin
                   replay-mixin
                   rsb.tools.commands:destination-mixin
                   progress-mixin
@@ -38,28 +39,34 @@
                           ((&values start-time start-index end-time end-index)
                                            command-replay-bounds)
                           (num-repetitions command-replay-num-repetitions)
+                          (filters         rsb.tools.commands:command-filters)
                           (replay-strategy command-replay-strategy)
                           (base-uri        rsb.tools.commands:command-destination)
                           (progress-style  command-progress-style))
-          command))
-   (rsbag.rsb:with-open-connection
-       (connection (apply #'rsbag.rsb:bag->events input-files base-uri
-                          :error-policy    error-policy
-                          :channels        channels
-                          :replay-strategy replay-strategy
-                          (append
-                           (when start-time
-                             (list :start-time start-time))
-                           (when start-index
-                             (list :start-index start-index))
-                           (when end-time
-                             (list :end-time end-time))
-                           (when end-index
-                             (list :end-index end-index))
-                           (when num-repetitions
-                             (list :num-repetitions num-repetitions)))))
-     (log:info "~@<Connection ~A~@:>" connection)
-     (rsbag.rsb:replay connection (rsbag.rsb:connection-strategy connection)
-                       :progress (case progress-style
-                                   (:line  (curry #'print-replay-progress *info-output*))
-                                   (:ready (curry #'print-ready *info-output*)))))))
+          command)
+         (access? (rsb.ep:access? filters :data :read)))
+    (when access?
+      (error "~@<Unsupported filter~P: ~{~A~^, ~}.~@:>"
+             (length filters) filters))
+    (rsbag.rsb:with-open-connection
+        (connection (apply #'rsbag.rsb:bag->events input-files base-uri
+                           :error-policy    error-policy
+                           :channels        channels
+                           :filters         filters
+                           :replay-strategy replay-strategy
+                           (append
+                            (when start-time
+                              (list :start-time start-time))
+                            (when start-index
+                              (list :start-index start-index))
+                            (when end-time
+                              (list :end-time end-time))
+                            (when end-index
+                              (list :end-index end-index))
+                            (when num-repetitions
+                              (list :num-repetitions num-repetitions)))))
+      (log:info "~@<Connection ~A~@:>" connection)
+      (rsbag.rsb:replay connection (rsbag.rsb:connection-strategy connection)
+                        :progress (case progress-style
+                                    (:line  (curry #'print-replay-progress *info-output*))
+                                    (:ready (curry #'print-ready *info-output*)))))))

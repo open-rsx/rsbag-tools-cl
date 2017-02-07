@@ -1,12 +1,13 @@
 ;;;; record.lisp --- Implementation of the record command.
 ;;;;
-;;;; Copyright (C) 2013, 2014, 2015, 2016 Jan Moringen
+;;;; Copyright (C) 2013, 2014, 2015, 2016, 2017 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
 (cl:in-package #:rsbag.tools.commands)
 
 (defclass record (rsb.tools.commands:source-mixin
+                  rsb.tools.commands:filter-mixin
                   file-output-mixin
                   index-timestamp-mixin
                   progress-mixin
@@ -19,14 +20,6 @@
                           :documentation
                           "TODO" #+later (make-channel-strategy-help-string :show show)
                               #+later (:short-name    "a"
-                                       :argument-name "SPEC"))
-   (filters               :initarg  :filters
-                          :type     list
-                          :reader   record-filters
-                          :initform '()
-                          :documentation
-                          "TODO" #+later (make-filter-help-string :show show)
-                              #+later (:short-name    "f"
                                        :argument-name "SPEC"))
    (flush-strategy        :initarg  :flush-strategy
                           :reader   record-flush-strategy
@@ -287,7 +280,7 @@
                                                &key error-policy)
   (let+ (((&accessors-r/o
            (uris                  rsb.tools.commands:command-uris)
-           (filters               record-filters)
+           (filters               rsb.tools.commands:command-filters)
            (output-file           command-output-file)
            (force?                command-force?)
            (index-timestamp       command-index-timestamp)

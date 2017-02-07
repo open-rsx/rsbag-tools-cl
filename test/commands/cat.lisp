@@ -1,6 +1,6 @@
 ;;;; cat.lisp --- Tests for the cat command class.
 ;;;;
-;;;; Copyright (C) 2015, 2016 Jan Moringen
+;;;; Copyright (C) 2015, 2016, 2017 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -38,10 +38,15 @@
         ;; These are Ok.
         ((:input-files          ("foo.tide")
           :replay-strategy-spec "as-fast-as-possible"
-          :style-spec            "detailed"))
+          :style-spec           "detailed"))
         ((:input-files          (,#P"foo.tide")
           :replay-strategy-spec "as-fast-as-possible"
-          :style-spec            "detailed"))
+          :style-spec           "detailed"))
+        ((:input-files          ("foo.tide")
+          :replay-strategy-spec "as-fast-as-possible"
+          :style-spec           "detailed"
+          :filters              ,(list
+                                  (rsb.filter:filter :scope :scope "/"))))
         ((:input-files          ("foo.tide")
           :replay-strategy      ,(rsbag.rsb:make-replay-strategy
                                   :as-fast-as-possible)

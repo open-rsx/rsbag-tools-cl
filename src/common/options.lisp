@@ -1,6 +1,6 @@
 ;;;; options.lisp --- Common functions related to commandline options.
 ;;;;
-;;;; Copyright (C) 2012, 2013, 2014, 2015, 2016 Jan Moringen
+;;;; Copyright (C) 2012-2017 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -26,6 +26,7 @@
    + start-{time,index}
    + end-{time,index}
    + loop
+   + filter
    + replay-strategy
    + show-progress"
   (%make-group
@@ -147,6 +148,11 @@
                                 ~:*~A should be repeated ~
                                 indefinitely."
                            action)))
+   (make-stropt :long-name     "filter"
+                :short-name    "f"
+                :argument-name "SPEC"
+                :description
+                (rsb.tools.common:make-filter-help-string :show show))
    (when replay-strategy?
      (make-stropt  :long-name     "replay-strategy"
                    :short-name    "r"

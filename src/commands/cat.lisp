@@ -1,6 +1,6 @@
 ;;;; cat.lisp --- Implementation of the cat command.
 ;;;;
-;;;; Copyright (C) 2013, 2014, 2015, 2016 Jan Moringen
+;;;; Copyright (C) 2013, 2014, 2015, 2016, 2017 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -8,6 +8,7 @@
 
 (defclass cat (file-input-mixin
                bag->events-mixin
+               rsb.tools.commands:filter-mixin
                replay-mixin
                rsb.tools.commands:style-mixin
                rsb.tools.commands:output-stream-mixin
@@ -39,12 +40,13 @@
                           ((&values start-time start-index end-time end-index)
                                            command-replay-bounds)
                           (num-repetitions command-replay-num-repetitions)
+                          (filters         rsb.tools.commands:command-filters)
                           (replay-strategy command-replay-strategy)
                           (style           rsb.tools.commands:command-style)
                           (stream          rsb.tools.commands:command-stream)
                           (progress-style  command-progress-style))
           command)
-         (access? (rsb.ep:access? style :data :read))
+         (access? (rsb.ep:access? (list* style filters) :data :read))
          (sink    (lambda (datum) ; TODO should be a mixin from rsb-tools-cl
                     (if (typep datum 'rsb:event)
                         (rsb.formatting:format-event datum style stream)
@@ -55,6 +57,7 @@
          (apply #'rsbag.rsb:bag->events input-files sink  ; TODO should return connection and strategy as two values
                 :error-policy    error-policy
                 :channels        channels
+                :filters         filters
                 :transform       (coding-transform access?)
                 :replay-strategy replay-strategy
                 (append (when start-time

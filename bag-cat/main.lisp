@@ -1,6 +1,6 @@
 ;;;; main.lisp --- Main function of the bag-cat program.
 ;;;;
-;;;; Copyright (C) 2011-2016 Jan Moringen
+;;;; Copyright (C) 2011-2017 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -123,6 +123,10 @@
          ((&values start-time start-index end-time end-index)
           (process-bounds-options))
          (loop            (getopt :long-name "loop"))
+         (filters         (iter (for spec next (getopt :long-name "filter"))
+                                (while spec)
+                                (collect (apply #'rsb.filter:filter
+                                                (parse-instantiation-spec spec)))))
          (replay-strategy (getopt :long-name "replay-strategy"))
          (style           (getopt :long-name "style"))
          (target-stream   (getopt :long-name "target-stream"))
@@ -151,6 +155,7 @@
                   :end-time             end-time
                   :end-index            end-index
                   :num-repetitions      loop
+                  :filters              filters
                   :replay-strategy-spec replay-strategy
                   :style-spec           style
                   :stream-spec          target-stream

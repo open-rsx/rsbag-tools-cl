@@ -1,6 +1,6 @@
 ;;;; main.lisp --- Main function of the bag-play program.
 ;;;;
-;;;; Copyright (C) 2011, 2012, 2013, 2014, 2015, 2016 Jan Moringen
+;;;; Copyright (C) 2011-2017 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -64,6 +64,10 @@
          ((&values start-time start-index end-time end-index)
           (process-bounds-options))
          (loop            (getopt :long-name "loop"))
+         (filters         (iter (for spec next (getopt :long-name "filter"))
+                                (while spec)
+                                (collect (apply #'rsb.filter:filter
+                                                (parse-instantiation-spec spec)))))
          (replay-strategy (getopt :long-name "replay-strategy"))
          (progress-style  (getopt :long-name "show-progress")))
     (rsb.formatting:with-print-limits (*standard-output*)
@@ -80,6 +84,7 @@
                   :end-time             end-time
                   :end-index            end-index
                   :num-repetitions      loop
+                  :filters              filters
                   :replay-strategy-spec replay-strategy
                   :destination          base-uri
                   :progress-style       progress-style)))
