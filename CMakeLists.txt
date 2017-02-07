@@ -1,6 +1,6 @@
 # CMakeLists.txt --- CMake build description file.
 #
-# Copyright (C) 2011-2016 Jan Moringen
+# Copyright (C) 2011-2017 Jan Moringen
 #
 # Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -213,7 +213,9 @@ if(GIT_EXECUTABLE AND (NOT RSBAG_TOOLS_VERSION_PATCH))
                                                 RSBAG_TOOLS_VERSION_PATCH
                                                 RSBAG_TOOLS_VERSION_COMMIT)
 endif()
-set(VERSION_SUFFIX "${RSBAG_TOOLS_VERSION_MAJOR}.${RSBAG_TOOLS_VERSION_MINOR}")
+set(VERSION_SUFFIX "${RSBAG_TOOLS_VERSION_MAJOR}.${RSBAG_TOOLS_VERSION_MINOR}"
+    CACHE STRING
+    "Suffix to append to installed binaries and share/ sub-directory.")
 
 message(STATUS "Project is ${CMAKE_PROJECT_NAME} (${VERSION_FROM_LISP})")
 
