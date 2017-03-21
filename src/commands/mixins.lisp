@@ -1,6 +1,6 @@
 ;;;; mixins.lisp --- Mixin classes used by the RSBag command classes.
 ;;;;
-;;;; Copyright (C) 2013, 2014, 2015, 2016 Jan Moringen
+;;;; Copyright (C) 2013, 2014, 2015, 2016, 2017 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -317,5 +317,5 @@
      (replay-strategy-spec nil replay-strategy-spec-supplied?))
   (when replay-strategy-spec-supplied?
     (setf (command-%replay-strategy instance)
-          (rsbag.rsb:make-replay-strategy
+          (rsbag.rsb.replay:make-strategy
            (parse-instantiation-spec replay-strategy-spec)))))

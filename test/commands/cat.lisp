@@ -25,7 +25,7 @@
 
         ;; Some invalid cases with incompatible initargs.
         ((:input-files          ("foo.tide")
-          :replay-strategy      ,(rsbag.rsb:make-replay-strategy
+          :replay-strategy      ,(rsbag.rsb.replay:make-strategy
                                   :as-fast-as-possible)
           :replay-strategy-spec "as-fast-as-possible")
                                                        incompatible-initargs)
@@ -48,7 +48,7 @@
           :filters              ,(list
                                   (rsb.filter:filter :scope :scope "/"))))
         ((:input-files          ("foo.tide")
-          :replay-strategy      ,(rsbag.rsb:make-replay-strategy
+          :replay-strategy      ,(rsbag.rsb.replay:make-strategy
                                   :as-fast-as-possible)
           :style-spec           "detailed"))
         ((:input-files          ("foo.tide")

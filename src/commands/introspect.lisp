@@ -1,6 +1,6 @@
 ;;;; introspect.lisp --- Implementation of the introspect command.
 ;;;;
-;;;; Copyright (C) 2013, 2014, 2015 Jan Moringen
+;;;; Copyright (C) 2013, 2014, 2015, 2017 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -75,10 +75,10 @@
                         (when end-index
                           (list :end-index end-index)))))
       (log:info "~@<Replaying using connection ~A~@:>" connection)
-      (rsbag.rsb:replay connection (rsbag.rsb:connection-strategy connection)
-                        :progress (case progress-style
-                                    (:line (curry #'print-replay-progress
-                                                  *info-output*)))))
+      (rsbag.rsb.replay:replay
+       connection (rsbag.rsb:connection-strategy connection)
+       :progress (case progress-style
+                   (:line (curry #'print-replay-progress *info-output*)))))
     (case progress-style
       (:line (fresh-line *info-output*)))
 

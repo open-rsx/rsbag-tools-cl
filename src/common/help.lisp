@@ -1,6 +1,6 @@
 ;;;; help.lisp --- Automatic generation of help strings.
 ;;;;
-;;;; Copyright (C) 2012, 2013, 2014, 2016 Jan Moringen
+;;;; Copyright (C) 2012-2017 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -35,7 +35,7 @@
        (mapcar (lambda (provider)
                  (list (service-provider:provider-name provider)
                        (service-provider:provider-class provider)))
-               (service-provider:service-providers 'rsbag.rsb:replay-strategy))
+               (service-provider:service-providers 'rsbag.rsb.replay:strategy))
        stream
        :initarg-blacklist '(:start-index :end-index
                             :start-time  :end-time
