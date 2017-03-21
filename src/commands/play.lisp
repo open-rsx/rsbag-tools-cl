@@ -33,7 +33,6 @@
 
 (defmethod rsb.tools.commands:command-execute ((command play)
                                                &key error-policy)
-  ;; Create a reader and start the receiving and printing loop.
   (let+ (((&accessors-r/o (input-files     command-input-files)
                           (channels        command-replay-channels)
                           ((&values start-time start-index end-time end-index)
