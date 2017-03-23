@@ -1,6 +1,6 @@
 ;;;; record.lisp --- Tests for the record command class.
 ;;;;
-;;;; Copyright (C) 2015 Jan Moringen
+;;;; Copyright (C) 2015, 2017 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -24,7 +24,7 @@
         ;; Some invalid cases with incompatible initargs.
         ((:uris                    ("/")
           :output-file             "foo.tide"
-          :channel-allocation      ,(rsbag.rsb:make-channel-strategy :scope-and-type)
+          :channel-allocation      ,(rsbag.rsb.recording:make-strategy :scope-and-type)
           :channel-allocation-spec "scope-and-type")
          incompatible-initargs)
         ((:uris                    ("/")
@@ -47,7 +47,7 @@
           :index-timestamp         :create))
         ((:uris                    ("/")
           :output-file             "foo.tide"
-          :channel-allocation      ,(rsbag.rsb:make-channel-strategy :scope-and-type)))
+          :channel-allocation      ,(rsbag.rsb.recording:make-strategy :scope-and-type)))
         ((:uris                    ("/")
           :output-file             "foo.tide"
           :channel-allocation-spec "scope-and-type"))
