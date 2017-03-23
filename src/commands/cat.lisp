@@ -47,7 +47,8 @@
                           (progress-style  command-progress-style))
           command)
          (access? (rsb.ep:access? (list* style filters) :data :read))
-         (sink    (lambda (datum) ; TODO should be a mixin from rsb-tools-cl
+         (sink    (lambda (timestamp datum) ; TODO should be a mixin from rsb-tools-cl
+                    (declare (ignore timestamp))
                     (if (typep datum 'rsb:event)
                         (rsb.formatting:format-event datum style stream)
                         (rsb.formatting:format-payload

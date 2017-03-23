@@ -53,14 +53,15 @@
                           (progress-style  command-progress-style))
           command)
          (database (make-instance 'rsb.introspection::remote-introspection-database))
-         ((&flet process-event (event)
+         ((&flet process-entry (timestamp event)
+            (declare (ignore timestamp) )
             (when (and (not (rsb:event-method event))
                        (not (typep (rsb:event-data event)
                                    'rsb.introspection:bye)))
               (rsb.ep:handle database event)))))
     (rsbag.rsb:with-open-connection
         (connection
-         (apply #'rsbag.rsb:bag->events input-files #'process-event
+         (apply #'rsbag.rsb:bag->events input-files #'process-entry
                 :error-policy    error-policy
                 :channels        channels
                 :transform       `(&from-source
