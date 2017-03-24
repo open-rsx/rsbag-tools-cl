@@ -13,7 +13,9 @@
                   channel-allocation-mixin
                   progress-mixin
                   print-items:print-items-mixin)
-  ((progress-style        :initform :entries)
+  ((index-timestamp       :type     keyword
+                          :initform :send)
+   (progress-style        :initform :entries)
    (flush-strategy        :initarg  :flush-strategy
                           :reader   record-flush-strategy
                           :accessor record-%flush-strategy

@@ -13,9 +13,13 @@
                        file-output-mixin
                        bag->events-mixin
                        rsb.tools.commands:filter-mixin
+                       index-timestamp-mixin
+                       channel-allocation-mixin
                        progress-mixin
                        print-items:print-items-mixin)
-    ((transform/datum     :initarg  :transform/datum
+    ((index-timestamp     :initform nil)
+     (channel-allocation  :initform (make-instance 'clone))
+     (transform/datum     :initarg  :transform/datum
                           :reader   command-transform/datum
                           :initform nil
                           :documentation
@@ -62,6 +66,8 @@
                           (filters             rsb.tools.commands:command-filters)
                           (output-file         command-output-file)
                           (force?              command-force?)
+                          (index-timestamp     command-index-timestamp)
+                          (channel-allocation  command-channel-allocation)
                           (transform/datum     command-transform/datum)
                           (transform/timestamp command-transform/timestamp)
                           (progress-style      command-progress-style))
@@ -72,23 +78,36 @@
             (let+ ((datum/transformed     (if transform/datum
                                               (funcall transform/datum datum)
                                               datum))
-                   (timestamp/transformed (if transform/timestamp
-                                              (funcall transform/timestamp
-                                                       timestamp datum/transformed)
-                                              timestamp)))
-              (when datum/transformed
-                (rsbag.rsb.recording:process-event
-                 sink timestamp/transformed datum/transformed)))))
-         (channel-allocation (make-instance 'clone))
+                   (timestamp/transformed (when transform/timestamp
+                                            (funcall transform/timestamp
+                                                     timestamp datum/transformed))))
+              (cond
+                ((not datum/transformed))
+                (timestamp/transformed
+                 (rsbag.rsb.recording:process-event
+                  sink timestamp/transformed datum/transformed))
+                (index-timestamp
+                 (rsbag.rsb.recording:process-event
+                  sink nil datum/transformed))
+                (t
+                 (rsbag.rsb.recording:process-event
+                  sink timestamp datum/transformed))))))
          ((&flet wrap-process-datum-for-clone ()
             (let+ (((&flet note-source (source timestamp event)
                       (declare (ignore timestamp))
                       (push (cons event source)
                             (strategy-%events channel-allocation)))))
               (note-source-channel #'process-datum #'note-source))))
-         (sink-function (wrap-process-datum-for-clone))
+         (sink-function  (cond
+                           ((typep channel-allocation 'clone)
+                            (wrap-process-datum-for-clone))
+                           ((rsb.ep:access? channel-allocation :meta-data :read)
+                            (annotate-wire-schema #'process-datum))
+                           (t
+                            #'process-datum)))
 
-         (access         (%access filters transform/datum channel-allocation))
+         (access         (%access filters transform/datum
+                                  index-timestamp channel-allocation))
          (make-transform (ecase access
                            (:data  (lambda () (coding-transform t)))
                            (:event (lambda () (coding-transform nil)))
@@ -110,12 +129,14 @@
                               (when end-index
                                 (list :end-index end-index)))))
       (rsbag.rsb:with-open-connection
-          (output (rsbag.rsb:events->bag
-                   nil output-file
-                   :error-policy     error-policy
-                   :if-exists        (if force? :supersede :error)
-                   :transform        (funcall make-transform)
-                   :channel-strategy channel-allocation))
+          (output (apply #'rsbag.rsb:events->bag
+                         nil output-file
+                         :error-policy     error-policy
+                         :if-exists        (if force? :supersede :error)
+                         :transform        (funcall make-transform)
+                         :channel-strategy channel-allocation
+                         (when index-timestamp
+                           (list :timestamp index-timestamp))))
         (setf sink output)
         (rsbag.rsb.replay:replay
          input (rsbag.rsb.replay:connection-strategy input)
@@ -125,14 +146,14 @@
 
 ;;; Determine required amount of de/encoding
 
-(defun %access (filters transform? channel-strategy)
+(defun %access (filters transform? index-timestamp channel-strategy)
   (let+ ((processors (list* channel-strategy filters))
          ((&flet parts ()
             (mapcar #'car rsb.event-processing:*event-parts*))))
     (cond
       ((or transform? (rsb.ep:access? processors :data :read))
        :data)
-      ((rsb.ep:access? processors (parts) :read)
+      ((or index-timestamp (rsb.ep:access? processors (parts) :read))
        :event)
       (t
        nil))))
@@ -209,3 +230,34 @@
             (funcall note-function source timestamp event)
             (funcall function timestamp event))))
     (apply #'rsbag.rsb:bag->events source #'note-channel args)))
+
+;;; `annotate-wire-schema'
+;;;
+;;; Helper construct which wraps a function for injecting the RSB
+;;; wire-schema into the meta-data of events around the sink function
+;;; provided to `bag->events'.
+
+(defstruct (annotate-wire-schema
+             (:constructor annotate-wire-schema (function))
+             (:predicate   nil)
+             (:copier      nil))
+  (function nil :type function :read-only t))
+
+(defmethod rsbag.rsb:bag->events ((source channel) (dest annotate-wire-schema)
+                                  &rest args &key)
+  (let+ ((type (getf (channel-meta-data source) :type))
+         ((&flet rsb-type? (type)
+            (and (typep type '(cons keyword (cons symbol null)))
+                 (starts-with-subseq
+                  "RSB-EVENT" (symbol-name (first type))))))
+         (wire-schema (when (rsb-type? type)
+                        (second type)))
+         ((&structure-r/o annotate-wire-schema- function) dest)
+         ((&flet annotate (timestamp event)
+            (setf (rsb:meta-data event :rsb.transport.wire-schema)
+                  wire-schema)
+            (funcall function timestamp event)))
+         (sink (if wire-schema
+                   #'annotate
+                   function)))
+    (apply #'rsbag.rsb:bag->events source sink args)))

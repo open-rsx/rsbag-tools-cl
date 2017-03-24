@@ -21,21 +21,40 @@
         (()                                   missing-required-initarg) ; :input-files is missing
         ((:input-files          ("foo.tide")) missing-required-initarg) ; :output-file is missing
 
+        ;; Some invalid cases with incompatible initargs.
+        ((:input-files             ("foo.tide")
+          :output-file             "foo.tide"
+          :channel-allocation      ,(rsbag.rsb.recording:make-strategy :scope-and-type)
+          :channel-allocation-spec "scope-and-type")
+         incompatible-initargs)
+
         ;; These are Ok.
-        ((:input-files          ("foo.tide")
-          :output-file          "bar.tide"))
-        ((:input-files          (,#P"foo.tide")
-          :output-file          "bar.tide"))
-        ((:input-files          ("foo.tide")
-          :output-file          ,#P"bar.tide"))
-        ((:input-files          ("foo.tide")
-          :output-file          "bar.tide"
-          :start-index          0))
-        ((:input-files          ("foo.tide")
-          :output-file          "bar.tide"
-          :end-index            0))
-        ((:input-files          ("foo.tide" "baz.tide")
-          :output-file          "bar.tide")))
+        ((:input-files             ("foo.tide")
+          :output-file             "bar.tide"))
+        ((:input-files             (,#P"foo.tide")
+          :output-file             "bar.tide"))
+        ((:input-files             ("foo.tide")
+          :output-file             ,#P"bar.tide"))
+        ((:input-files             ("foo.tide")
+          :output-file             "bar.tide"
+          :start-index             0))
+        ((:input-files             ("foo.tide")
+          :output-file             "bar.tide"
+          :end-index               0))
+        ((:input-files             ("foo.tide" "baz.tide")
+          :output-file             "bar.tide"))
+        ((:input-files             ("foo.tide")
+          :output-file             "bar.tide"
+          :index-timestamp         nil))
+        ((:input-files             ("foo.tide")
+          :output-file             "bar.tide"
+          :index-timestamp         :create))
+        ((:input-files             ("foo.tide")
+          :output-file             "bar.tide"
+          :channel-allocation      ,(rsbag.rsb.recording:make-strategy :scope-and-type)))
+        ((:input-files             ("foo.tide")
+          :output-file             "bar.tide"
+          :channel-allocation-spec "scope-and-type")))
 
     (let+ (((&flet do-it () (apply #'rsb.tools.commands:make-command :transform
                                    :service 'rsbag.tools.commands::command

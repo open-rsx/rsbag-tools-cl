@@ -156,9 +156,8 @@
 
 (defclass index-timestamp-mixin ()
   ((index-timestamp :initarg  :index-timestamp
-                    :type     keyword
+                    :type     (or null keyword)
                     :reader   command-index-timestamp
-                    :initform :send
                     :documentation
                     "Name of the timestamp which should be used to
                      index events in the created log file."))
