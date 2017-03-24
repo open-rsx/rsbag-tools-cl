@@ -366,6 +366,26 @@ foreach(FILE ${TIDE_FILES} ${ELAN_FILES})
                      --debug ${CONTINUE} --force -o "${OUTPUT}"
                      "${FILE}")
 
+    # transform: index timestamp
+    foreach(TIMESTAMP "CREATE" "SEND" "RECEIVE" "DELIVER")
+        string(REGEX REPLACE "/" "" OUTPUT "${NAME}")
+        add_test(NAME    "transform/${NAME}/timestamp=${TIMESTAMP}"
+                 COMMAND "${MAIN_EXECUTABLE}" transform
+                         --index-timestamp ${TIMESTAMP}
+                         --debug ${CONTINUE} --force -o "${TIMESTAMP}-${OUTPUT}"
+                         "${FILE}")
+    endforeach()
+
+    # transform: channel allocation
+    foreach(CHANNEL_ALLOCATION "scope-and-type")
+        string(REGEX REPLACE "/" "" OUTPUT "${NAME}")
+        add_test(NAME    "transform/${NAME}/channel-allocation=${CHANNEL_ALLOCATION}"
+                 COMMAND "${MAIN_EXECUTABLE}" transform
+                         --channel-allocation ${CHANNEL_ALLOCATION}
+                         --debug ${CONTINUE} --force -o "${CHANNEL_ALLOCATION}-${OUTPUT}"
+                         "${FILE}")
+    endforeach()
+
     # play with prefix scope
     add_test(NAME    "play/${NAME}/${TAG}/prefix"
              COMMAND "${MAIN_EXECUTABLE}" play

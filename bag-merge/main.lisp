@@ -60,6 +60,8 @@
               (flag    :long-name     "force"
                        :description
                        "Should the output file be overwritten in case it already exists?")
+              (make-index-timestamp-option)
+              (make-channel-allocation-option :show show)
               (stropt  :long-name     "transform-datum"
                        #+todo :argument-name
                        #+todo :description #+todo "TODO")
@@ -112,9 +114,12 @@
          (progress-style      (getopt :long-name "show-progress"))
          (transform/datum     (getopt :long-name "transform-datum"))
          (transform/timestamp (getopt :long-name "transform-timestamp"))
-         (output-files        (or (getopt :long-name "output-file")
+         (output-file         (or (getopt :long-name "output-file")
                                   (error "~@<No output file specified.~@:>")))
-         (force?              (getopt :long-name "force")))
+         (force?              (getopt :long-name "force"))
+         (index-timestamp     (when-let ((value (getopt :long-name "index-timestamp")))
+                                (make-keyword value)))
+         (channel-allocation  (getopt :long-name "channel-allocation")))
     (rsb.formatting:with-print-limits (*standard-output*)
       (with-logged-warnings
         (with-error-policy (error-policy)
@@ -138,10 +143,14 @@
                          :end-time       end-time
                          :end-index      end-index
                          :filters        filters
-                         :progress-style progress-style
-                         :output-file    output-files
+                         :output-file    output-file
                          :force?         force?
+                         :progress-style progress-style
                          (append
+                          (when index-timestamp
+                            (list :index-timestamp index-timestamp))
+                          (when channel-allocation
+                            (list :channel-allocation-spec channel-allocation))
                           (when transform/datum
                             (list :transform/datum transform/datum))
                           (etypecase transform/timestamp
