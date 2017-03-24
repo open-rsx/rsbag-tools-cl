@@ -105,6 +105,10 @@
                                 (or (make-channel-filter specs) t)))
          ((&values start-time start-index end-time end-index)
           (process-bounds-options))
+         (filters             (iter (for spec next (getopt :long-name "filter"))
+                                    (while spec)
+                                    (collect (apply #'rsb.filter:filter
+                                                    (parse-instantiation-spec spec)))))
          (progress-style      (getopt :long-name "show-progress"))
          (transform/datum     (getopt :long-name "transform-datum"))
          (transform/timestamp (getopt :long-name "transform-timestamp"))
@@ -133,6 +137,7 @@
                          :start-index    start-index
                          :end-time       end-time
                          :end-index      end-index
+                         :filters        filters
                          :progress-style progress-style
                          :output-file    output-files
                          :force?         force?

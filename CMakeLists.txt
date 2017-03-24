@@ -437,6 +437,41 @@ foreach(FILE ${TIDE_FILES} ${ELAN_FILES})
         endif()
     endforeach()
 
+    # cat, play, transform, introspect: filters
+    foreach(FILTER "scope :scope \"/foo\"")
+        string(REGEX REPLACE "[ \"]" "_"
+               TAG "filter:${FILTER}")
+
+        # cat
+        add_test(NAME    "cat/${NAME}/${TAG}"
+                 COMMAND "${MAIN_EXECUTABLE}" cat
+                         --debug ${CONTINUE}
+                         --filter "${FILTER}"
+                         "${FILE}")
+
+        # play
+        add_test(NAME    "play/${NAME}/${TAG}"
+                 COMMAND "${MAIN_EXECUTABLE}" play
+                         --debug ${CONTINUE}
+                         --filter "${FILTER}"
+                         --replay-strategy as-fast-as-possible
+                         "${FILE}" inprocess:)
+        # transform
+        string(REGEX REPLACE "/" "" OUTPUT "${NAME}")
+        add_test(NAME    "transform/${NAME}/${TAG}"
+                 COMMAND "${MAIN_EXECUTABLE}" transform
+                         --debug ${CONTINUE}
+                         --filter "${FILTER}"
+                         --force -o "${OUTPUT}" "${FILE}")
+
+        # introspect
+        add_test(NAME    "introspect/${NAME}/${TAG}"
+                 COMMAND "${MAIN_EXECUTABLE}" introspect
+                         --debug ${CONTINUE}
+                         --filter "${FILTER}"
+                         "${FILE}")
+    endforeach()
+
     # cat, play, introspect: show-progress
     foreach(PROGRESS_STYLE "none" "line" "ready")
         set(TAG "show-progress:${PROGRESS_STYLE}")
