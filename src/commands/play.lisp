@@ -1,6 +1,6 @@
 ;;;; play.lisp --- Implementation of the play command.
 ;;;;
-;;;; Copyright (C) 2013, 2014, 2015, 2017 Jan Moringen
+;;;; Copyright (C) 2013, 2014, 2015, 2016, 2017 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -16,7 +16,7 @@
                   print-items:print-items-mixin)
     ((progress-style :initform :line))
     (:documentation
-     "Publish events from a log file of recorded events.
+     "Publish events from log files of recorded events.
 
       Replaying event flows as closely to the original as possible or
       with certain modifications can be very useful when debugging

@@ -66,7 +66,10 @@
         ((:input-files          ("foo.tide")
           :destination          "/"
           :replay-strategy-spec "as-fast-as-possible"
-          :progress-style       :none)))
+          :progress-style       :none))
+        ((:input-files          ("foo.tide" "bar.tide")
+          :destination          "/"
+          :replay-strategy-spec "as-fast-as-possible")))
 
     (let+ (((&flet do-it () (apply #'rsb.tools.commands:make-command :play
                                    :service 'rsbag.tools.commands::command
