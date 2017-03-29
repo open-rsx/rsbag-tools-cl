@@ -12,6 +12,7 @@
   (defclass transform (file-input-mixin
                        file-output-mixin
                        bag->events-mixin
+                       rsb.tools.commands:filter-mixin
                        progress-mixin
                        print-items:print-items-mixin)
     ((transform/datum     :initarg  :transform/datum
@@ -58,6 +59,7 @@
                           (channels            command-replay-channels)
                           ((&values start-time start-index end-time end-index)
                            command-replay-bounds)
+                          (filters             rsb.tools.commands:command-filters)
                           (output-file         command-output-file)
                           (force?              command-force?)
                           (transform/datum     command-transform/datum)
@@ -86,7 +88,7 @@
               (note-source-channel #'process-datum #'note-source))))
          (sink-function (wrap-process-datum-for-clone))
 
-         (access         (%access transform/datum channel-allocation))
+         (access         (%access filters transform/datum channel-allocation))
          (make-transform (ecase access
                            (:data  (lambda () (coding-transform t)))
                            (:event (lambda () (coding-transform nil)))
@@ -96,6 +98,7 @@
                       input-files sink-function
                       :error-policy    error-policy
                       :channels        channels
+                      :filters         filters
                       :transform       (funcall make-transform)
                       :replay-strategy :as-fast-as-possible
                       (append (when start-time
@@ -122,8 +125,8 @@
 
 ;;; Determine required amount of de/encoding
 
-(defun %access (transform? channel-strategy)
-  (let+ ((processors channel-strategy)
+(defun %access (filters transform? channel-strategy)
+  (let+ ((processors (list* channel-strategy filters))
          ((&flet parts ()
             (mapcar #'car rsb.event-processing:*event-parts*))))
     (cond
