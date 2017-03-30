@@ -1,6 +1,6 @@
 ;;;; transform.lisp --- Tests for the transform command class.
 ;;;;
-;;;; Copyright (C) 2015 Jan Moringen
+;;;; Copyright (C) 2015, 2017 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -33,7 +33,9 @@
           :start-index          0))
         ((:input-files          ("foo.tide")
           :output-file          "bar.tide"
-          :end-index            0)))
+          :end-index            0))
+        ((:input-files          ("foo.tide" "baz.tide")
+          :output-file          "bar.tide")))
 
     (let+ (((&flet do-it () (apply #'rsb.tools.commands:make-command :transform
                                    :service 'rsbag.tools.commands::command
