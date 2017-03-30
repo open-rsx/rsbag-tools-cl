@@ -10,17 +10,10 @@
                   rsb.tools.commands:filter-mixin
                   file-output-mixin
                   index-timestamp-mixin
+                  channel-allocation-mixin
                   progress-mixin
                   print-items:print-items-mixin)
   ((progress-style        :initform :entries)
-   (channel-allocation    :initarg  :channel-allocation
-                          :reader   record-channel-allocation
-                          :accessor record-%channel-allocation
-                          :initform (rsbag.rsb.recording:make-strategy :scope-and-type)
-                          :documentation
-                          "TODO" #+later (make-channel-strategy-help-string :show show)
-                              #+later (:short-name    "a"
-                                       :argument-name "SPEC"))
    (flush-strategy        :initarg  :flush-strategy
                           :reader   record-flush-strategy
                           :accessor record-%flush-strategy
@@ -114,16 +107,10 @@
      (slot-names t)
      &key
      output-file
-     (channel-allocation      nil channel-allocation-supplied?)
-     (channel-allocation-spec nil channel-allocation-spec-supplied?)
-     (flush-strategy          nil flush-strategy-supplied?)
-     (flush-strategy-spec     nil flush-strategy-spec-supplied?)
-     (control-uri             nil control-uri-supplied?))
+     (flush-strategy      nil flush-strategy-supplied?)
+     (flush-strategy-spec nil flush-strategy-spec-supplied?)
+     (control-uri         nil control-uri-supplied?))
   (declare (ignore control-uri))
-  (when (and channel-allocation-supplied? channel-allocation-spec-supplied?)
-    (incompatible-initargs 'record
-                           :channel-allocation      channel-allocation
-                           :channel-allocation-spec channel-allocation-spec))
   (when (and flush-strategy-supplied? flush-strategy-spec-supplied?)
     (incompatible-initargs 'record
                            :flush-strategy      flush-strategy
@@ -135,12 +122,7 @@
     ((instance   record)
      (slot-names t)
      &key
-     (channel-allocation-spec nil channel-allocation-spec-supplied?)
-     (flush-strategy-spec     nil flush-strategy-spec-supplied?))
-  (when channel-allocation-spec-supplied?
-    (setf (record-%channel-allocation instance)
-          (rsbag.rsb.recording:make-strategy
-           (parse-instantiation-spec channel-allocation-spec))))
+     (flush-strategy-spec nil flush-strategy-spec-supplied?))
   (when flush-strategy-spec-supplied?
     (setf (record-%flush-strategy instance)
           (parse-instantiation-spec flush-strategy-spec))))
@@ -284,7 +266,7 @@
            (output-file           command-output-file)
            (force?                command-force?)
            (index-timestamp       command-index-timestamp)
-           (channel-allocation    record-channel-allocation)
+           (channel-allocation    command-channel-allocation)
            (flush-strategy        record-flush-strategy)
            (control-uri           record-control-uri)
            (introspection-survey? record-introspection-survey?)

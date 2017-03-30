@@ -166,6 +166,41 @@
    "This class is intended to be mixed into command classes that store
     and index events based on a configurable timestamp."))
 
+;;; `channel-allocation-mixin'
+
+(defclass channel-allocation-mixin ()
+  ((channel-allocation :initarg  :channel-allocation
+                       :reader   command-channel-allocation
+                       :accessor command-%channel-allocation
+                       :documentation
+                       "TODO" #+later (make-channel-strategy-help-string :show show)
+                       #+later (:short-name    "a"
+                                               :argument-name "SPEC")))
+  (:documentation
+   "Adds to command classes a channel allocation slot with proper
+    initialization logic."))
+
+(defmethod shared-initialize :before
+    ((instance   channel-allocation-mixin)
+     (slot-names t)
+     &key
+     (channel-allocation      nil channel-allocation-supplied?)
+     (channel-allocation-spec nil channel-allocation-spec-supplied?))
+  (when (and channel-allocation-supplied? channel-allocation-spec-supplied?)
+    (incompatible-initargs 'channel-allocation-mixin
+                           :channel-allocation      channel-allocation
+                           :channel-allocation-spec channel-allocation-spec)))
+
+(defmethod shared-initialize :after
+    ((instance   channel-allocation-mixin)
+     (slot-names t)
+     &key
+     (channel-allocation-spec nil channel-allocation-spec-supplied?))
+  (when channel-allocation-spec-supplied?
+    (setf (command-%channel-allocation instance)
+          (rsbag.rsb.recording:make-strategy
+           (parse-instantiation-spec channel-allocation-spec)))))
+
 ;;; `bag->events-mixin'
 
 (defclass bag->events-mixin ()
