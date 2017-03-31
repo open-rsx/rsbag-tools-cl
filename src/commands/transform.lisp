@@ -74,37 +74,33 @@
           command)
          ;; Plumbing starts here.
          (sink)
-         ((&flet process-datum (timestamp datum)
-            (let+ ((datum/transformed     (if transform/datum
-                                              (funcall transform/datum datum)
-                                              datum))
-                   (timestamp/transformed (when transform/timestamp
-                                            (funcall transform/timestamp
-                                                     timestamp datum/transformed))))
-              (cond
-                ((not datum/transformed))
-                (timestamp/transformed
-                 (rsbag.rsb.recording:process-event
-                  sink timestamp/transformed datum/transformed))
-                (index-timestamp
-                 (rsbag.rsb.recording:process-event
-                  sink nil datum/transformed))
-                (t
-                 (rsbag.rsb.recording:process-event
-                  sink timestamp datum/transformed))))))
+         (store-datum
+          (if index-timestamp
+              (lambda (timestamp datum)
+                (declare (ignore timestamp))
+                (rsbag.rsb.recording:process-event sink nil datum))
+              (lambda (timestamp datum)
+                (rsbag.rsb.recording:process-event sink timestamp datum))))
          ((&flet wrap-process-datum-for-clone ()
-            (let+ (((&flet note-source (source timestamp event)
-                      (declare (ignore timestamp))
+            (let+ (((&flet note-source-and-store (source timestamp event)
                       (push (cons event source)
-                            (strategy-%events channel-allocation)))))
-              (note-source-channel #'process-datum #'note-source))))
+                            (strategy-%events channel-allocation))
+                      (funcall store-datum timestamp event))))
+              (note-source-channel (curry #'%compose-transform
+                                          transform/datum transform/timestamp)
+                                   #'note-source-and-store))))
          (sink-function  (cond
                            ((typep channel-allocation 'clone)
                             (wrap-process-datum-for-clone))
                            ((rsb.ep:access? channel-allocation :meta-data :read)
-                            (annotate-wire-schema #'process-datum))
+                            (annotate-wire-schema
+                             (%compose-transform
+                              transform/datum transform/timestamp
+                              store-datum)))
                            (t
-                            #'process-datum)))
+                            (%compose-transform
+                             transform/datum transform/timestamp
+                             store-datum))))
 
          (access         (%access filters transform/datum
                                   index-timestamp channel-allocation))
@@ -157,6 +153,32 @@
        :event)
       (t
        nil))))
+
+;;; Datum and timestamp transform
+
+(defun %compose-transform (transform/datum transform/timestamp cont)
+  (declare (type function cont))
+  (cond
+    ((and transform/datum transform/timestamp)
+     (locally (declare (type function transform/datum transform/timestamp))
+       (lambda (timestamp datum)
+         (when-let* ((datum/transformed     (funcall transform/datum datum))
+                     (timestamp/transformed (funcall transform/timestamp
+                                                     timestamp datum/transformed)))
+           (funcall cont timestamp/transformed datum/transformed)))))
+    (transform/datum
+     (locally (declare (type function transform/datum))
+       (lambda (timestamp datum)
+         (when-let ((datum/transformed (funcall transform/datum datum)))
+           (funcall cont timestamp datum/transformed)))))
+    (transform/timestamp
+     (locally (declare (type function transform/timestamp))
+       (lambda (timestamp datum)
+         (when-let ((timestamp/transformed (funcall transform/timestamp
+                                                    timestamp datum)))
+           (funcall cont timestamp/transformed datum)))))
+    (t
+     cont)))
 
 ;;; `clone' channel allocation strategy
 ;;;
@@ -217,19 +239,17 @@
 ;;; channels of events around the function provided to `bag->events'.
 
 (defstruct (note-source-channel
-             (:constructor note-source-channel (function note-function))
-             (:predicate nil)
-             (:copier nil))
-  (function      nil :type function :read-only t)
+             (:constructor note-source-channel (make-sink note-function))
+             (:predicate   nil)
+             (:copier      nil))
+  (make-sink     nil :type function :read-only t)
   (note-function nil :type function :read-only t))
 
 (defmethod rsbag.rsb:bag->events ((source channel) (dest note-source-channel)
                                   &rest args &key)
-  (let+ (((&structure-r/o note-source-channel- function note-function) dest)
-         ((&flet note-channel (timestamp event)
-            (funcall note-function source timestamp event)
-            (funcall function timestamp event))))
-    (apply #'rsbag.rsb:bag->events source #'note-channel args)))
+  (let+ (((&structure-r/o note-source-channel- make-sink note-function) dest)
+         (sink (funcall make-sink (curry note-function source))))
+    (apply #'rsbag.rsb:bag->events source sink args)))
 
 ;;; `annotate-wire-schema'
 ;;;
