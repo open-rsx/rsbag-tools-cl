@@ -1,6 +1,6 @@
 ;;;; info.lisp --- Implementation of the info command.
 ;;;;
-;;;; Copyright (C) 2014, 2015, 2016 Jan Moringen
+;;;; Copyright (C) 2014, 2015, 2016, 2017 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -140,8 +140,9 @@
                           (stream      rsb.tools.commands:command-stream))
           command)
          ((&flet process-bag (input)
-            (with-bag (bag input :direction :input :transform '(nil))
-              (rsb.formatting:format-event bag style stream)))))
+            (with-simple-restart (continue "~@<Skip ~A.~@:>" input)
+              (with-bag (bag input :direction :input :transform '(nil))
+                (rsb.formatting:format-event bag style stream))))))
     (mapc #'process-bag input-files)))
 
 (defmethod rsb.tools.commands:command-make-style ((command info)
