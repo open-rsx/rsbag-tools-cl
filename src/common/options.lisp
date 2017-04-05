@@ -191,3 +191,24 @@
               \"end-index\" are mutually exclusive.~@:>"))
 
     (values start-time start-index end-time end-index)))
+
+(defun make-index-timestamp-option (&key default)
+  (apply #'make-stropt
+         :long-name     "index-timestamp"
+         :argument-name "NAME"
+         :description   (format nil "Name of the timestamp which should ~
+                                     be used to index events in the ~
+                                     created log file.")
+         (when default
+           (list :default-value "SEND"))))
+
+(defun make-channel-allocation-option (&key
+                                       default
+                                       (show :default))
+  (apply #'make-stropt
+         :long-name     "channel-allocation"
+         :short-name    "a"
+         :argument-name "SPEC"
+         :description   (make-channel-strategy-help-string :show show)
+         (when default
+           (list :default-value default))))

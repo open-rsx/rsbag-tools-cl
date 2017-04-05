@@ -1,6 +1,6 @@
 ;;;; main.lisp --- Main function of the bag-record program.
 ;;;;
-;;;; Copyright (C) 2011, 2012, 2013, 2014, 2015, 2016 Jan Moringen
+;;;; Copyright (C) 2011-2017 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -30,17 +30,10 @@
                        :default-value nil
                        :description
                        "Should the output file be overwritten in case it already exists?")
-              (stropt  :long-name     "index-timestamp"
-                       :default-value "SEND"
-                       :argument-name "NAME"
-                       :description
-                       "Name of the timestamp which should be used to index events in the created log file.")
-              (stropt  :long-name     "channel-allocation"
-                       :short-name    "a"
-                       :default-value "collapse-reserved :next :scope-and-type"
-                       :argument-name "SPEC"
-                       :description
-                       (make-channel-strategy-help-string :show show))
+              (rsbag.tools.common:make-index-timestamp-option :default "SEND")
+              (rsbag.tools.common:make-channel-allocation-option
+               :default "collapse-reserved :next :scope-and-type"
+               :show    show)
               (stropt  :long-name     "filter"
                        :short-name    "f"
                        :argument-name "SPEC"

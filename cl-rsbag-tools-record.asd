@@ -1,6 +1,6 @@
 ;;;; rsbag-tools-record.asd --- System definition for the bag-record program.
 ;;;;
-;;;; Copyright (C) 2011, 2012, 2013, 2014, 2015, 2016 Jan Moringen
+;;;; Copyright (C) 2011-2017 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -84,6 +84,7 @@ rsbag log files."
                 (:version :rsb-tools-common     #.(version/string :revision? nil))
                 (:version :cl-rsb-formatting    #.(version/string :revision? nil))
 
+                (:version :rsbag-tools-common   #.(version/string))
                 (:version :rsbag-tools-commands #.(version/string)))
   :components  ((:module     "bag-record"
                  :serial     t

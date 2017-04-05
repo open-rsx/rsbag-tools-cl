@@ -42,3 +42,33 @@
                             :num-repetitions
                             :error-policy
                             :stream :previous-command)))))
+
+(defun make-channel-strategy-help-string (&key (show :default))
+  "Return a help string that explains how to specify channel
+   allocation strategies and lists the available strategies."
+  (with-output-to-string (stream)
+    (format stream "Allocate channels for received events in the ~
+                    output bag file according to the strategy ~
+                    designated by SPEC which has to be of the form~@
+                    ~@
+                    ~2@TKIND KEY1 VALUE1 KEY2 VALUE2 ...~@
+                    ~@
+                    where keys and values depend on KIND and are ~
+                    optional in most cases. Examples (note that the ~
+                    single quotes have to be included only when used ~
+                    within a shell):~@
+                    ~@
+                    ~2@T-a scope-and-type~@
+                    ~@
+                    ")
+    (with-abbreviation (stream :channel-strategies show)
+      (format stream "Currently, the following strategies are supported:~@
+                      ~@
+                      ")
+      (print-classes-help-string
+       (mapcar (lambda (provider)
+                 (list (service-provider:provider-name provider)
+                       (service-provider:provider-class provider)))
+               (service-provider:service-providers
+                'rsbag.rsb.recording:strategy))
+       stream))))

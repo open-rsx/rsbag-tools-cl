@@ -1,6 +1,6 @@
 ;;;; package.lisp --- Package definition for common module.
 ;;;;
-;;;; Copyright (C) 2011, 2012, 2013, 2015, 2016 Jan Moringen
+;;;; Copyright (C) 2011-2017 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -20,11 +20,15 @@
   ;; Commandline options
   (:export
    #:make-replay-options
-   #:process-bounds-options)
+   #:process-bounds-options
+
+   #:make-index-timestamp-option
+   #:make-channel-allocation-option)
 
   ;; Help text generation
   (:export
-   #:make-replay-strategy-help-string)
+   #:make-replay-strategy-help-string
+   #:make-channel-strategy-help-string)
 
   (:documentation
    "This package contains some common utility functions for RSBag:
