@@ -43,9 +43,10 @@
    :item    (make-common-options :show show)
    :item    (make-error-handling-options :show show)
    :item    (make-replay-options
-             :show                    show
-             :replay-strategy-default "as-fast-as-possible"
-             :show-progress-default   :line
+             :show                  show
+             :loop?                 nil
+             :replay-strategy?      nil
+             :show-progress-default :line
              :action                  "processing")
    :item    (defgroup (:header "Transform Options")
               (path    :long-name     "output-file"
