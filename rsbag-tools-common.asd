@@ -1,6 +1,6 @@
 ;;;; rsbag-tools-common.asd --- Common functions for rsbag-based utilities.
 ;;;;
-;;;; Copyright (C) 2012, 2013, 2014, 2016 Jan Moringen
+;;;; Copyright (C) 2012-2017 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -81,8 +81,7 @@ RSBag-related systems."
                 (:version :rsb-tools-common #.(version/string :revision? nil)))
   :components  ((:module     "common"
                  :pathname   "src/common"
+                 :serial     t
                  :components ((:file       "package")
-                              (:file       "help"
-                               :depends-on ("package"))
-                              (:file       "options"
-                               :depends-on ("package" "help"))))))
+                              (:file       "help")
+                              (:file       "options")))))
