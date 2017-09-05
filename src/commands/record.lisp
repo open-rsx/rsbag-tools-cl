@@ -64,6 +64,12 @@
                              it. Does not start recording. Only
                              applicable if not bag is currently open.
 
+                           ensuredirectoryandopen : string -> void
+
+                             Like open but create the directories on
+                             the path to the specified file, if
+                             necessary.
+
                            close : void -> void
 
                              Close the current bag. Only applicable if
@@ -168,7 +174,21 @@
            ((&flet close-connection ()
               (log:info "~@<Closing ~A~@:>" connection)
               (setf close? t)
-              (bt:condition-notify condition))))
+              (bt:condition-notify condition)))
+           ((&flet open-file (filename &key create-directories?)
+              (bt:with-lock-held (lock)
+                (when connection
+                  (error "~@<Recording ~A in progress, cannot open a ~
+                         different bag.~@:>"
+                         connection))
+                (log:info "~@<Opening ~S~@:>" filename)
+                (when create-directories?
+                  (ensure-directories-exist filename))
+                (setf connection (funcall make-connection filename)
+                      running?   nil
+                      close?     nil)
+                (bt:condition-notify condition)
+                (notify/location "open" connection)))))
       (rsb.patterns.request-reply:with-methods (server)
           (;; Connection level
            ("isstarted" ()
@@ -202,17 +222,10 @@
                  (namestring
                   (bag-location (rsbag.rsb:connection-bag connection))))))
            ("open" (filename string)
-             (bt:with-lock-held (lock)
-               (when connection
-                 (error "~@<Recording ~A in progress, cannot open a ~
-                         different bag.~@:>"
-                        connection))
-               (log:info "~@<Opening ~S~@:>" filename)
-               (setf connection (funcall make-connection filename)
-                     running?   nil
-                     close?     nil)
-               (bt:condition-notify condition)
-               (notify/location "open" connection))
+             (open-file filename)
+             (values))
+           ("ensuredirectoryandopen" (filename string)
+             (open-file filename :create-directories? t)
              (values))
            ("close" ()
              (bt:with-lock-held (lock)

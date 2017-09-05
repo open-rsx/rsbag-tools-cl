@@ -111,7 +111,12 @@ Request/Reply Part~@_
   CONTROL-SCOPE/open : string -> void~@_
     ~@_
     Open the specified file to record into it. Does not start ~
-    recording. Only applicable if not bag is currently open.
+    recording. Only applicable if not bag is currently open.~@_
+  ~@_
+  CONTROL-SCOPE/ensuredirectoryandopen : string -> void~@_
+    ~@_
+    Like open but create the directories on the path to the specified ~
+    file, if necessary.~@_
   ~@_
   CONTROL-SCOPE/close : void -> void~@_
     ~@_
