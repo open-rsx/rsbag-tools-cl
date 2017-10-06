@@ -160,7 +160,6 @@ function(configure_lisp NAME CODE)
                                     :inherit-configuration)")
     file(TO_CMAKE_PATH "${LISP_FASL_CACHE_DIR}" LISP_FASL_CACHE_DIR)
     set(ASDF_OUTPUT_TRANSLATIONS "(:output-translations
-                                    ${ASDF_EXTRA_OUTPUT_TRANSLATIONS}
                                     (t (\\\"${LISP_FASL_CACHE_DIR}\\\" :implementation))
                                     :ignore-inherited-configuration)")
     configure_file("${CMAKE_CURRENT_SOURCE_DIR}/sbcl.cmake.in"
@@ -224,14 +223,11 @@ set(MAIN_NAME        "rsbag")
 set(MAIN_SYSTEM_NAME "cl-rsbag-tools-main")
 set(MAIN_EXECUTABLE  "${CMAKE_CURRENT_BINARY_DIR}/${MAIN_NAME}${CMAKE_EXECUTABLE_SUFFIX}")
 set(TOOLS            record info play cat transform introspect)
-set(ASDF_EXTRA_OUTPUT_TRANSLATIONS "((\\\"${CMAKE_CURRENT_SOURCE_DIR}\\\" #P\\\"${MAIN_SYSTEM_NAME}\\\")
-                                    #P\\\"${CMAKE_CURRENT_BINARY_DIR}/${MAIN_NAME}\\\")")
 set(LISP_INIT "${LISP_INIT} ${LISP_LOAD}")
 configure_lisp_redirect("${MAIN_NAME}"
                         "--eval \"(load-system :iterate)\"
                          --eval \"(setf iterate::*always-declare-variables* t)\"
                          --eval \"(asdf:oos (quote asdf:program-op) :${MAIN_SYSTEM_NAME})\"")
-set(ASDF_EXTRA_OUTPUT_TRANSLATIONS)
 add_custom_command(OUTPUT  "${MAIN_EXECUTABLE}"
                    COMMAND "${CMAKE_COMMAND}" -P "${CMAKE_CURRENT_BINARY_DIR}/sbcl.${MAIN_NAME}.cmake"
                    COMMENT "Creating Lisp image ${MAIN_NAME} (this can take a long time)")

@@ -1,6 +1,6 @@
 ;;;; rsbag-tools-main.asd --- System definition for the bag-main program.
 ;;;;
-;;;; Copyright (C) 2011, 2012, 2013, 2014, 2015 Jan Moringen
+;;;; Copyright (C) 2011-2017 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -87,7 +87,12 @@ tools."
                  :serial     t
                  :components ((:file       "package")
                               (:file       "main"))))
-  :entry-point "rsbag.tools.main:main")
+  :entry-point "rsbag.tools.main:main"
+  :output-files (program-op (operation component)
+                            (let* ((output/relative #-win32 "rsbag" #+win32 "rsbag.exe")
+                                   (output/absolute (uiop:ensure-absolute-pathname
+                                                     output/relative *default-pathname-defaults*)))
+                              (values (list output/absolute) t))))
 
 (defmethod perform :before ((operation program-op)
                             (component (eql (find-system :cl-rsbag-tools-main))))
