@@ -1,0 +1,84 @@
+#+OPTIONS: toc:nil num:nil
+
+* Introduction
+
+  The Common Lisp systems in this repository can be used to build a
+  command line program that provides several tools for recording,
+  replaying and manipulating events interchanged in distributed
+  systems using the [[https://github.com/open-rsx][Robotics Service Bus]] middleware.
+
+  *The full documentation for RSBag can be found at
+  <https://docs.cor-lab.de/manual/rsbag-trunk/index.html>.*
+
+* Dependencies
+
+  At the moment, the code is not portable and can only be used with
+  the [[http://sbcl.org][SBCL]] implementation of Common Lisp.
+
+  Dependencies not available via [[https://www.quicklisp.org/beta/][Quicklisp]] are:
+
+  + [[https://github.com/open-rsx/rsb-cl][rsb]]
+
+    + [[https://github.com/scymtym/network.spread][network.spread]] for using the [[http://www.spread.org][Spread]] transport
+
+    + [[https://github.com/scymtym/cl-protobuf][cl-protobuf]]
+
+  + [[https://github.com/open-rsx/rsb-tools-cl][rsb-tools]]
+
+  + [[https://github.com/open-rsx/rsbag-cl][rsbag]]
+
+    + [[https://github.com/scymtym/iterate-sequence][iterate-sequence]]
+
+* TODO Building
+
+  There is a CMake-based legacy build system, but it will be removed.
+
+* Using
+
+  After building the binary, it can be invoked with a sub-command to
+  select the function to perform:
+
+  #+BEGIN_SRC bash :results output :exports both
+    rsbag 2>&1
+  #+END_SRC
+
+  #+RESULTS:
+  #+begin_example
+  Invoke this program as
+
+       rsbag redump [FILENAME (compress|static)*]
+    or rsbag record
+    or rsbag info
+    or rsbag merge
+    or rsbag transform
+    or rsbag cat
+    or rsbag play
+    or rsbag introspect
+
+  (not rsbag).
+  #+end_example
+
+  For more information, see the full documentation mentioned [[*Introduction][above]].
+
+* Contributing
+
+  If you want to contribute to this project, please
+
+  + submit your intended changes as coherent pull requests.
+
+  + rebase onto the master branch and squash any fixups and
+    corrections.
+
+  + make sure the unit tests pass.
+
+* Acknowledgments
+
+  The development of this software has been supported as follows:
+
+  + The development of this software was supported by CoR-Lab,
+    Research Institute for Cognition and Robotics Bielefeld
+    University.
+
+  + This work was supported by the Cluster of Excellence Cognitive
+    Interaction Technology ‘CITEC’ (EXC 277) at Bielefeld University,
+    which is funded by the German Research Foundation (DFG).
