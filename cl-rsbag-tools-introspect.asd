@@ -1,6 +1,6 @@
 ;;;; rsbag-tools-introspect.asd --- System definition for the bag-introspect program.
 ;;;;
-;;;; Copyright (C) 2011, 2012, 2013, 2014, 2015, 2016 Jan Moringen
+;;;; Copyright (C) 2011-2018 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -66,24 +66,26 @@ See `version/list' for details on keyword parameters."
 
 ;;; System definition
 
-(defsystem :cl-rsbag-tools-introspect
+(asdf:defsystem "cl-rsbag-tools-introspect"
+  :description "A tool that gathers introspection info from log files."
+  :license     "GPLv3" ; see COPYING file for details
   :author      "Jan Moringen <jmoringe@techfak.uni-bielefeld.de>"
   :maintainer  "Jan Moringen <jmoringe@techfak.uni-bielefeld.de>"
+
   :version     #.(version/string)
-  :license     "GPLv3" ; see COPYING file for details
-  :description "A tool that gathers introspection info from log files."
-  :depends-on  (:alexandria
-                :let-plus
-                (:version :log4cl                        "1.1.1")
+  :depends-on  ("alexandria"
+                "let-plus"
+                (:version "log4cl"                        "1.1.1")
 
-                (:version :cl-rsbag                      #.(version/string :revision? nil))
+                (:version "cl-rsbag"                      #.(version/string :revision? nil))
 
-                (:version :rsb-tools-common              #.(version/string :revision? nil))
-                (:version :cl-rsb-formatting             #.(version/string :revision? nil))
-                (:version :rsb-formatting-and-rsb-common #.(version/string :revision? nil)) ; for formatting help
+                (:version "rsb-tools-common"              #.(version/string :revision? nil))
+                (:version "cl-rsb-formatting"             #.(version/string :revision? nil))
+                (:version "rsb-formatting-and-rsb-common" #.(version/string :revision? nil)) ; for formatting help
 
-                (:version :rsbag-tools-common            #.(version/string))
-                (:version :rsbag-tools-commands          #.(version/string)))
+                (:version "rsbag-tools-common"            #.(version/string))
+                (:version "rsbag-tools-commands"          #.(version/string)))
+
   :components  ((:module     "bag-introspect"
                  :serial     t
                  :components ((:file       "package")

@@ -1,6 +1,6 @@
 ;;;; rsbag-tools-common.asd --- Common functions for rsbag-based utilities.
 ;;;;
-;;;; Copyright (C) 2012-2017 Jan Moringen
+;;;; Copyright (C) 2012-2018 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -66,19 +66,21 @@ See `version/list' for details on keyword parameters."
 
 ;;; System definition
 
-(defsystem :rsbag-tools-common
+(asdf:defsystem "rsbag-tools-common"
+  :description "Common functions for RSBag-related systems."
+  :license     "GPLv3" ; see COPYING file for details
+
   :author      "Jan Moringen <jmoringe@techfak.uni-bielefeld.de>"
   :maintainer  "Jan Moringen <jmoringe@techfak.uni-bielefeld.de>"
+
   :version     #.(version/string)
-  :license     "GPLv3" ; see COPYING file for details
-  :description "This system provides some common functions for
-RSBag-related systems."
-  :depends-on  (:alexandria
-                :let-plus
+  :depends-on  ("alexandria"
+                "let-plus"
 
-                (:version :cl-rsbag         #.(version/string :revision? nil))
+                (:version "cl-rsbag"         #.(version/string :revision? nil))
 
-                (:version :rsb-tools-common #.(version/string :revision? nil)))
+                (:version "rsb-tools-common" #.(version/string :revision? nil)))
+
   :components  ((:module     "common"
                  :pathname   "src/common"
                  :serial     t

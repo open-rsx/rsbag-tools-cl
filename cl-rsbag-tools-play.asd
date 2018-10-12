@@ -1,6 +1,6 @@
 ;;;; rsbag-tools-play.asd --- System definition for the bag-play program.
 ;;;;
-;;;; Copyright (C) 2011, 2012, 2013, 2014, 2015, 2016 Jan Moringen
+;;;; Copyright (C) 2011-2018 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -66,26 +66,29 @@ See `version/list' for details on keyword parameters."
 
 ;;; System definition
 
-(defsystem :cl-rsbag-tools-play
+(asdf:defsystem "cl-rsbag-tools-play"
+  :description "A tool that replays events stored in rsbag log files."
+  :license     "GPLv3"                  ; see COPYING file for details
+
   :author      "Jan Moringen <jmoringe@techfak.uni-bielefeld.de>"
   :maintainer  "Jan Moringen <jmoringe@techfak.uni-bielefeld.de>"
+
   :version     #.(version/string)
-  :license     "GPLv3" ; see COPYING file for details
-  :description "A tool that replays events stored in rsbag log files."
-  :depends-on  (:alexandria
-                :let-plus
-                (:version :log4cl               "1.1.1")
-                :cl-ppcre
+  :depends-on  ("alexandria"
+                "let-plus"
+                (:version "log4cl"               "1.1.1")
+                "cl-ppcre"
 
-                (:version :cl-rsbag             #.(version/string :revision? nil))
+                (:version "cl-rsbag"             #.(version/string :revision? nil))
 
-                (:version :cl-rsb               #.(version/string :revision? nil))
+                (:version "cl-rsb"               #.(version/string :revision? nil))
 
-                (:version :rsb-tools-common     #.(version/string :revision? nil))
-                (:version :cl-rsb-formatting    #.(version/string :revision? nil))
+                (:version "rsb-tools-common"     #.(version/string :revision? nil))
+                (:version "cl-rsb-formatting"    #.(version/string :revision? nil))
 
-                (:version :rsbag-tools-common   #.(version/string))
-                (:version :rsbag-tools-commands #.(version/string)))
+                (:version "rsbag-tools-common"   #.(version/string))
+                (:version "rsbag-tools-commands" #.(version/string)))
+
   :components  ((:module     "bag-play"
                  :serial     t
                  :components ((:file       "package")

@@ -1,6 +1,6 @@
 ;;;; rsbag-tools-commands.asd --- System definition for RSBag commands.
 ;;;;
-;;;; Copyright (C) 2014, 2015, 2016 Jan Moringen
+;;;; Copyright (C) 2014-2018 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -66,29 +66,31 @@
 
 ;;; System definition
 
-(defsystem :rsbag-tools-commands
+(asdf:defsystem "rsbag-tools-commands"
+  :description "RSBag commands."
+  :license     "GPLv3"                 ; see COPYING file for details.
+
   :author      "Jan Moringen <jmoringe@techfak.uni-bielefeld.de>"
   :maintainer  "Jan Moringen <jmoringe@techfak.uni-bielefeld.de>"
+
   :version     #.(version/string)
-  :license     "GPLv3" ; see COPYING file for details.
-  :description "RSBag commands."
-  :depends-on  (:alexandria
-                :let-plus
-                (:version :more-conditions               "0.4")
-                (:version :log4cl                        "1.1.1")
-                (:version :architecture.service-provider "0.1")
-                (:version :utilities.print-items         "0.1")
+  :depends-on  ("alexandria"
+                "let-plus"
+                (:version "more-conditions"               "0.4")
+                (:version "log4cl"                        "1.1.1")
+                (:version "architecture.service-provider" "0.1")
+                (:version "utilities.print-items"         "0.1")
 
-                (:version :cl-rsbag                      #.(version/string :revision? nil))
-                (:version :rsbag-builder                 #.(version/string :revision? nil))
+                (:version "cl-rsbag"                      #.(version/string :revision? nil))
+                (:version "rsbag-builder"                 #.(version/string :revision? nil))
 
-                (:version :cl-rsb                        #.(version/string :revision? nil))
-                (:version :rsb-patterns-request-reply    #.(version/string :revision? nil))
+                (:version "cl-rsb"                        #.(version/string :revision? nil))
+                (:version "rsb-patterns-request-reply"    #.(version/string :revision? nil))
 
-                (:version :rsb-tools-common              #.(version/string :revision? nil))
-                (:version :cl-rsb-formatting             #.(version/string :revision? nil))
-                (:version :rsb-tools-commands            #.(version/string :revision? nil)))
-  :encoding    :utf-8
+                (:version "rsb-tools-common"              #.(version/string :revision? nil))
+                (:version "cl-rsb-formatting"             #.(version/string :revision? nil))
+                (:version "rsb-tools-commands"            #.(version/string :revision? nil)))
+
   :components  ((:module     "commands"
                  :pathname   "src/commands"
                  :serial     t
@@ -105,21 +107,23 @@
                               (:file       "cat")
                               (:file       "transform")
                               (:file       "introspect"))))
-  :in-order-to ((test-op (test-op :rsbag-tools-commands-test))))
+  :in-order-to ((test-op (test-op "rsbag-tools-commands/test"))))
 
-(defsystem :rsbag-tools-commands-test
+(asdf:defsystem "rsbag-tools-commands/test"
+  :description "Unit tests for rsbag-tools-commands system."
+  :license     "GPLv3"                 ; see COPYING file for details.
+
   :author      "Jan Moringen <jmoringe@techfak.uni-bielefeld.de>"
   :maintainer  "Jan Moringen <jmoringe@techfak.uni-bielefeld.de>"
+
   :version     #.(version/string)
-  :license     "GPLv3" ; see COPYING file for details.
-  :description "Unit tests for rsbag-tools-commands system."
-  :depends-on  (:alexandria
-                :let-plus
+  :depends-on  ("alexandria"
+                "let-plus"
 
-                (:version :lift                 "1.7.1")
+                (:version "lift"                 "1.7.1")
 
-                (:version :rsbag-tools-commands #.(version/string)))
-  :encoding    :utf-8
+                (:version "rsbag-tools-commands" #.(version/string)))
+
   :components  ((:module     "commands"
                  :pathname   "test/commands"
                  :serial     t
@@ -130,10 +134,9 @@
                               (:file       "play")
                               (:file       "cat")
                               (:file       "transform")
-                              (:file       "introspect")))))
+                              (:file       "introspect"))))
 
-(defmethod perform ((operation test-op)
-                    (component (eql (find-system :rsbag-tools-commands-test))))
-  (funcall (find-symbol "RUN-TESTS" :lift)
-           :config (funcall (find-symbol "LIFT-RELATIVE-PATHNAME" :lift)
-                            "lift-rsbag-tools-commands.config")))
+  :perform     (test-op (operation component)
+                 (funcall (find-symbol "RUN-TESTS" :lift)
+                          :config (funcall (find-symbol "LIFT-RELATIVE-PATHNAME" :lift)
+                                           "lift-rsbag-tools-commands.config"))))

@@ -1,6 +1,6 @@
 ;;;; rsbag-tools-main.asd --- System definition for the bag-main program.
 ;;;;
-;;;; Copyright (C) 2011-2017 Jan Moringen
+;;;; Copyright (C) 2011-2018 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -66,34 +66,35 @@ See `version/list' for details on keyword parameters."
 
 ;;; System definition
 
-(defsystem :cl-rsbag-tools-main
+(asdf:defsystem "cl-rsbag-tools-main"
+  :description "Main program and dispatch functions for all cl-rsbag tools."
+  :license     "GPLv3" ; see COPYING file for details
   :author      "Jan Moringen <jmoringe@techfak.uni-bielefeld.de>"
   :maintainer  "Jan Moringen <jmoringe@techfak.uni-bielefeld.de>"
+
   :version     #.(version/string)
-  :license     "GPLv3" ; see COPYING file for details
-  :description "Main program and dispatch functions for all cl-rsbag
-tools."
-  :depends-on  (:alexandria
+  :depends-on  ("alexandria"
 
-                (:version :rsb-introspection         #.(version/string :revision? nil))
+                (:version "rsb-introspection"         #.(version/string :revision? nil))
 
-                (:version :cl-rsbag-tools-record     #.(version/string))
-                (:version :cl-rsbag-tools-info       #.(version/string))
-                (:version :cl-rsbag-tools-cat        #.(version/string))
-                (:version :cl-rsbag-tools-merge      #.(version/string))
-                (:version :cl-rsbag-tools-play       #.(version/string))
-                (:version :cl-rsbag-tools-introspect #.(version/string)))
+                (:version "cl-rsbag-tools-record"     #.(version/string))
+                (:version "cl-rsbag-tools-info"       #.(version/string))
+                (:version "cl-rsbag-tools-cat"        #.(version/string))
+                (:version "cl-rsbag-tools-merge"      #.(version/string))
+                (:version "cl-rsbag-tools-play"       #.(version/string))
+                (:version "cl-rsbag-tools-introspect" #.(version/string)))
+
   :components  ((:module     "main"
                  :serial     t
                  :components ((:file       "package")
                               (:file       "main"))))
+
   :entry-point "rsbag.tools.main:main"
   :output-files (program-op (operation component)
                             (let* ((output/relative #-win32 "rsbag" #+win32 "rsbag.exe")
                                    (output/absolute (uiop:ensure-absolute-pathname
                                                      output/relative *default-pathname-defaults*)))
-                              (values (list output/absolute) t))))
+                              (values (list output/absolute) t)))
 
-(defmethod perform :before ((operation program-op)
-                            (component (eql (find-system :cl-rsbag-tools-main))))
-  (mapc #'register-immutable-system (already-loaded-systems)))
+  :perform     (program-op :before (operation component)
+                 (mapc #'register-immutable-system (already-loaded-systems))))

@@ -1,6 +1,6 @@
 ;;;; rsbag-tools-record.asd --- System definition for the bag-record program.
 ;;;;
-;;;; Copyright (C) 2011-2017 Jan Moringen
+;;;; Copyright (C) 2011-2018 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -66,26 +66,27 @@ See `version/list' for details on keyword parameters."
 
 ;;; System definition
 
-(defsystem :cl-rsbag-tools-record
+(asdf:defsystem "cl-rsbag-tools-record"
+  :description "A tool that captures RSB events into log files."
+  :license     "GPLv3"                  ; see COPYING file for details
+
   :author      "Jan Moringen <jmoringe@techfak.uni-bielefeld.de>"
   :maintainer  "Jan Moringen <jmoringe@techfak.uni-bielefeld.de>"
+
   :version     #.(version/string)
-  :license     "GPLv3" ; see COPYING file for details
-  :description "A tool that captures RSB events and stores them in
-rsbag log files."
-  :depends-on  (:alexandria
-                :let-plus
-                (:version :log4cl               "1.1.1")
+  :depends-on  ("alexandria"
+                "let-plus"
+                (:version "log4cl"               "1.1.1")
 
-                (:version :cl-rsbag             #.(version/string :revision? nil))
+                (:version "cl-rsbag"             #.(version/string :revision? nil))
 
-                (:version :cl-rsb               #.(version/string :revision? nil))
+                (:version "cl-rsb"               #.(version/string :revision? nil))
 
-                (:version :rsb-tools-common     #.(version/string :revision? nil))
-                (:version :cl-rsb-formatting    #.(version/string :revision? nil))
+                (:version "rsb-tools-common"     #.(version/string :revision? nil))
+                (:version "cl-rsb-formatting"    #.(version/string :revision? nil))
 
-                (:version :rsbag-tools-common   #.(version/string))
-                (:version :rsbag-tools-commands #.(version/string)))
+                (:version "rsbag-tools-common"   #.(version/string))
+                (:version "rsbag-tools-commands" #.(version/string)))
   :components  ((:module     "bag-record"
                  :serial     t
                  :components ((:file       "package")
