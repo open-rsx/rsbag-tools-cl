@@ -1,6 +1,6 @@
 ;;;; rsbag-tools-commands.asd --- System definition for RSBag commands.
 ;;;;
-;;;; Copyright (C) 2014-2018 Jan Moringen
+;;;; Copyright (C) 2014-2019 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -84,11 +84,11 @@
                 (:version "cl-rsbag"                      #.(version/string :revision? nil))
                 (:version "rsbag-builder"                 #.(version/string :revision? nil))
 
-                (:version "cl-rsb"                        #.(version/string :revision? nil))
+                (:version "rsb"                           #.(version/string :revision? nil))
                 (:version "rsb-patterns-request-reply"    #.(version/string :revision? nil))
 
                 (:version "rsb-tools-common"              #.(version/string :revision? nil))
-                (:version "cl-rsb-formatting"             #.(version/string :revision? nil))
+                (:version "rsb-formatting"                #.(version/string :revision? nil))
                 (:version "rsb-tools-commands"            #.(version/string :revision? nil)))
 
   :components  ((:module     "commands"

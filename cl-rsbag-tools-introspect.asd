@@ -1,6 +1,6 @@
 ;;;; rsbag-tools-introspect.asd --- System definition for the bag-introspect program.
 ;;;;
-;;;; Copyright (C) 2011-2018 Jan Moringen
+;;;; Copyright (C) 2011-2019 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -80,7 +80,7 @@ See `version/list' for details on keyword parameters."
                 (:version "cl-rsbag"                      #.(version/string :revision? nil))
 
                 (:version "rsb-tools-common"              #.(version/string :revision? nil))
-                (:version "cl-rsb-formatting"             #.(version/string :revision? nil))
+                (:version "rsb-formatting"                #.(version/string :revision? nil))
                 (:version "rsb-formatting-and-rsb-common" #.(version/string :revision? nil)) ; for formatting help
 
                 (:version "rsbag-tools-common"            #.(version/string))
